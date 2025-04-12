@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AchievementCard } from "@/components/achievements/achievement-card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 
 type Achievement = {
   id: string;
@@ -311,6 +313,12 @@ const sampleAchievements: Achievements = {
 
 export default function DashboardPage() {
   const [achievements, setAchievements] = useState(sampleAchievements);
+  const [openSections, setOpenSections] = useState({
+    puttingMastery: true,
+    distanceControl: true,
+    scoringAchievements: true,
+    specialtyShots: true
+  });
 
   const toggleAchievement = (category: keyof Achievements, id: string) => {
     setAchievements((prev) => ({
@@ -320,6 +328,13 @@ export default function DashboardPage() {
           ? { ...achievement, isCompleted: !achievement.isCompleted }
           : achievement
       ),
+    }));
+  };
+
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
     }));
   };
 
@@ -334,62 +349,94 @@ export default function DashboardPage() {
           <TabsTrigger value="collection">Collection</TabsTrigger>
         </TabsList>
         <TabsContent value="skill">
-          <div className="space-y-8">
+          <div className="space-y-4">
             {/* Putting Mastery Section */}
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Putting Mastery</h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {achievements.skill.slice(0, 8).map((achievement) => (
-                  <AchievementCard
-                    key={achievement.id}
-                    {...achievement}
-                    onToggle={() => toggleAchievement("skill", achievement.id)}
-                  />
-                ))}
-              </div>
-            </div>
+            <Collapsible open={openSections.puttingMastery}>
+              <CollapsibleTrigger 
+                onClick={() => toggleSection('puttingMastery')}
+                className="flex items-center justify-between w-full"
+              >
+                <h2 className="text-2xl font-bold">Putting Mastery</h2>
+                <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.puttingMastery ? 'rotate-180' : ''}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  {achievements.skill.slice(0, 8).map((achievement) => (
+                    <AchievementCard
+                      key={achievement.id}
+                      {...achievement}
+                      onToggle={() => toggleAchievement("skill", achievement.id)}
+                    />
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Distance Control Section */}
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Distance Control</h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {achievements.skill.slice(8, 16).map((achievement) => (
-                  <AchievementCard
-                    key={achievement.id}
-                    {...achievement}
-                    onToggle={() => toggleAchievement("skill", achievement.id)}
-                  />
-                ))}
-              </div>
-            </div>
+            <Collapsible open={openSections.distanceControl}>
+              <CollapsibleTrigger 
+                onClick={() => toggleSection('distanceControl')}
+                className="flex items-center justify-between w-full"
+              >
+                <h2 className="text-2xl font-bold">Distance Control</h2>
+                <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.distanceControl ? 'rotate-180' : ''}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  {achievements.skill.slice(8, 16).map((achievement) => (
+                    <AchievementCard
+                      key={achievement.id}
+                      {...achievement}
+                      onToggle={() => toggleAchievement("skill", achievement.id)}
+                    />
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Scoring Achievements Section */}
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Scoring Achievements</h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {achievements.skill.slice(16, 29).map((achievement) => (
-                  <AchievementCard
-                    key={achievement.id}
-                    {...achievement}
-                    onToggle={() => toggleAchievement("skill", achievement.id)}
-                  />
-                ))}
-              </div>
-            </div>
+            <Collapsible open={openSections.scoringAchievements}>
+              <CollapsibleTrigger 
+                onClick={() => toggleSection('scoringAchievements')}
+                className="flex items-center justify-between w-full"
+              >
+                <h2 className="text-2xl font-bold">Scoring Achievements</h2>
+                <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.scoringAchievements ? 'rotate-180' : ''}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  {achievements.skill.slice(16, 29).map((achievement) => (
+                    <AchievementCard
+                      key={achievement.id}
+                      {...achievement}
+                      onToggle={() => toggleAchievement("skill", achievement.id)}
+                    />
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Specialty Shots Section */}
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Specialty Shots</h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {achievements.skill.slice(29).map((achievement) => (
-                  <AchievementCard
-                    key={achievement.id}
-                    {...achievement}
-                    onToggle={() => toggleAchievement("skill", achievement.id)}
-                  />
-                ))}
-              </div>
-            </div>
+            <Collapsible open={openSections.specialtyShots}>
+              <CollapsibleTrigger 
+                onClick={() => toggleSection('specialtyShots')}
+                className="flex items-center justify-between w-full"
+              >
+                <h2 className="text-2xl font-bold">Specialty Shots</h2>
+                <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.specialtyShots ? 'rotate-180' : ''}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  {achievements.skill.slice(29).map((achievement) => (
+                    <AchievementCard
+                      key={achievement.id}
+                      {...achievement}
+                      onToggle={() => toggleAchievement("skill", achievement.id)}
+                    />
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </TabsContent>
         <TabsContent value="social">
