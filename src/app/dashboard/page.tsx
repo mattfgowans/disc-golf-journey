@@ -344,9 +344,9 @@ export default function DashboardPage() {
       
       <Tabs defaultValue="skill" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="skill">Skill</TabsTrigger>
-          <TabsTrigger value="social">Social</TabsTrigger>
-          <TabsTrigger value="collection">Collection</TabsTrigger>
+          <TabsTrigger value="skill" className="cursor-pointer">Skill</TabsTrigger>
+          <TabsTrigger value="social" className="cursor-pointer">Social</TabsTrigger>
+          <TabsTrigger value="collection" className="cursor-pointer">Collection</TabsTrigger>
         </TabsList>
         <TabsContent value="skill">
           <div className="space-y-4">
@@ -354,9 +354,12 @@ export default function DashboardPage() {
             <Collapsible open={openSections.puttingMastery}>
               <CollapsibleTrigger 
                 onClick={() => toggleSection('puttingMastery')}
-                className="flex items-center justify-between w-full"
+                className="flex items-center justify-between w-full p-4 rounded-lg bg-secondary/70 hover:bg-secondary/90 transition-colors cursor-pointer"
               >
-                <h2 className="text-2xl font-bold">Putting Mastery</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-bold">Putting Mastery</h2>
+                  <span className="text-sm text-muted-foreground">(Click to expand)</span>
+                </div>
                 <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.puttingMastery ? 'rotate-180' : ''}`} />
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -376,9 +379,12 @@ export default function DashboardPage() {
             <Collapsible open={openSections.distanceControl}>
               <CollapsibleTrigger 
                 onClick={() => toggleSection('distanceControl')}
-                className="flex items-center justify-between w-full"
+                className="flex items-center justify-between w-full p-4 rounded-lg bg-secondary/70 hover:bg-secondary/90 transition-colors cursor-pointer"
               >
-                <h2 className="text-2xl font-bold">Distance Control</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-bold">Distance Control</h2>
+                  <span className="text-sm text-muted-foreground">(Click to expand)</span>
+                </div>
                 <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.distanceControl ? 'rotate-180' : ''}`} />
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -398,9 +404,12 @@ export default function DashboardPage() {
             <Collapsible open={openSections.scoringAchievements}>
               <CollapsibleTrigger 
                 onClick={() => toggleSection('scoringAchievements')}
-                className="flex items-center justify-between w-full"
+                className="flex items-center justify-between w-full p-4 rounded-lg bg-secondary/70 hover:bg-secondary/90 transition-colors cursor-pointer"
               >
-                <h2 className="text-2xl font-bold">Scoring Achievements</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-bold">Scoring Achievements</h2>
+                  <span className="text-sm text-muted-foreground">(Click to expand)</span>
+                </div>
                 <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.scoringAchievements ? 'rotate-180' : ''}`} />
               </CollapsibleTrigger>
               <CollapsibleContent>
@@ -420,9 +429,12 @@ export default function DashboardPage() {
             <Collapsible open={openSections.specialtyShots}>
               <CollapsibleTrigger 
                 onClick={() => toggleSection('specialtyShots')}
-                className="flex items-center justify-between w-full"
+                className="flex items-center justify-between w-full p-4 rounded-lg bg-secondary/70 hover:bg-secondary/90 transition-colors cursor-pointer"
               >
-                <h2 className="text-2xl font-bold">Specialty Shots</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-bold">Specialty Shots</h2>
+                  <span className="text-sm text-muted-foreground">(Click to expand)</span>
+                </div>
                 <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.specialtyShots ? 'rotate-180' : ''}`} />
               </CollapsibleTrigger>
               <CollapsibleContent>
