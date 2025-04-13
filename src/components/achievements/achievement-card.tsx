@@ -48,12 +48,19 @@ export function AchievementCard({
             variant={isCompleted ? "outline" : "default"}
             onClick={onToggle}
             className={isCompleted ? "text-green-600" : ""}
+            disabled={isCompleted}
           >
             {isCompleted ? "Completed ✓" : "Mark as Complete"}
           </Button>
           {completedDate && (
-            <span className="text-sm text-gray-500">
-              Completed on {completedDate}
+            <span className="text-sm text-muted-foreground">
+              Completed {new Date(completedDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric'
+              })}
             </span>
           )}
         </div>
