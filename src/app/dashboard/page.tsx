@@ -28,7 +28,7 @@ type Achievements = {
 // Sample achievements data (we'll replace this with real data later)
 const sampleAchievements: Achievements = {
   skill: [
-    // PUTTING MASTERY
+    // PUTTING MASTERY (0-11)
     {
       id: "skill-22",
       title: "Circle One Success",
@@ -107,7 +107,7 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
     },
 
-    // DISTANCE CONTROL
+    // DISTANCE CONTROL (11-19)
     {
       id: "skill-3",
       title: "Noodle Arm",
@@ -165,7 +165,93 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
     },
 
-    // SCORING ACHIEVEMENTS
+    // SPECIALTY SHOTS (19-31)
+    {
+      id: "skill-29",
+      title: "Thumbs Up",
+      description: "Birdie a hole while throwing a thumber off tee",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-30",
+      title: "Grenade Launcher",
+      description: "Birdie while throwing a grenade off tee",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-31",
+      title: "Tomahawk Triumph",
+      description: "Birdie with a tomahawk off tee",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-32",
+      title: "Rolling Thunder",
+      description: "Birdie with a roller off tee",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-33",
+      title: "Water Walker",
+      description: "Birdie while skipping a disc off the water off the tee",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-20",
+      title: "Damage Control",
+      description: "Save par after a bad drive (going OB)",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-40",
+      title: "Hyzer Flip Hero",
+      description: "Execute a perfect hyzer flip that lands within 10 feet",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-41",
+      title: "Flex Master",
+      description: "Birdie a hole after throwing a forehand or backhand flex shot",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-42",
+      title: "Wind Warrior",
+      description: "Successfully birdie a hole in 20+ mph winds",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-43",
+      title: "Ambidextrous Ace",
+      description: "Make a throw with your non-dominant hand that lands within 10 feet",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-44",
+      title: "Thumber",
+      description: "Successfully execute a thumber shot",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-45",
+      title: "Forehand Finesse",
+      description: "Card 3 birdies in one round using only forehand throws",
+      category: "skill",
+      isCompleted: false,
+    },
+
+    // SCORING ACHIEVEMENTS (31-46)
     {
       id: "1",
       title: "First Par",
@@ -257,119 +343,6 @@ const sampleAchievements: Achievements = {
       category: "skill",
       isCompleted: false,
     },
-
-    // SPECIALTY SHOTS
-    {
-      id: "skill-29",
-      title: "Thumbs Up",
-      description: "Birdie a hole while throwing a thumber off tee",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-30",
-      title: "Grenade Launcher",
-      description: "Birdie while throwing a grenade off tee",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-31",
-      title: "Tomahawk Triumph",
-      description: "Birdie with a tomahawk off tee",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-32",
-      title: "Rolling Thunder",
-      description: "Birdie with a roller off tee",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-33",
-      title: "Water Walker",
-      description: "Birdie while skipping a disc off the water off the tee",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-20",
-      title: "Damage Control",
-      description: "Save par after a bad drive (going OB)",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-37",
-      title: "Chain Reaction",
-      description: "Hit chains on 5 consecutive putts in a round",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-38",
-      title: "Straddle Star",
-      description: "Make 3 straddle putts in one round",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-39",
-      title: "Jump Putt Pro",
-      description: "Make a jump putt from outside circle 1",
-      category: "skill",
-      isCompleted: false,
-    },
-
-    // Distance Control (continuing)
-    {
-      id: "skill-40",
-      title: "Hyzer Flip Hero",
-      description: "Execute a perfect hyzer flip that lands within 10 feet",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-41",
-      title: "Flex Master",
-      description: "Birdie a hole after throwing a forehand or backhand flex shot",
-      category: "skill",
-      isCompleted: false,
-    },
-
-    // Specialty Shots (continuing)
-    {
-      id: "skill-42",
-      title: "Wind Warrior",
-      description: "Successfully birdie a hole in 20+ mph winds",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-43",
-      title: "Ambidextrous Ace",
-      description: "Make a throw with your non-dominant hand that lands within 10 feet",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-44",
-      title: "Thumber",
-      description: "Successfully execute a thumber shot",
-      category: "skill",
-      isCompleted: false,
-    },
-    {
-      id: "skill-45",
-      title: "Forehand Finesse",
-      description: "Card 3 birdies in one round using only forehand throws",
-      category: "skill",
-      isCompleted: false,
-    },
-
-    // Scoring Achievements (continuing)
     {
       id: "skill-46",
       title: "Scramble Master",
@@ -402,6 +375,20 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
     },
     {
+      id: "social-23",
+      title: "Clean Up Crew",
+      description: "Participate in 3 course clean-up events",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-24",
+      title: "Tree Guardian",
+      description: "Help plant trees or maintain landscaping at a course",
+      category: "social",
+      isCompleted: false,
+    },
+    {
       id: "social-5",
       title: "PDGA Official",
       description: "Purchase a PDGA membership and receive your player number",
@@ -429,12 +416,68 @@ const sampleAchievements: Achievements = {
       category: "social",
       isCompleted: false,
     },
+    {
+      id: "social-32",
+      title: "Disc Golf Buddy",
+      description: "Play 5 rounds with the same person",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-33",
+      title: "Regular Partner",
+      description: "Play 10 rounds with the same person",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-34",
+      title: "Dedicated Duo",
+      description: "Play 25 rounds with the same person",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-35",
+      title: "Dynamic Partnership",
+      description: "Play 50 rounds with the same person",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-36",
+      title: "Disc Golf Soulmates",
+      description: "Play 100 rounds with the same person",
+      category: "social",
+      isCompleted: false,
+    },
 
     // TEACHING & LEADERSHIP
     {
       id: "social-7",
       title: "Disc Golf Mentor",
       description: "Teach someone how to play disc golf",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-25",
+      title: "Youth Mentor",
+      description: "Coach youth players in disc golf",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-26",
+      title: "School Program",
+      description: "Help introduce disc golf to a school program",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-27",
+      title: "Next Generation",
+      description: "Donate discs to youth programs",
       category: "social",
       isCompleted: false,
     },
@@ -459,12 +502,40 @@ const sampleAchievements: Achievements = {
       category: "social",
       isCompleted: false,
     },
+    {
+      id: "social-28",
+      title: "Club Board Member",
+      description: "Serve on local disc golf club board",
+      category: "social",
+      isCompleted: false,
+    },
 
     // COMPETITION & EVENTS
     {
       id: "social-2",
       title: "Tournament First-Timer",
       description: "Play in your first tournament",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-29",
+      title: "Scorekeeper",
+      description: "Keep score for a tournament card",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-30",
+      title: "Spotter",
+      description: "Volunteer as a spotter in a tournament",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-31",
+      title: "Registration Desk",
+      description: "Help run tournament registration/check-in",
       category: "social",
       isCompleted: false,
     },
@@ -542,7 +613,7 @@ const sampleAchievements: Achievements = {
     }
   ],
   collection: [
-    // DISC ESSENTIALS
+    // DISC ESSENTIALS (0-6)
     {
       id: "collection-1",
       title: "First Disc",
@@ -586,7 +657,7 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
     },
 
-    // DISC COLLECTION MILESTONES
+    // DISC COLLECTION MILESTONES (6-13)
     {
       id: "collection-7",
       title: "Starting Five",
@@ -637,7 +708,7 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
     },
 
-    // EQUIPMENT & ACCESSORIES
+    // EQUIPMENT & ACCESSORIES (13-21)
     {
       id: "collection-14",
       title: "Bag Upgrade",
@@ -695,7 +766,7 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
     },
 
-    // SPECIAL DISCS
+    // SPECIAL DISCS (21-30)
     {
       id: "collection-21",
       title: "Limited Release",
@@ -760,7 +831,14 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
     },
 
-    // COURSE EXPLORER
+    // COURSE EXPLORER (30-37)
+    {
+      id: "collection-30",
+      title: "First Course",
+      description: "Play your first round at a new course",
+      category: "collection",
+      isCompleted: false,
+    },
     {
       id: "collection-31",
       title: "Course Sampler",
@@ -811,7 +889,7 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
     },
 
-    // ROUND MILESTONES
+    // ROUND MILESTONES (37-44)
     {
       id: "collection-38",
       title: "Dedicated Player",
@@ -923,27 +1001,27 @@ export default function DashboardPage() {
   // Category ranges for skill achievements
   const skillCategories = {
     puttingMastery: { start: 0, end: 11 },
-    distanceControl: { start: 11, end: 21 },
-    scoringAchievements: { start: 21, end: 35 },
-    specialtyShots: { start: 35, end: 45 },
+    distanceControl: { start: 11, end: 19 },
+    specialtyShots: { start: 19, end: 31 },
+    scoringAchievements: { start: 31, end: 46 }
   };
 
   // Category ranges for social achievements
   const socialCategories = {
-    communityEngagement: { start: 0, end: 7 },
-    teachingLeadership: { start: 7, end: 11 },
-    competitionEvents: { start: 11, end: 17 },
-    mediaContent: { start: 17, end: 22 }
+    communityEngagement: { start: 0, end: 14 },
+    teachingLeadership: { start: 14, end: 22 },
+    competitionEvents: { start: 22, end: 31 },
+    mediaContent: { start: 31, end: 36 }
   };
 
   // Category ranges for collection achievements
   const collectionCategories = {
     discEssentials: { start: 0, end: 6 },
     discMilestones: { start: 6, end: 13 },
-    equipmentAccessories: { start: 13, end: 22 },
-    specialDiscs: { start: 22, end: 31 },
-    courseExplorer: { start: 31, end: 38 },
-    roundMilestones: { start: 38, end: 45 }
+    equipmentAccessories: { start: 13, end: 21 },
+    specialDiscs: { start: 21, end: 30 },
+    courseExplorer: { start: 30, end: 37 },
+    roundMilestones: { start: 37, end: 44 }
   };
 
   // Calculate completion percentages for each category
@@ -1094,49 +1172,6 @@ export default function DashboardPage() {
                 </CollapsibleContent>
               </Collapsible>
 
-              {/* Scoring Achievements Section */}
-              <Collapsible open={openSections.scoringAchievements}>
-                <CollapsibleTrigger 
-                  onClick={() => toggleSection('scoringAchievements')}
-                  className="relative w-full"
-                >
-                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
-                    <div 
-                      className="w-full h-full opacity-10 transition-all duration-300"
-                      style={{ 
-                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-2xl font-bold">Scoring Achievements</h2>
-                      <span className={cn(
-                        "text-sm font-semibold",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))}%)
-                      </span>
-                      {getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)) === 100 && (
-                        <span className="text-blue-500">✓</span>
-                      )}
-                    </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.scoringAchievements ? 'rotate-180' : ''}`} />
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {achievements.skill.slice(skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end).map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("skill", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
               {/* Specialty Shots Section */}
               <Collapsible open={openSections.specialtyShots}>
                 <CollapsibleTrigger 
@@ -1170,6 +1205,49 @@ export default function DashboardPage() {
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
                     {achievements.skill.slice(skillCategories.specialtyShots.start, skillCategories.specialtyShots.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("skill", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Scoring Achievements Section */}
+              <Collapsible open={openSections.scoringAchievements}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('scoringAchievements')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Scoring Achievements</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))}%)
+                      </span>
+                      {getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)) === 100 && (
+                        <span className="text-blue-500">✓</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.scoringAchievements ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {achievements.skill.slice(skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
