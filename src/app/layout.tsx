@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Disc Golf Journey",
-  description: "Track your disc golf achievements and progress",
+  description: "Track your disc golf achievements and progress through putting, distance, specialty shots, and social milestones.",
 };
 
 export default function RootLayout({
