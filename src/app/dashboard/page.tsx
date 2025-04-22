@@ -1060,7 +1060,7 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto py-4" data-gramm="false">
       <Tabs defaultValue="skill" className="w-full">
-        <div className="sticky top-16 bg-background/80 backdrop-blur-sm z-40 pb-2 border-b">
+        <div className="sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-40 pb-2 border-b">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="skill">Skill</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
@@ -1069,10 +1069,10 @@ export default function DashboardPage() {
         </div>
 
         <TabsContent value="skill">
-          <div className="sticky top-[104px] bg-background/80 backdrop-blur-sm z-30 pb-2 border-b">
-            <div className="flex justify-center">
-              <div className="text-center">
-                <div className="flex items-center gap-2">
+          <div className="sticky top-[104px] bg-background z-30 pb-2 border-b">
+            <div className="flex justify-center bg-background">
+              <div className="text-center bg-background p-2">
+                <div className="flex items-center gap-2 bg-background">
                   <ProgressRing percentage={skillCompletion} size={80} strokeWidth={6} />
                   <p className="text-sm text-muted-foreground max-w-[160px]">
                     {qualifiesForPatch(skillCompletion) 
@@ -1261,10 +1261,10 @@ export default function DashboardPage() {
           </div>
         </TabsContent>
         <TabsContent value="social">
-          <div className="sticky top-[104px] bg-background/80 backdrop-blur-sm z-30 pb-2 border-b">
-            <div className="flex justify-center">
-              <div className="text-center">
-                <div className="flex items-center gap-2">
+          <div className="sticky top-[104px] bg-background z-30 pb-2 border-b">
+            <div className="flex justify-center bg-background">
+              <div className="text-center bg-background p-2">
+                <div className="flex items-center gap-2 bg-background">
                   <ProgressRing percentage={socialCompletion} size={80} strokeWidth={6} />
                   <p className="text-sm text-muted-foreground max-w-[160px]">
                     {qualifiesForPatch(socialCompletion)
@@ -1453,10 +1453,10 @@ export default function DashboardPage() {
           </div>
         </TabsContent>
         <TabsContent value="collection">
-          <div className="sticky top-[104px] bg-background/80 backdrop-blur-sm z-30 pb-2 border-b">
-            <div className="flex justify-center">
-              <div className="text-center">
-                <div className="flex items-center gap-2">
+          <div className="sticky top-[104px] bg-background z-30 pb-2 border-b">
+            <div className="flex justify-center bg-background">
+              <div className="text-center bg-background p-2">
+                <div className="flex items-center gap-2 bg-background">
                   <ProgressRing percentage={collectionCompletion} size={80} strokeWidth={6} />
                   <p className="text-sm text-muted-foreground max-w-[160px]">
                     {qualifiesForPatch(collectionCompletion)
