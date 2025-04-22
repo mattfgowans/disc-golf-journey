@@ -85,6 +85,27 @@ const sampleAchievements: Achievements = {
       category: "skill",
       isCompleted: false,
     },
+    {
+      id: "skill-37",
+      title: "Chain Reaction",
+      description: "Hit chains on 5 consecutive putts in a round",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-38",
+      title: "Straddle Star",
+      description: "Make 3 straddle putts in one round",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-39",
+      title: "Jump Putt Pro",
+      description: "Make a jump putt from outside circle 1",
+      category: "skill",
+      isCompleted: false,
+    },
 
     // DISTANCE CONTROL
     {
@@ -280,6 +301,82 @@ const sampleAchievements: Achievements = {
       category: "skill",
       isCompleted: false,
     },
+    {
+      id: "skill-37",
+      title: "Chain Reaction",
+      description: "Hit chains on 5 consecutive putts in a round",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-38",
+      title: "Straddle Star",
+      description: "Make 3 straddle putts in one round",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-39",
+      title: "Jump Putt Pro",
+      description: "Make a jump putt from outside circle 1",
+      category: "skill",
+      isCompleted: false,
+    },
+
+    // Distance Control (continuing)
+    {
+      id: "skill-40",
+      title: "Hyzer Flip Hero",
+      description: "Execute a perfect hyzer flip that lands within 10 feet",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-41",
+      title: "Flex Master",
+      description: "Birdie a hole after throwing a forehand or backhand flex shot",
+      category: "skill",
+      isCompleted: false,
+    },
+
+    // Specialty Shots (continuing)
+    {
+      id: "skill-42",
+      title: "Wind Warrior",
+      description: "Successfully birdie a hole in 20+ mph winds",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-43",
+      title: "Ambidextrous Ace",
+      description: "Make a throw with your non-dominant hand that lands within 10 feet",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-44",
+      title: "Thumber",
+      description: "Successfully execute a thumber shot",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
+      id: "skill-45",
+      title: "Forehand Finesse",
+      description: "Card 3 birdies in one round using only forehand throws",
+      category: "skill",
+      isCompleted: false,
+    },
+
+    // Scoring Achievements (continuing)
+    {
+      id: "skill-46",
+      title: "Scramble Master",
+      description: "Save par from 3 different lies off the fairway in one round",
+      category: "skill",
+      isCompleted: false,
+    },
   ],
   social: [
     // COMMUNITY ENGAGEMENT
@@ -322,6 +419,13 @@ const sampleAchievements: Achievements = {
       id: "social-8",
       title: "Social Butterfly",
       description: "Play with 10 different people",
+      category: "social",
+      isCompleted: false,
+    },
+    {
+      id: "social-22",
+      title: "Disc Trader",
+      description: "Participate in your first disc swap event (in person or online)",
       category: "social",
       isCompleted: false,
     },
@@ -583,6 +687,13 @@ const sampleAchievements: Achievements = {
       category: "collection",
       isCompleted: false,
     },
+    {
+      id: "collection-45",
+      title: "Practice Setup",
+      description: "Own a personal practice basket",
+      category: "collection",
+      isCompleted: false,
+    },
 
     // SPECIAL DISCS
     {
@@ -634,54 +745,119 @@ const sampleAchievements: Achievements = {
       category: "collection",
       isCompleted: false,
     },
+    {
+      id: "collection-28",
+      title: "Glow Getter",
+      description: "Add a glow-in-the-dark disc to your collection",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-29",
+      title: "Vintage Collector",
+      description: "Own a disc that's over 20 years old",
+      category: "collection",
+      isCompleted: false,
+    },
 
     // COURSE EXPLORER
     {
-      id: "collection-28",
+      id: "collection-31",
       title: "Course Sampler",
       description: "Play at 5 unique courses",
       category: "collection",
       isCompleted: false,
     },
     {
-      id: "collection-29",
+      id: "collection-32",
       title: "Course Enthusiast",
       description: "Play at 10 unique courses",
       category: "collection",
       isCompleted: false,
     },
     {
-      id: "collection-30",
+      id: "collection-33",
       title: "Course Adventurer",
       description: "Play at 25 unique courses",
       category: "collection",
       isCompleted: false,
     },
     {
-      id: "collection-31",
-      title: "Course Explorer",
+      id: "collection-34",
+      title: "Course Century",
       description: "Play at 50 unique courses",
       category: "collection",
       isCompleted: false,
     },
     {
-      id: "collection-32",
-      title: "Course Century",
+      id: "collection-35",
+      title: "Course Explorer",
       description: "Play at 100+ unique courses",
       category: "collection",
       isCompleted: false,
     },
     {
-      id: "collection-33",
+      id: "collection-36",
       title: "State's Best",
       description: "Play the #1 rated course in your state",
       category: "collection",
       isCompleted: false,
     },
     {
-      id: "collection-34",
+      id: "collection-37",
       title: "National Treasure",
       description: "Play the #1 rated course in your country",
+      category: "collection",
+      isCompleted: false,
+    },
+
+    // ROUND MILESTONES
+    {
+      id: "collection-38",
+      title: "Dedicated Player",
+      description: "Play 10 rounds of disc golf",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-39",
+      title: "Regular Player",
+      description: "Play 25 rounds of disc golf",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-40",
+      title: "Committed Player",
+      description: "Play 50 rounds of disc golf",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-41",
+      title: "Century Player",
+      description: "Play 100 rounds of disc golf",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-42",
+      title: "Veteran Player",
+      description: "Play 250 rounds of disc golf",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-43",
+      title: "Elite Player",
+      description: "Play 500 rounds of disc golf",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-44",
+      title: "Disc Golf Legend",
+      description: "Play 1000+ rounds of disc golf",
       category: "collection",
       isCompleted: false,
     },
@@ -703,7 +879,8 @@ export default function DashboardPage() {
     discMilestones: false,
     equipmentAccessories: false,
     specialDiscs: false,
-    courseExplorer: false
+    courseExplorer: false,
+    roundMilestones: false
   });
 
   const toggleAchievement = (category: keyof Achievements, id: string) => {
@@ -711,8 +888,6 @@ export default function DashboardPage() {
       ...prev,
       [category]: prev[category].map((achievement) => {
         if (achievement.id === id) {
-          // If achievement is not completed, mark it as completed with current timestamp
-          // If it's already completed, don't allow uncompleting it
           if (!achievement.isCompleted) {
             return {
               ...achievement,
@@ -747,27 +922,28 @@ export default function DashboardPage() {
 
   // Category ranges for skill achievements
   const skillCategories = {
-    puttingMastery: { start: 0, end: 8 },
-    distanceControl: { start: 8, end: 16 },
-    scoringAchievements: { start: 16, end: 29 },
-    specialtyShots: { start: 29, end: 35 }
+    puttingMastery: { start: 0, end: 11 },
+    distanceControl: { start: 11, end: 21 },
+    scoringAchievements: { start: 21, end: 35 },
+    specialtyShots: { start: 35, end: 45 },
   };
 
   // Category ranges for social achievements
   const socialCategories = {
-    communityEngagement: { start: 0, end: 6 },
-    teachingLeadership: { start: 6, end: 10 },
-    competitionEvents: { start: 10, end: 16 },
-    mediaContent: { start: 16, end: 21 }
+    communityEngagement: { start: 0, end: 7 },
+    teachingLeadership: { start: 7, end: 11 },
+    competitionEvents: { start: 11, end: 17 },
+    mediaContent: { start: 17, end: 22 }
   };
 
   // Category ranges for collection achievements
   const collectionCategories = {
     discEssentials: { start: 0, end: 6 },
     discMilestones: { start: 6, end: 13 },
-    equipmentAccessories: { start: 13, end: 20 },
-    specialDiscs: { start: 20, end: 27 },
-    courseExplorer: { start: 27, end: 34 }
+    equipmentAccessories: { start: 13, end: 22 },
+    specialDiscs: { start: 22, end: 31 },
+    courseExplorer: { start: 31, end: 38 },
+    roundMilestones: { start: 38, end: 45 }
   };
 
   // Calculate completion percentages for each category
@@ -784,626 +960,678 @@ export default function DashboardPage() {
   // Check if category qualifies for patch
   const qualifiesForPatch = (percentage: number) => percentage >= 80;
 
+  const getProgressBackground = (value: number) => {
+    let color;
+    if (value === 0) color = "rgb(156, 163, 175)";
+    else if (value <= 25) color = "rgb(239, 68, 68)";
+    else if (value <= 60) color = "rgb(234, 179, 8)";
+    else if (value <= 99) color = "rgb(22, 163, 74)";
+    else color = "rgb(59, 130, 246)";
+
+    return `linear-gradient(90deg, ${color} 0%, ${color} ${value}%, transparent ${value}%, transparent 100%)`;
+  };
+
+  const getCompletionColor = (value: number) => {
+    if (value === 0) return "text-gray-400";
+    if (value <= 25) return "text-red-500";
+    if (value <= 60) return "text-yellow-500";
+    if (value <= 99) return "text-green-600";
+    return "text-blue-500";
+  };
+
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Your Achievements</h1>
-      
+    <div className="container mx-auto py-4" data-gramm="false">
       <Tabs defaultValue="skill" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="skill" className="cursor-pointer">
-            <div className="flex flex-col items-center gap-2">
-              <span>Skill</span>
-              {qualifiesForPatch(skillCompletion) && (
-                <Badge variant="default" className="bg-green-600">
-                  Patch Unlocked! 🏆
-                </Badge>
-              )}
-            </div>
-          </TabsTrigger>
-          <TabsTrigger value="social" className="cursor-pointer">
-            <div className="flex flex-col items-center gap-2">
-              <span>Social</span>
-              {qualifiesForPatch(socialCompletion) && (
-                <Badge variant="default" className="bg-green-600">
-                  Patch Unlocked! 🏆
-                </Badge>
-              )}
-            </div>
-          </TabsTrigger>
-          <TabsTrigger value="collection" className="cursor-pointer">
-            <div className="flex flex-col items-center gap-2">
-              <span>Collection</span>
-              {qualifiesForPatch(collectionCompletion) && (
-                <Badge variant="default" className="bg-green-600">
-                  Patch Unlocked! 🏆
-                </Badge>
-              )}
-            </div>
-          </TabsTrigger>
-        </TabsList>
+        <div className="sticky top-16 bg-background/80 backdrop-blur-sm z-40 pb-2 border-b">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="skill">Skill</TabsTrigger>
+            <TabsTrigger value="social">Social</TabsTrigger>
+            <TabsTrigger value="collection">Collection</TabsTrigger>
+          </TabsList>
+        </div>
+
         <TabsContent value="skill">
-          <div className="flex justify-center mb-8">
-            <div className="text-center">
-              <ProgressRing percentage={skillCompletion} />
-              <p className="mt-2 text-sm text-muted-foreground">
-                {qualifiesForPatch(skillCompletion) 
-                  ? "Congratulations! You've unlocked the Skill Patch! 🎉" 
-                  : `${Math.round(80 - skillCompletion)}% more to unlock the Skill Patch`}
-              </p>
+          <div className="sticky top-[104px] bg-background/80 backdrop-blur-sm z-30 pb-2 border-b">
+            <div className="flex justify-center">
+              <div className="text-center">
+                <div className="flex items-center gap-2">
+                  <ProgressRing percentage={skillCompletion} size={80} strokeWidth={6} />
+                  <p className="text-sm text-muted-foreground max-w-[160px]">
+                    {qualifiesForPatch(skillCompletion) 
+                      ? "Patch Unlocked! 🎉" 
+                      : `${Math.round(80 - skillCompletion)}% to Patch`}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="space-y-4">
-            {/* Putting Mastery Section */}
-            <Collapsible open={openSections.puttingMastery}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('puttingMastery')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("skill", skillCategories.puttingMastery.start, skillCategories.puttingMastery.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Putting Mastery</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("skill", skillCategories.puttingMastery.start, skillCategories.puttingMastery.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.puttingMastery.start, skillCategories.puttingMastery.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("skill", skillCategories.puttingMastery.start, skillCategories.puttingMastery.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.puttingMastery ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.skill.slice(skillCategories.puttingMastery.start, skillCategories.puttingMastery.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("skill", achievement.id)}
-                    />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
 
-            {/* Distance Control Section */}
-            <Collapsible open={openSections.distanceControl}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('distanceControl')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("skill", skillCategories.distanceControl.start, skillCategories.distanceControl.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Distance Control</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("skill", skillCategories.distanceControl.start, skillCategories.distanceControl.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.distanceControl.start, skillCategories.distanceControl.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("skill", skillCategories.distanceControl.start, skillCategories.distanceControl.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.distanceControl ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.skill.slice(skillCategories.distanceControl.start, skillCategories.distanceControl.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("skill", achievement.id)}
+          <div className="mt-4">
+            <div className="space-y-4">
+              {/* Putting Mastery Section */}
+              <Collapsible open={openSections.puttingMastery}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('puttingMastery')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.puttingMastery.start, skillCategories.puttingMastery.end)))
+                      }}
                     />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Putting Mastery</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.puttingMastery.start, skillCategories.puttingMastery.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.puttingMastery.start, skillCategories.puttingMastery.end)))}%)
+                      </span>
+                      {getCategoryCompletion(getCategoryAchievements("skill", skillCategories.puttingMastery.start, skillCategories.puttingMastery.end)) === 100 && (
+                        <span className="text-blue-500">✓</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.puttingMastery ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {achievements.skill.slice(skillCategories.puttingMastery.start, skillCategories.puttingMastery.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("skill", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-            {/* Scoring Achievements Section */}
-            <Collapsible open={openSections.scoringAchievements}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('scoringAchievements')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Scoring Achievements</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.scoringAchievements ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.skill.slice(skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("skill", achievement.id)}
+              {/* Distance Control Section */}
+              <Collapsible open={openSections.distanceControl}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('distanceControl')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.distanceControl.start, skillCategories.distanceControl.end)))
+                      }}
                     />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Distance Control</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.distanceControl.start, skillCategories.distanceControl.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.distanceControl.start, skillCategories.distanceControl.end)))}%)
+                      </span>
+                      {getCategoryCompletion(getCategoryAchievements("skill", skillCategories.distanceControl.start, skillCategories.distanceControl.end)) === 100 && (
+                        <span className="text-blue-500">✓</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.distanceControl ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {achievements.skill.slice(skillCategories.distanceControl.start, skillCategories.distanceControl.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("skill", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-            {/* Specialty Shots Section */}
-            <Collapsible open={openSections.specialtyShots}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('specialtyShots')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("skill", skillCategories.specialtyShots.start, skillCategories.specialtyShots.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Specialty Shots</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("skill", skillCategories.specialtyShots.start, skillCategories.specialtyShots.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.specialtyShots.start, skillCategories.specialtyShots.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("skill", skillCategories.specialtyShots.start, skillCategories.specialtyShots.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.specialtyShots ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.skill.slice(skillCategories.specialtyShots.start, skillCategories.specialtyShots.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("skill", achievement.id)}
+              {/* Scoring Achievements Section */}
+              <Collapsible open={openSections.scoringAchievements}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('scoringAchievements')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))
+                      }}
                     />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Scoring Achievements</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))}%)
+                      </span>
+                      {getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)) === 100 && (
+                        <span className="text-blue-500">✓</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.scoringAchievements ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {achievements.skill.slice(skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("skill", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Specialty Shots Section */}
+              <Collapsible open={openSections.specialtyShots}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('specialtyShots')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.specialtyShots.start, skillCategories.specialtyShots.end)))
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Specialty Shots</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.specialtyShots.start, skillCategories.specialtyShots.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.specialtyShots.start, skillCategories.specialtyShots.end)))}%)
+                      </span>
+                      {getCategoryCompletion(getCategoryAchievements("skill", skillCategories.specialtyShots.start, skillCategories.specialtyShots.end)) === 100 && (
+                        <span className="text-blue-500">✓</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.specialtyShots ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {achievements.skill.slice(skillCategories.specialtyShots.start, skillCategories.specialtyShots.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("skill", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
           </div>
         </TabsContent>
         <TabsContent value="social">
-          <div className="flex justify-center mb-8">
-            <div className="text-center">
-              <ProgressRing percentage={socialCompletion} />
-              <p className="mt-2 text-sm text-muted-foreground">
-                {qualifiesForPatch(socialCompletion)
-                  ? "Congratulations! You've unlocked the Social Patch! 🎉"
-                  : `${Math.round(80 - socialCompletion)}% more to unlock the Social Patch`}
-              </p>
+          <div className="sticky top-[104px] bg-background/80 backdrop-blur-sm z-30 pb-2 border-b">
+            <div className="flex justify-center">
+              <div className="text-center">
+                <div className="flex items-center gap-2">
+                  <ProgressRing percentage={socialCompletion} size={80} strokeWidth={6} />
+                  <p className="text-sm text-muted-foreground max-w-[160px]">
+                    {qualifiesForPatch(socialCompletion)
+                      ? "Patch Unlocked! 🎉"
+                      : `${Math.round(80 - socialCompletion)}% to Patch`}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="space-y-4">
-            {/* Community Engagement Section */}
-            <Collapsible open={openSections.communityEngagement}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('communityEngagement')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("social", socialCategories.communityEngagement.start, socialCategories.communityEngagement.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Community Engagement</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("social", socialCategories.communityEngagement.start, socialCategories.communityEngagement.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.communityEngagement.start, socialCategories.communityEngagement.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("social", socialCategories.communityEngagement.start, socialCategories.communityEngagement.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.communityEngagement ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.social.slice(socialCategories.communityEngagement.start, socialCategories.communityEngagement.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("social", achievement.id)}
-                    />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
 
-            {/* Teaching & Leadership Section */}
-            <Collapsible open={openSections.teachingLeadership}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('teachingLeadership')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("social", socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Teaching & Leadership</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("social", socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("social", socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.teachingLeadership ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.social.slice(socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("social", achievement.id)}
+          <div className="mt-4">
+            <div className="space-y-4">
+              {/* Community Engagement Section */}
+              <Collapsible open={openSections.communityEngagement}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('communityEngagement')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("social", socialCategories.communityEngagement.start, socialCategories.communityEngagement.end)))
+                      }}
                     />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Community Engagement</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", socialCategories.communityEngagement.start, socialCategories.communityEngagement.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.communityEngagement.start, socialCategories.communityEngagement.end)))}%)
+                      </span>
+                      {getCategoryCompletion(getCategoryAchievements("social", socialCategories.communityEngagement.start, socialCategories.communityEngagement.end)) === 100 && (
+                        <span className="text-blue-500">✓</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.communityEngagement ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {achievements.social.slice(socialCategories.communityEngagement.start, socialCategories.communityEngagement.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("social", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-            {/* Competition & Events Section */}
-            <Collapsible open={openSections.competitionEvents}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('competitionEvents')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("social", socialCategories.competitionEvents.start, socialCategories.competitionEvents.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Competition & Events</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("social", socialCategories.competitionEvents.start, socialCategories.competitionEvents.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.competitionEvents.start, socialCategories.competitionEvents.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("social", socialCategories.competitionEvents.start, socialCategories.competitionEvents.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.competitionEvents ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.social.slice(socialCategories.competitionEvents.start, socialCategories.competitionEvents.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("social", achievement.id)}
+              {/* Teaching & Leadership Section */}
+              <Collapsible open={openSections.teachingLeadership}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('teachingLeadership')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("social", socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end)))
+                      }}
                     />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Teaching & Leadership</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end)))}%)
+                      </span>
+                      {getCategoryCompletion(getCategoryAchievements("social", socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end)) === 100 && (
+                        <span className="text-blue-500">✓</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.teachingLeadership ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {achievements.social.slice(socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("social", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-            {/* Media & Content Section */}
-            <Collapsible open={openSections.mediaContent}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('mediaContent')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("social", socialCategories.mediaContent.start, socialCategories.mediaContent.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Media & Content</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("social", socialCategories.mediaContent.start, socialCategories.mediaContent.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.mediaContent.start, socialCategories.mediaContent.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("social", socialCategories.mediaContent.start, socialCategories.mediaContent.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.mediaContent ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.social.slice(socialCategories.mediaContent.start, socialCategories.mediaContent.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("social", achievement.id)}
+              {/* Competition & Events Section */}
+              <Collapsible open={openSections.competitionEvents}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('competitionEvents')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("social", socialCategories.competitionEvents.start, socialCategories.competitionEvents.end)))
+                      }}
                     />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Competition & Events</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", socialCategories.competitionEvents.start, socialCategories.competitionEvents.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.competitionEvents.start, socialCategories.competitionEvents.end)))}%)
+                      </span>
+                      {getCategoryCompletion(getCategoryAchievements("social", socialCategories.competitionEvents.start, socialCategories.competitionEvents.end)) === 100 && (
+                        <span className="text-blue-500">✓</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.competitionEvents ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {achievements.social.slice(socialCategories.competitionEvents.start, socialCategories.competitionEvents.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("social", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Media & Content Section */}
+              <Collapsible open={openSections.mediaContent}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('mediaContent')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("social", socialCategories.mediaContent.start, socialCategories.mediaContent.end)))
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Media & Content</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", socialCategories.mediaContent.start, socialCategories.mediaContent.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.mediaContent.start, socialCategories.mediaContent.end)))}%)
+                      </span>
+                      {getCategoryCompletion(getCategoryAchievements("social", socialCategories.mediaContent.start, socialCategories.mediaContent.end)) === 100 && (
+                        <span className="text-blue-500">✓</span>
+                      )}
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.mediaContent ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {achievements.social.slice(socialCategories.mediaContent.start, socialCategories.mediaContent.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("social", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
           </div>
         </TabsContent>
         <TabsContent value="collection">
-          <div className="flex justify-center mb-8">
-            <div className="text-center">
-              <ProgressRing percentage={collectionCompletion} />
-              <p className="mt-2 text-sm text-muted-foreground">
-                {qualifiesForPatch(collectionCompletion)
-                  ? "Congratulations! You've unlocked the Collection Patch! 🎉"
-                  : `${Math.round(80 - collectionCompletion)}% more to unlock the Collection Patch`}
-              </p>
+          <div className="sticky top-[104px] bg-background/80 backdrop-blur-sm z-30 pb-2 border-b">
+            <div className="flex justify-center">
+              <div className="text-center">
+                <div className="flex items-center gap-2">
+                  <ProgressRing percentage={collectionCompletion} size={80} strokeWidth={6} />
+                  <p className="text-sm text-muted-foreground max-w-[160px]">
+                    {qualifiesForPatch(collectionCompletion)
+                      ? "Patch Unlocked! 🎉"
+                      : `${Math.round(80 - collectionCompletion)}% to Patch`}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="space-y-4">
-            {/* Disc Essentials Section */}
-            <Collapsible open={openSections.discEssentials}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('discEssentials')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Disc Essentials</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.discEssentials ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.collection.slice(collectionCategories.discEssentials.start, collectionCategories.discEssentials.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("collection", achievement.id)}
-                    />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
 
-            {/* Collection Milestones Section */}
-            <Collapsible open={openSections.discMilestones}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('discMilestones')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Collection Milestones</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.discMilestones ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.collection.slice(collectionCategories.discMilestones.start, collectionCategories.discMilestones.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("collection", achievement.id)}
+          <div className="mt-4">
+            <div className="space-y-4">
+              {/* Disc Essentials Section */}
+              <Collapsible open={openSections.discEssentials}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('discEssentials')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end)))
+                      }}
                     />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Disc Essentials</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end)))}%)
+                      </span>
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.discEssentials ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("collection", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-            {/* Equipment & Accessories Section */}
-            <Collapsible open={openSections.equipmentAccessories}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('equipmentAccessories')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Equipment & Accessories</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.equipmentAccessories ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.collection.slice(collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("collection", achievement.id)}
+              {/* Disc Collection Milestones Section */}
+              <Collapsible open={openSections.discMilestones}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('discMilestones')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end)))
+                      }}
                     />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Disc Collection Milestones</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end)))}%)
+                      </span>
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.discMilestones ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("collection", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-            {/* Special Discs Section */}
-            <Collapsible open={openSections.specialDiscs}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('specialDiscs')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Special Discs</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.specialDiscs ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.collection.slice(collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("collection", achievement.id)}
+              {/* Equipment & Accessories Section */}
+              <Collapsible open={openSections.equipmentAccessories}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('equipmentAccessories')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end)))
+                      }}
                     />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Equipment & Accessories</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end)))}%)
+                      </span>
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.equipmentAccessories ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("collection", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-            {/* Course Explorer Section */}
-            <Collapsible open={openSections.courseExplorer}>
-              <CollapsibleTrigger 
-                onClick={() => toggleSection('courseExplorer')}
-                className="relative w-full"
-              >
-                <div className="absolute inset-0 z-0">
-                  <Progress 
-                    value={getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end))} 
-                  />
-                </div>
-                <div className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-secondary/90 transition-colors cursor-pointer z-10 relative">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold">Course Explorer</h2>
-                    <span className={cn(
-                      "text-sm",
-                      getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end)) === 100
-                        ? "text-green-600 font-semibold"
-                        : "text-muted-foreground"
-                    )}>
-                      ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end)))}%)
-                    </span>
-                    {getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end)) === 100 && (
-                      <span className="text-green-600">✓</span>
-                    )}
-                  </div>
-                  <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.courseExplorer ? 'rotate-180' : ''}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                  {achievements.collection.slice(collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end).map((achievement) => (
-                    <AchievementCard
-                      key={achievement.id}
-                      {...achievement}
-                      onToggle={() => toggleAchievement("collection", achievement.id)}
+              {/* Special Discs Section */}
+              <Collapsible open={openSections.specialDiscs}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('specialDiscs')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end)))
+                      }}
                     />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Special Discs</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end)))}%)
+                      </span>
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.specialDiscs ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("collection", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Course Explorer Section */}
+              <Collapsible open={openSections.courseExplorer}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('courseExplorer')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end)))
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Course Explorer</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end)))}%)
+                      </span>
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.courseExplorer ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("collection", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Round Milestones Section */}
+              <Collapsible open={openSections.roundMilestones}>
+                <CollapsibleTrigger 
+                  onClick={() => toggleSection('roundMilestones')}
+                  className="relative w-full"
+                >
+                  <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+                    <div 
+                      className="w-full h-full opacity-10 transition-all duration-300"
+                      style={{ 
+                        background: getProgressBackground(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.roundMilestones.start, collectionCategories.roundMilestones.end)))
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold">Round Milestones</h2>
+                      <span className={cn(
+                        "text-sm font-semibold",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.roundMilestones.start, collectionCategories.roundMilestones.end)))
+                      )}>
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.roundMilestones.start, collectionCategories.roundMilestones.end)))}%)
+                      </span>
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.roundMilestones ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                    {getCategoryAchievements("collection", collectionCategories.roundMilestones.start, collectionCategories.roundMilestones.end).map((achievement) => (
+                      <AchievementCard
+                        key={achievement.id}
+                        {...achievement}
+                        onToggle={() => toggleAchievement("collection", achievement.id)}
+                      />
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
