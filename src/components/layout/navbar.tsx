@@ -15,7 +15,7 @@ export function Navbar() {
   const isAuthenticated = true;
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
+    <nav className="sticky top-0 z-50 bg-background border-b">
       <div className="flex h-16 items-center px-4 container mx-auto">
         <Link href="/" className="font-bold text-xl">
           Disc Golf Journey
