@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  basePath: '/disc-golf-journey',
+  ...(process.env.NODE_ENV === 'production' ? {
+    output: 'export',
+    basePath: '/disc-golf-journey',
+  } : {}),
   images: {
     unoptimized: true,
   },
