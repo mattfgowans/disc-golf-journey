@@ -100,6 +100,13 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
     },
     {
+      id: "skill-0",
+      title: "Scooby Snack",
+      description: "Make a putt using the scoober technique",
+      category: "skill",
+      isCompleted: false,
+    },
+    {
       id: "skill-10",
       title: "Money Shot",
       description: "Make your first throw in from 66+ ft (not off the tee shot)",
@@ -913,7 +920,7 @@ const sampleAchievements: Achievements = {
     },
     { id: "collection-40",
       title: "Top of the State",
-      description: "play the top 5 courses in your state",
+      description: "Play the top 5 courses in your state",
       category: "collection",
       isCompleted: false,
     },
@@ -1030,7 +1037,7 @@ export default function DashboardPage() {
 
   // Category ranges for skill achievements
   const skillCategories = {
-    puttingMastery: { start: 0, end: 10 },
+    puttingMastery: { start: 0, end: 11 },
     distanceControl: { start: 11, end: 20 },
     specialtyShots: { start: 21, end: 30 },
     scoringAchievements: { start: 31, end: 40 }
