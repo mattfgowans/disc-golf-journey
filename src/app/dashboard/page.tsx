@@ -890,33 +890,81 @@ const sampleAchievements: Achievements = {
       category: "collection",
       isCompleted: false,
     },
+    {
+      id: "collection-37",
+      title: "Course Legend",
+      description: "Play 50 different courses",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-38",
+      title: "Course Explorer",
+      description: "Play 100+ different courses",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-39",
+      title: "State's Best",
+      description: "Play the #1 rated course in your state",
+      category: "collection",
+      isCompleted: false,
+    },
+    { id: "collection-40",
+      title: "Top of the State",
+      description: "play the top 5 courses in your state",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-41",
+      title: "National Treasure",
+      description: "Play the #1 rated course in the country",
+      category: "collection",
+      isCompleted: false,
+    },
 
     // ROUND MILESTONES (100-120)
     {
-      id: "collection-37",
+      id: "collection-42",
       title: "First Round",
       description: "Complete your first round of disc golf",
       category: "collection",
       isCompleted: false,
     },
     {
-      id: "collection-38",
+      id: "collection-43",
       title: "Dedicated Player",
       description: "Play 10 rounds of disc golf",
       category: "collection",
       isCompleted: false,
     },
     {
-      id: "collection-39",
+      id: "collection-44",
       title: "Experienced Player",
       description: "Play 50 rounds of disc golf",
       category: "collection",
       isCompleted: false,
     },
     {
-      id: "collection-40",
+      id: "collection-45",
       title: "Seasoned Veteran",
       description: "Play 100 rounds of disc golf",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-46",
+      title: "Veteran Player",
+      description: "Play 250 rounds of disc golf",
+      category: "collection",
+      isCompleted: false,
+    },
+    {
+      id: "collection-47",
+      title: "Elite Player",
+      description: "Play 500+ rounds of disc golf",
       category: "collection",
       isCompleted: false,
     }
@@ -1003,8 +1051,8 @@ export default function DashboardPage() {
     discMilestones: { start: 6, end: 13 },
     equipmentAccessories: { start: 13, end: 21 },
     specialDiscs: { start: 21, end: 34 },
-    courseExplorer: { start: 34, end: 37 },
-    roundMilestones: { start: 37, end: 41 }
+    courseExplorer: { start: 34, end: 42 },
+    roundMilestones: { start: 42, end: 48 }
   };
 
   // Calculate completion percentages for each category
