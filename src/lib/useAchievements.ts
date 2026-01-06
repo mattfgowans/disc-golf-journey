@@ -87,8 +87,25 @@ export function useAchievements(initialAchievements?: Achievements) {
 
     try {
       const userDocRef = doc(db, "users", user.uid);
+
+      // Clean the data before saving (remove null completedDate fields)
+      const cleanAchievements = {
+        skill: newAchievements.skill.map(a => {
+          const { completedDate, ...rest } = a;
+          return completedDate ? { ...rest, completedDate } : rest;
+        }),
+        social: newAchievements.social.map(a => {
+          const { completedDate, ...rest } = a;
+          return completedDate ? { ...rest, completedDate } : rest;
+        }),
+        collection: newAchievements.collection.map(a => {
+          const { completedDate, ...rest } = a;
+          return completedDate ? { ...rest, completedDate } : rest;
+        }),
+      };
+
       await updateDoc(userDocRef, {
-        achievements: newAchievements,
+        achievements: cleanAchievements,
         updatedAt: new Date().toISOString(),
       });
       setAchievements(newAchievements);
@@ -103,26 +120,26 @@ export function useAchievements(initialAchievements?: Achievements) {
     category: keyof Achievements,
     id: string
   ) => {
-    console.log('Toggling achievement:', category, id);
-    if (!user) {
-      console.log('No user, returning');
-      return;
-    }
+    if (!user) return;
 
     const updatedAchievements = {
       ...achievements,
       [category]: achievements[category].map(achievement =>
         achievement.id === id
-          ? {
-              ...achievement,
-              isCompleted: !achievement.isCompleted,
-              completedDate: !achievement.isCompleted ? new Date().toISOString() : undefined
-            }
+          ? !achievement.isCompleted
+            ? {
+                ...achievement,
+                isCompleted: true,
+                completedDate: new Date().toISOString()
+              }
+            : {
+                ...achievement,
+                isCompleted: false,
+                completedDate: null // Firebase doesn't allow undefined, so we use null
+              }
           : achievement
       )
     };
-
-    console.log('Updated achievements:', updatedAchievements);
 
     // Update local state immediately for UI responsiveness
     setAchievements(updatedAchievements);
@@ -130,7 +147,6 @@ export function useAchievements(initialAchievements?: Achievements) {
     // Save to Firestore (async)
     try {
       await saveAchievements(updatedAchievements);
-      console.log('Achievement saved successfully');
     } catch (error) {
       // If save fails, revert the local state change
       console.error("Failed to save achievement:", error);

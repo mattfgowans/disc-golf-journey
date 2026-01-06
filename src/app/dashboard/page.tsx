@@ -1023,11 +1023,6 @@ export default function DashboardPage() {
     ? achievements
     : sampleAchievements;
 
-  // Debug logging
-  console.log('Current achievements:', currentAchievements);
-  console.log('Firebase achievements:', achievements);
-  console.log('Using Firebase?', achievements && achievements.skill.length > 0);
-
   // Show loading state
   if (authLoading || achievementsLoading) {
     return (
