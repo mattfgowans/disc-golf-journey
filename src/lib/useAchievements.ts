@@ -46,14 +46,20 @@ export function useAchievements(initialAchievements?: Achievements) {
         const userDocRef = doc(db, "users", user.uid);
         const userDoc = await getDoc(userDocRef);
 
+        console.log('🔍 Loading achievements for user:', user.uid);
+
         if (userDoc.exists()) {
           const data = userDoc.data();
           const savedAchievements = data.achievements;
-          
+
+          console.log('📋 Saved achievements from Firebase:', savedAchievements);
+
           // If user has saved achievements, use them; otherwise initialize with defaults
           if (savedAchievements && savedAchievements.skill?.length > 0) {
+            console.log('✅ Using saved achievements from Firebase');
             setAchievements(savedAchievements);
           } else {
+            console.log('🆕 Initializing with default achievements');
             // Initialize with default achievements if provided, otherwise empty
             const achievementsToSave = initialAchievements || defaultAchievements;
             await setDoc(userDocRef, {
@@ -63,6 +69,7 @@ export function useAchievements(initialAchievements?: Achievements) {
             setAchievements(achievementsToSave);
           }
         } else {
+          console.log('📝 Creating new user document with achievements');
           // Create user document with default achievements if it doesn't exist
           const achievementsToSave = initialAchievements || defaultAchievements;
           await setDoc(userDocRef, {
@@ -103,6 +110,8 @@ export function useAchievements(initialAchievements?: Achievements) {
           return completedDate ? { ...rest, completedDate } : rest;
         }),
       };
+
+      console.log('💾 Saving achievements to Firebase:', cleanAchievements.skill.filter(a => a.id === 'skill-0' || a.id === 'skill-11'));
 
       await updateDoc(userDocRef, {
         achievements: cleanAchievements,

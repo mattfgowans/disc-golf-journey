@@ -1025,6 +1025,7 @@ export default function DashboardPage() {
 
   // Debug logging for achievement state
   console.log('🎯 Current achievements state:', currentAchievements.skill.filter(a => a.id === 'skill-0' || a.id === 'skill-11'));
+  console.log('🔄 Using Firebase data?', achievements && achievements.skill.length > 0);
 
   // Show loading state
   if (authLoading || achievementsLoading) {
