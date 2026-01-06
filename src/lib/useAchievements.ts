@@ -120,7 +120,13 @@ export function useAchievements(initialAchievements?: Achievements) {
     category: keyof Achievements,
     id: string
   ) => {
-    if (!user) return;
+    console.log('🔄 Toggling achievement:', category, id);
+    if (!user) {
+      console.log('❌ No user, returning');
+      return;
+    }
+
+    console.log('📊 Current achievements before toggle:', achievements[category].filter(a => a.id === 'skill-0' || a.id === 'skill-11'));
 
     const updatedAchievements = {
       ...achievements,
@@ -141,15 +147,18 @@ export function useAchievements(initialAchievements?: Achievements) {
       )
     };
 
+    console.log('📊 Achievements after toggle:', updatedAchievements[category].filter(a => a.id === 'skill-0' || a.id === 'skill-11'));
+
     // Update local state immediately for UI responsiveness
     setAchievements(updatedAchievements);
 
     // Save to Firestore (async)
     try {
       await saveAchievements(updatedAchievements);
+      console.log('✅ Achievement saved successfully');
     } catch (error) {
       // If save fails, revert the local state change
-      console.error("Failed to save achievement:", error);
+      console.error("❌ Failed to save achievement:", error);
       setAchievements(achievements);
     }
   };
