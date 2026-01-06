@@ -59,6 +59,7 @@ A web application for tracking disc golf achievements across different categorie
 - Firebase authentication configured
 - Ready for backend integration
 - Authentication system structure in place
+- Deployed with GitHub Actions
 
 ## Next Steps
 
@@ -66,4 +67,4 @@ A web application for tracking disc golf achievements across different categorie
 - Add more achievements
 - Add achievement tiers/levels
 - Implement data persistence
-- Add social features
+- Add social features 
