@@ -57,7 +57,7 @@ export function useAchievements(initialAchievements?: Achievements) {
           // If user has saved achievements, use them; otherwise initialize with defaults
           if (savedAchievements && savedAchievements.skill?.length > 0) {
             // Check if the saved data has duplicate IDs (our bug from before)
-            const skillIds = savedAchievements.skill.map(a => a.id);
+            const skillIds = savedAchievements.skill.map((a: Achievement) => a.id);
             const hasDuplicateIds = skillIds.length !== new Set(skillIds).size;
 
             if (hasDuplicateIds) {
