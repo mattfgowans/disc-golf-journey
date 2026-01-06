@@ -137,23 +137,29 @@ export function useAchievements(initialAchievements?: Achievements) {
 
     console.log('📊 Current achievements before toggle:', achievements[category].filter(a => a.id === 'skill-0' || a.id === 'skill-11'));
 
+    // Find the specific achievement to toggle
+    const achievementToToggle = achievements[category].find(a => a.id === id);
+    if (!achievementToToggle) {
+      console.error('❌ Achievement not found:', id);
+      return;
+    }
+
+    console.log('🎯 Found achievement to toggle:', achievementToToggle);
+
     const updatedAchievements = {
       ...achievements,
-      [category]: achievements[category].map(achievement =>
-        achievement.id === id
-          ? !achievement.isCompleted
-            ? {
-                ...achievement,
-                isCompleted: true,
-                completedDate: new Date().toISOString()
-              }
-            : {
-                ...achievement,
-                isCompleted: false,
-                completedDate: null // Firebase doesn't allow undefined, so we use null
-              }
-          : achievement
-      )
+      [category]: achievements[category].map(achievement => {
+        if (achievement.id === id) {
+          const newState = !achievement.isCompleted;
+          console.log(`🔄 Toggling ${achievement.id} from ${achievement.isCompleted} to ${newState}`);
+          return {
+            ...achievement,
+            isCompleted: newState,
+            completedDate: newState ? new Date().toISOString() : null
+          };
+        }
+        return achievement;
+      })
     };
 
     console.log('📊 Achievements after toggle:', updatedAchievements[category].filter(a => a.id === 'skill-0' || a.id === 'skill-11'));

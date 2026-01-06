@@ -31,6 +31,11 @@ export function AchievementCard({
 }: AchievementCardProps) {
   const Icon = categoryIcons[category];
 
+  // Debug logging for specific achievements
+  if (title === "Practice Makes Perfect" || title === "Scooby Snack") {
+    console.log(`🎴 ${title}: isCompleted=${isCompleted}, completedDate=${completedDate}`);
+  }
+
   return (
     <Card className={`${isCompleted ? 'bg-green-50' : ''} transition-colors`}>
       <CardHeader className="flex flex-row items-center gap-4">
