@@ -56,6 +56,7 @@ A web application for tracking disc golf achievements across different categorie
 
 - Frontend UI implemented
 - Sample achievements added
+- Firebase authentication configured
 - Ready for backend integration
 - Authentication system structure in place
 
