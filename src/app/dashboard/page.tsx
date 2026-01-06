@@ -9,6 +9,10 @@ import { ProgressRing } from "@/components/ui/progress-ring";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { useAchievements } from "@/lib/useAchievements";
+import { useAuth } from "@/lib/firebase-auth";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type Achievement = {
   id: string;
@@ -994,7 +998,8 @@ const sampleAchievements: Achievements = {
 };
 
 export default function DashboardPage() {
-  const [achievements, setAchievements] = useState(sampleAchievements);
+  const { user, loading: authLoading, signInWithGoogle } = useAuth();
+  const { achievements, loading: achievementsLoading, toggleAchievement } = useAchievements(sampleAchievements);
   const [openSections, setOpenSections] = useState({
     puttingMastery: false,
     distanceControl: false,
@@ -1013,23 +1018,34 @@ export default function DashboardPage() {
     roundMilestones: false
   });
 
-  const toggleAchievement = (category: keyof Achievements, id: string) => {
-    setAchievements((prev) => ({
-      ...prev,
-      [category]: prev[category].map((achievement) => {
-        if (achievement.id === id) {
-          if (!achievement.isCompleted) {
-            return {
-              ...achievement,
-              isCompleted: true,
-              completedDate: new Date().toISOString(),
-            };
-          }
-        }
-        return achievement;
-      }),
-    }));
-  };
+  // Use achievements from Firebase, or fallback to sample if not loaded yet
+  const currentAchievements = (achievements && achievements.skill.length > 0) 
+    ? achievements 
+    : sampleAchievements;
+
+  // Show loading state
+  if (authLoading || achievementsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Show sign-in prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <h2 className="text-2xl font-bold mb-4">Sign in to track your achievements</h2>
+        <p className="text-gray-600 mb-6">
+          Sign in with Google to save your progress and track your disc golf journey.
+        </p>
+        <Button onClick={signInWithGoogle} size="lg">
+          Sign in with Google
+        </Button>
+      </div>
+    );
+  }
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections(prev => ({
@@ -1079,8 +1095,8 @@ export default function DashboardPage() {
 
   // Calculate completion percentages for each category
   const getCompletionPercentage = (category: keyof Achievements) => {
-    const totalAchievements = achievements[category].length;
-    const completedAchievements = achievements[category].filter(a => a.isCompleted).length;
+    const totalAchievements = currentAchievements[category].length;
+    const completedAchievements = currentAchievements[category].filter(a => a.isCompleted).length;
     return (completedAchievements / totalAchievements) * 100;
   };
 
@@ -1162,7 +1178,7 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {achievements.skill.slice(skillCategories.puttingMastery.start, skillCategories.puttingMastery.end).map((achievement) => (
+                    {currentAchievements.skill.slice(skillCategories.puttingMastery.start, skillCategories.puttingMastery.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1197,7 +1213,7 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {achievements.skill.slice(skillCategories.distanceControl.start, skillCategories.distanceControl.end).map((achievement) => (
+                    {currentAchievements.skill.slice(skillCategories.distanceControl.start, skillCategories.distanceControl.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1231,7 +1247,7 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {achievements.skill.slice(skillCategories.specialtyShots.start, skillCategories.specialtyShots.end).map((achievement) => (
+                    {currentAchievements.skill.slice(skillCategories.specialtyShots.start, skillCategories.specialtyShots.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1265,7 +1281,7 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {achievements.skill.slice(skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end).map((achievement) => (
+                    {currentAchievements.skill.slice(skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1319,7 +1335,7 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {achievements.social.slice(socialCategories.communityEngagement.start, socialCategories.communityEngagement.end).map((achievement) => (
+                    {currentAchievements.social.slice(socialCategories.communityEngagement.start, socialCategories.communityEngagement.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1353,7 +1369,7 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {achievements.social.slice(socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end).map((achievement) => (
+                    {currentAchievements.social.slice(socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1387,7 +1403,7 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {achievements.social.slice(socialCategories.competitionEvents.start, socialCategories.competitionEvents.end).map((achievement) => (
+                    {currentAchievements.social.slice(socialCategories.competitionEvents.start, socialCategories.competitionEvents.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1421,7 +1437,7 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {achievements.social.slice(socialCategories.mediaContent.start, socialCategories.mediaContent.end).map((achievement) => (
+                    {currentAchievements.social.slice(socialCategories.mediaContent.start, socialCategories.mediaContent.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1455,7 +1471,7 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {achievements.social.slice(socialCategories.goodSamaritan.start, socialCategories.goodSamaritan.end).map((achievement) => (
+                    {currentAchievements.social.slice(socialCategories.goodSamaritan.start, socialCategories.goodSamaritan.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}

@@ -9,10 +9,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/lib/firebase-auth";
 
 export function Navbar() {
-  // Temporarily set to true to see the dashboard
-  const isAuthenticated = true;
+  const { user, loading, signInWithGoogle, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  if (loading) {
+    return (
+      <nav className="sticky top-0 z-50 bg-background border-b">
+        <div className="flex h-16 items-center px-4 container mx-auto bg-background">
+          <Link href="/" className="font-bold text-xl">
+            Disc Golf Journey
+          </Link>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-background border-b">
@@ -22,14 +38,11 @@ export function Navbar() {
         </Link>
         
         <div className="ml-auto flex items-center space-x-4">
-          {!isAuthenticated ? (
+          {!user ? (
             <>
-              <Link href="/login">
-                <Button variant="ghost">Login</Button>
-              </Link>
-              <Link href="/register">
-                <Button>Sign up</Button>
-              </Link>
+              <Button variant="ghost" onClick={signInWithGoogle}>
+                Sign in with Google
+              </Button>
             </>
           ) : (
             <>
@@ -39,13 +52,22 @@ export function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <Avatar>
-                    <AvatarFallback>DG</AvatarFallback>
+                    <AvatarImage src={user.photoURL || undefined} />
+                    <AvatarFallback>
+                      {user.displayName?.charAt(0).toUpperCase() || "DG"}
+                    </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem disabled>
+                    {user.displayName || user.email}
+                  </DropdownMenuItem>
                   <DropdownMenuItem>Profile</DropdownMenuItem>
                   <DropdownMenuItem>Settings</DropdownMenuItem>
-                  <DropdownMenuItem className="text-red-600">
+                  <DropdownMenuItem 
+                    className="text-red-600"
+                    onClick={handleSignOut}
+                  >
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
