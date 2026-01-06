@@ -46,13 +46,9 @@ export function useAchievements(initialAchievements?: Achievements) {
         const userDocRef = doc(db, "users", user.uid);
         const userDoc = await getDoc(userDocRef);
 
-        console.log('🔍 Loading achievements for user:', user.uid);
-
         if (userDoc.exists()) {
           const data = userDoc.data();
           const savedAchievements = data.achievements;
-
-          console.log('📋 Saved achievements from Firebase:', savedAchievements);
 
           // If user has saved achievements, use them; otherwise initialize with defaults
           if (savedAchievements && savedAchievements.skill?.length > 0) {
@@ -61,7 +57,7 @@ export function useAchievements(initialAchievements?: Achievements) {
             const hasDuplicateIds = skillIds.length !== new Set(skillIds).size;
 
             if (hasDuplicateIds) {
-              console.log('🚨 Found duplicate IDs in Firebase data, resetting to defaults');
+              // Reset to defaults if duplicate IDs found
               const achievementsToSave = initialAchievements || defaultAchievements;
               await setDoc(userDocRef, {
                 achievements: achievementsToSave,
@@ -69,11 +65,9 @@ export function useAchievements(initialAchievements?: Achievements) {
               });
               setAchievements(achievementsToSave);
             } else {
-              console.log('✅ Using saved achievements from Firebase');
               setAchievements(savedAchievements);
             }
           } else {
-            console.log('🆕 Initializing with default achievements');
             // Initialize with default achievements if provided, otherwise empty
             const achievementsToSave = initialAchievements || defaultAchievements;
             await setDoc(userDocRef, {
@@ -83,7 +77,6 @@ export function useAchievements(initialAchievements?: Achievements) {
             setAchievements(achievementsToSave);
           }
         } else {
-          console.log('📝 Creating new user document with achievements');
           // Create user document with default achievements if it doesn't exist
           const achievementsToSave = initialAchievements || defaultAchievements;
           await setDoc(userDocRef, {
@@ -143,40 +136,20 @@ export function useAchievements(initialAchievements?: Achievements) {
     category: keyof Achievements,
     id: string
   ) => {
-    console.log('🔄 Toggling achievement:', category, id);
-    if (!user) {
-      console.log('❌ No user, returning');
-      return;
-    }
-
-    console.log('📊 Current achievements before toggle:', achievements[category].filter(a => a.id === 'skill-0' || a.id === 'skill-11'));
-
-    // Find the specific achievement to toggle
-    const achievementToToggle = achievements[category].find(a => a.id === id);
-    if (!achievementToToggle) {
-      console.error('❌ Achievement not found:', id);
-      return;
-    }
-
-    console.log('🎯 Found achievement to toggle:', achievementToToggle);
+    if (!user) return;
 
     const updatedAchievements = {
       ...achievements,
-      [category]: achievements[category].map(achievement => {
-        if (achievement.id === id) {
-          const newState = !achievement.isCompleted;
-          console.log(`🔄 Toggling ${achievement.id} from ${achievement.isCompleted} to ${newState}`);
-          return {
-            ...achievement,
-            isCompleted: newState,
-            completedDate: newState ? new Date().toISOString() : null
-          };
-        }
-        return achievement;
-      })
+      [category]: achievements[category].map(achievement =>
+        achievement.id === id
+          ? {
+              ...achievement,
+              isCompleted: !achievement.isCompleted,
+              completedDate: !achievement.isCompleted ? new Date().toISOString() : null
+            }
+          : achievement
+      )
     };
-
-    console.log('📊 Achievements after toggle:', updatedAchievements[category].filter(a => a.id === 'skill-0' || a.id === 'skill-11'));
 
     // Update local state immediately for UI responsiveness
     setAchievements(updatedAchievements);
@@ -184,10 +157,9 @@ export function useAchievements(initialAchievements?: Achievements) {
     // Save to Firestore (async)
     try {
       await saveAchievements(updatedAchievements);
-      console.log('✅ Achievement saved successfully');
     } catch (error) {
       // If save fails, revert the local state change
-      console.error("❌ Failed to save achievement:", error);
+      console.error("Failed to save achievement:", error);
       setAchievements(achievements);
     }
   };
