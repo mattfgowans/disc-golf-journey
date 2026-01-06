@@ -56,8 +56,22 @@ export function useAchievements(initialAchievements?: Achievements) {
 
           // If user has saved achievements, use them; otherwise initialize with defaults
           if (savedAchievements && savedAchievements.skill?.length > 0) {
-            console.log('✅ Using saved achievements from Firebase');
-            setAchievements(savedAchievements);
+            // Check if the saved data has duplicate IDs (our bug from before)
+            const skillIds = savedAchievements.skill.map(a => a.id);
+            const hasDuplicateIds = skillIds.length !== new Set(skillIds).size;
+
+            if (hasDuplicateIds) {
+              console.log('🚨 Found duplicate IDs in Firebase data, resetting to defaults');
+              const achievementsToSave = initialAchievements || defaultAchievements;
+              await setDoc(userDocRef, {
+                achievements: achievementsToSave,
+                createdAt: new Date().toISOString(),
+              });
+              setAchievements(achievementsToSave);
+            } else {
+              console.log('✅ Using saved achievements from Firebase');
+              setAchievements(savedAchievements);
+            }
           } else {
             console.log('🆕 Initializing with default achievements');
             // Initialize with default achievements if provided, otherwise empty
