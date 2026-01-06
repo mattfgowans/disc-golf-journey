@@ -103,7 +103,11 @@ export function useAchievements(initialAchievements?: Achievements) {
     category: keyof Achievements,
     id: string
   ) => {
-    if (!user) return;
+    console.log('Toggling achievement:', category, id);
+    if (!user) {
+      console.log('No user, returning');
+      return;
+    }
 
     const updatedAchievements = {
       ...achievements,
@@ -118,12 +122,15 @@ export function useAchievements(initialAchievements?: Achievements) {
       )
     };
 
+    console.log('Updated achievements:', updatedAchievements);
+
     // Update local state immediately for UI responsiveness
     setAchievements(updatedAchievements);
 
     // Save to Firestore (async)
     try {
       await saveAchievements(updatedAchievements);
+      console.log('Achievement saved successfully');
     } catch (error) {
       // If save fails, revert the local state change
       console.error("Failed to save achievement:", error);

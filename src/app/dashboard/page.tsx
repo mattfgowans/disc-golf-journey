@@ -1019,9 +1019,14 @@ export default function DashboardPage() {
   });
 
   // Use achievements from Firebase, or fallback to sample if not loaded yet
-  const currentAchievements = (achievements && achievements.skill.length > 0) 
-    ? achievements 
+  const currentAchievements = (achievements && achievements.skill.length > 0)
+    ? achievements
     : sampleAchievements;
+
+  // Debug logging
+  console.log('Current achievements:', currentAchievements);
+  console.log('Firebase achievements:', achievements);
+  console.log('Using Firebase?', achievements && achievements.skill.length > 0);
 
   // Show loading state
   if (authLoading || achievementsLoading) {
