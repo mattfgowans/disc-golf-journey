@@ -109,11 +109,12 @@ export function useAchievements(initialAchievements?: Achievements) {
     const achievement = updatedAchievements[category].find((a) => a.id === id);
 
     if (achievement) {
-      if (!achievement.isCompleted) {
-        achievement.isCompleted = true;
+      achievement.isCompleted = !achievement.isCompleted;
+      if (achievement.isCompleted) {
         achievement.completedDate = new Date().toISOString();
+      } else {
+        achievement.completedDate = undefined;
       }
-      // Note: We're not allowing un-completing achievements
     }
 
     await saveAchievements(updatedAchievements);

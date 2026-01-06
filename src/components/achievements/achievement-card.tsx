@@ -47,10 +47,9 @@ export function AchievementCard({
           <Button
             variant={isCompleted ? "outline" : "default"}
             onClick={onToggle}
-            className={isCompleted ? "text-green-600" : ""}
-            disabled={isCompleted}
+            className={isCompleted ? "text-green-600 border-green-600 hover:bg-green-50" : ""}
           >
-            {isCompleted ? "Completed ✓" : "Mark as Complete"}
+            {isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
           </Button>
           {completedDate && (
             <span className="text-sm text-muted-foreground">
