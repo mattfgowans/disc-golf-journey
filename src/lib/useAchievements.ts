@@ -105,19 +105,30 @@ export function useAchievements(initialAchievements?: Achievements) {
   ) => {
     if (!user) return;
 
-    const updatedAchievements = { ...achievements };
-    const achievement = updatedAchievements[category].find((a) => a.id === id);
+    const updatedAchievements = {
+      ...achievements,
+      [category]: achievements[category].map(achievement =>
+        achievement.id === id
+          ? {
+              ...achievement,
+              isCompleted: !achievement.isCompleted,
+              completedDate: !achievement.isCompleted ? new Date().toISOString() : undefined
+            }
+          : achievement
+      )
+    };
 
-    if (achievement) {
-      achievement.isCompleted = !achievement.isCompleted;
-      if (achievement.isCompleted) {
-        achievement.completedDate = new Date().toISOString();
-      } else {
-        achievement.completedDate = undefined;
-      }
+    // Update local state immediately for UI responsiveness
+    setAchievements(updatedAchievements);
+
+    // Save to Firestore (async)
+    try {
+      await saveAchievements(updatedAchievements);
+    } catch (error) {
+      // If save fails, revert the local state change
+      console.error("Failed to save achievement:", error);
+      setAchievements(achievements);
     }
-
-    await saveAchievements(updatedAchievements);
   };
 
   return {
