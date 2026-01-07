@@ -105,6 +105,7 @@ const sampleAchievements: Achievements = {
       description: "Make a putt using the scoober technique",
       category: "skill",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "skill-10",
@@ -352,6 +353,7 @@ const sampleAchievements: Achievements = {
       description: "Score under par at a course",
       category: "skill",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "skill-39",
@@ -359,6 +361,7 @@ const sampleAchievements: Achievements = {
       description: "Go double digits under par",
       category: "skill",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "skill-40",
@@ -366,6 +369,7 @@ const sampleAchievements: Achievements = {
       description: "Record a perfect round (birdied every hole)",
       category: "skill",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "skill-41",
@@ -373,6 +377,7 @@ const sampleAchievements: Achievements = {
       description: "Save par after a bad drive (going OB)",
       category: "skill",
       isCompleted: false,
+      points: 50,
     }
   ],
   social: [
@@ -432,6 +437,7 @@ const sampleAchievements: Achievements = {
       description: "Help plant trees, or maintain landscaping at a course",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-5",
@@ -439,6 +445,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase a PDGA membership and receive your player number",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-6",
@@ -462,6 +469,7 @@ const sampleAchievements: Achievements = {
       description: "Participate in your first disc swap event in person or online",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-9",
@@ -469,6 +477,7 @@ const sampleAchievements: Achievements = {
       description: "Play five rounds with the same person",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-10",
@@ -518,6 +527,7 @@ const sampleAchievements: Achievements = {
       description: "Show a new player around your local course",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-16",
@@ -525,6 +535,7 @@ const sampleAchievements: Achievements = {
       description: "Coach youth players in disc golf",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-17",
@@ -532,6 +543,7 @@ const sampleAchievements: Achievements = {
       description: "Help introduce disc golf to a school program",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-18",
@@ -539,6 +551,7 @@ const sampleAchievements: Achievements = {
       description: "Donate discs to youth programs or schools",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-19",
@@ -546,6 +559,7 @@ const sampleAchievements: Achievements = {
       description: "Direct or help direct a tournament",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-20",
@@ -553,6 +567,7 @@ const sampleAchievements: Achievements = {
       description: "Organize a league",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-21",
@@ -560,6 +575,7 @@ const sampleAchievements: Achievements = {
       description: "Serve on a local disc golf club board",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
 
     // COMPETITION & EVENTS (40-60)
@@ -569,6 +585,7 @@ const sampleAchievements: Achievements = {
       description: "Play in your first tournament",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-23",
@@ -576,6 +593,7 @@ const sampleAchievements: Achievements = {
       description: "Keep score for a tournament card",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-24",
@@ -583,6 +601,7 @@ const sampleAchievements: Achievements = {
       description: "Volunteer as a spotter in a tournament",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-25",
@@ -590,6 +609,7 @@ const sampleAchievements: Achievements = {
       description: "Help run a tournament registration/check-in",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-26",
@@ -597,6 +617,7 @@ const sampleAchievements: Achievements = {
       description: "Win your first tournament or league night",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-27",
@@ -604,6 +625,7 @@ const sampleAchievements: Achievements = {
       description: "Win your division in a tournament",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-28",
@@ -611,6 +633,7 @@ const sampleAchievements: Achievements = {
       description: "Participate in a doubles tournament",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-29",
@@ -618,6 +641,7 @@ const sampleAchievements: Achievements = {
       description: "Participate in an ace race event",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-30",
@@ -625,6 +649,7 @@ const sampleAchievements: Achievements = {
       description: "Play a glow round",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
 
     // MEDIA & CONTENT (60-80)
@@ -634,6 +659,7 @@ const sampleAchievements: Achievements = {
       description: "Review a course on UDisc or a similar platform",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-32",
@@ -641,6 +667,7 @@ const sampleAchievements: Achievements = {
       description: "Create disc golf content for others",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-33",
@@ -648,6 +675,7 @@ const sampleAchievements: Achievements = {
       description: "Start watching day-later content of the pro tour on JomezPro or another channel",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-34",
@@ -655,6 +683,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase a DGN subscription to watch live pro tour coverage",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-35",
@@ -662,6 +691,7 @@ const sampleAchievements: Achievements = {
       description: "Meet a professional disc golfer",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
 
     // GOOD SAMARITAN (80-100)
@@ -671,6 +701,7 @@ const sampleAchievements: Achievements = {
       description: "Return your first lost disc to its owner",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-37",
@@ -678,6 +709,7 @@ const sampleAchievements: Achievements = {
       description: "Return 5 discs to their owners",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-38",
@@ -685,6 +717,7 @@ const sampleAchievements: Achievements = {
       description: "Return 10 discs to their owners",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-39",
@@ -692,6 +725,7 @@ const sampleAchievements: Achievements = {
       description: "Return 25 discs to their owners",
       category: "social",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "social-40",
@@ -699,6 +733,7 @@ const sampleAchievements: Achievements = {
       description: "Return 50+ discs to their owners",
       category: "social",
       isCompleted: false,
+      points: 50,
     }
   ],
   collection: [
@@ -758,6 +793,7 @@ const sampleAchievements: Achievements = {
       description: "Get your first mini marker",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-5",
@@ -765,6 +801,7 @@ const sampleAchievements: Achievements = {
       description: "Get your first disc golf bag",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
 
     // DISC MILESTONES (20-40)
@@ -798,6 +835,7 @@ const sampleAchievements: Achievements = {
       description: "Own 50 different discs",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-10",
@@ -805,6 +843,7 @@ const sampleAchievements: Achievements = {
       description: "Own 100 different discs",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-11",
@@ -812,6 +851,7 @@ const sampleAchievements: Achievements = {
       description: "Own discs from 5 different manufacturers",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-12",
@@ -819,6 +859,7 @@ const sampleAchievements: Achievements = {
       description: "Own discs in 5 different plastic types",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
 
     // EQUIPMENT & ACCESSORIES (40-60)
@@ -828,6 +869,7 @@ const sampleAchievements: Achievements = {
       description: "Upgrade to a larger disc golf bag",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-14",
@@ -835,6 +877,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase a disc golf cart",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-15",
@@ -842,6 +885,7 @@ const sampleAchievements: Achievements = {
       description: "Get your first disc retriever",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-16",
@@ -849,6 +893,7 @@ const sampleAchievements: Achievements = {
       description: "Get your first disc golf towel",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-17",
@@ -856,6 +901,7 @@ const sampleAchievements: Achievements = {
       description: "Get your first whale sack or other equivalent chalk bag",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-18",
@@ -863,6 +909,7 @@ const sampleAchievements: Achievements = {
       description: "Own five different discs that you never use",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-19",
@@ -870,6 +917,7 @@ const sampleAchievements: Achievements = {
       description: "Buy a disc that's way too fast for your arm speed",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-20",
@@ -877,6 +925,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase a practice basket",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
 
     // SPECIAL DISCS (60-80)
@@ -886,6 +935,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase a tour series disc",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-22",
@@ -893,6 +943,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase a signature series disc",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-23",
@@ -900,6 +951,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase a first run disc",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-24",
@@ -907,6 +959,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase a limited edition disc",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-25",
@@ -914,6 +967,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase a tour series disc",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-26",
@@ -921,6 +975,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase a disc with a custom stamp",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-27",
@@ -928,6 +983,7 @@ const sampleAchievements: Achievements = {
       description: "Get a disc from a tournament",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-28",
@@ -935,6 +991,7 @@ const sampleAchievements: Achievements = {
       description: "Get a disc signed by a professional",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-29",
@@ -942,6 +999,7 @@ const sampleAchievements: Achievements = {
       description: "Design your own custom disc",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-30",
@@ -949,6 +1007,7 @@ const sampleAchievements: Achievements = {
       description: "Dye your first disc",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-31",
@@ -956,6 +1015,7 @@ const sampleAchievements: Achievements = {
       description: "Sell a dyed disc",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-32",
@@ -963,6 +1023,7 @@ const sampleAchievements: Achievements = {
       description: "Add a glow-in-the-dark disc to your collection",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-33",
@@ -970,6 +1031,7 @@ const sampleAchievements: Achievements = {
       description: "Own a disc that's over 20 years old",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
 
     // COURSE EXPLORER (80-100)
@@ -979,6 +1041,7 @@ const sampleAchievements: Achievements = {
       description: "Play 5 different courses",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-35",
@@ -986,6 +1049,7 @@ const sampleAchievements: Achievements = {
       description: "Play 10 different courses",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-36",
@@ -993,6 +1057,7 @@ const sampleAchievements: Achievements = {
       description: "Play 25 different courses",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-37",
@@ -1000,6 +1065,7 @@ const sampleAchievements: Achievements = {
       description: "Play 50 different courses",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-38",
@@ -1007,6 +1073,7 @@ const sampleAchievements: Achievements = {
       description: "Play 100+ different courses",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-39",
@@ -1014,6 +1081,7 @@ const sampleAchievements: Achievements = {
       description: "Play the #1 rated course in your state",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-40",
@@ -1021,6 +1089,7 @@ const sampleAchievements: Achievements = {
       description: "Play the top 5 courses in your state",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-41",
@@ -1028,6 +1097,7 @@ const sampleAchievements: Achievements = {
       description: "Play the #1 rated course in the country",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
 
     // ROUND MILESTONES (100-120)
@@ -1037,6 +1107,7 @@ const sampleAchievements: Achievements = {
       description: "Complete your first round of disc golf",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-43",
@@ -1044,6 +1115,7 @@ const sampleAchievements: Achievements = {
       description: "Play 10 rounds of disc golf",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-44",
@@ -1051,6 +1123,7 @@ const sampleAchievements: Achievements = {
       description: "Play 50 rounds of disc golf",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-45",
@@ -1058,6 +1131,7 @@ const sampleAchievements: Achievements = {
       description: "Play 100 rounds of disc golf",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-46",
@@ -1065,6 +1139,7 @@ const sampleAchievements: Achievements = {
       description: "Play 250 rounds of disc golf",
       category: "collection",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-47",
@@ -1072,6 +1147,7 @@ const sampleAchievements: Achievements = {
       description: "Play 500+ rounds of disc golf",
       category: "collection",
       isCompleted: false,
+      points: 50,
     }
   ]
 };
