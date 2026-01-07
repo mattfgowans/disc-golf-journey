@@ -65,6 +65,7 @@ const sampleAchievements: Achievements = {
       description: "Hit chains on 5 consecutive putts in a round",
       category: "skill",
       isCompleted: false,
+      points: 75,
     },
     {
       id: "skill-6",
@@ -72,6 +73,7 @@ const sampleAchievements: Achievements = {
       description: "Make 3 straddle putts in one round",
       category: "skill",
       isCompleted: false,
+      points: 60,
     },
     {
       id: "skill-7",
@@ -79,6 +81,7 @@ const sampleAchievements: Achievements = {
       description: "Make a jump putt from outside circle 1",
       category: "skill",
       isCompleted: false,
+      points: 90,
     },
     {
       id: "skill-8",
@@ -86,6 +89,7 @@ const sampleAchievements: Achievements = {
       description: "Make a putt using the turbo putt technique",
       category: "skill",
       isCompleted: false,
+      points: 85,
     },
     {
       id: "skill-9",
@@ -93,6 +97,7 @@ const sampleAchievements: Achievements = {
       description: "Make a putt using the Vinnie basketball technique",
       category: "skill",
       isCompleted: false,
+      points: 80,
     },
     {
       id: "skill-11",
@@ -188,6 +193,7 @@ const sampleAchievements: Achievements = {
       description: "Birdie a hole while throwing a thumber off tee",
       category: "skill",
       isCompleted: false,
+      points: 110,
     },
     {
       id: "skill-23",
@@ -195,6 +201,7 @@ const sampleAchievements: Achievements = {
       description: "Birdie while throwing a grenade off tee",
       category: "skill",
       isCompleted: false,
+      points: 115,
     },
     {
       id: "skill-24",
@@ -202,6 +209,7 @@ const sampleAchievements: Achievements = {
       description: "Birdie with a tomahawk off tee",
       category: "skill",
       isCompleted: false,
+      points: 120,
     },
     {
       id: "skill-25",
@@ -260,6 +268,7 @@ const sampleAchievements: Achievements = {
       description: "Score your first par on a hole",
       category: "skill",
       isCompleted: false,
+      points: 40,
     },
     {
       id: "skill-33",
@@ -267,6 +276,7 @@ const sampleAchievements: Achievements = {
       description: "Score your first birdie",
       category: "skill",
       isCompleted: false,
+      points: 60,
     },
     {
       id: "skill-33a",
@@ -274,6 +284,7 @@ const sampleAchievements: Achievements = {
       description: "Birdie your first par 4 hole",
       category: "skill",
       isCompleted: false,
+      points: 80,
     },
     {
       id: "skill-33b",
@@ -281,6 +292,7 @@ const sampleAchievements: Achievements = {
       description: "Birdie your first par 5 hole",
       category: "skill",
       isCompleted: false,
+      points: 100,
     },
     {
       id: "skill-34",
@@ -288,6 +300,7 @@ const sampleAchievements: Achievements = {
       description: "Score your first eagle",
       category: "skill",
       isCompleted: false,
+      points: 150,
     },
     {
       id: "skill-35",
@@ -384,6 +397,22 @@ const sampleAchievements: Achievements = {
       description: "Help plant trees, or maintain landscaping at a course",
       category: "social",
       isCompleted: false,
+      points: 90,
+    },
+    {
+      id: "social-5",
+      title: "PDGA Official",
+      description: "Purchase a PDGA membership and receive your player number",
+      category: "social",
+      isCompleted: false,
+      points: 200,
+    },
+    {
+      id: "social-4",
+      title: "Tree Guardian",
+      description: "Help plant trees, or maintain landscaping at a course",
+      category: "social",
+      isCompleted: false,
     },
     {
       id: "social-5",
@@ -398,6 +427,7 @@ const sampleAchievements: Achievements = {
       description: "Play a round with three or more people",
       category: "social",
       isCompleted: false,
+      points: 60,
     },
     {
       id: "social-7",
@@ -405,6 +435,7 @@ const sampleAchievements: Achievements = {
       description: "Play with 10 different people",
       category: "social",
       isCompleted: false,
+      points: 150,
     },
     {
       id: "social-8",
@@ -680,6 +711,22 @@ const sampleAchievements: Achievements = {
       category: "collection",
       isCompleted: false,
       points: 45,
+    },
+    {
+      id: "collection-4",
+      title: "Mini Marker",
+      description: "Get your first mini marker",
+      category: "collection",
+      isCompleted: false,
+      points: 20,
+    },
+    {
+      id: "collection-5",
+      title: "Disc Carrier",
+      description: "Get your first disc golf bag",
+      category: "collection",
+      isCompleted: false,
+      points: 50,
     },
     {
       id: "collection-4",
