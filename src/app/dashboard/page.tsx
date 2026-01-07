@@ -1754,7 +1754,10 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end).map((achievement) => (
+                    {(() => {
+                      const discMilestonesAchievements = getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end);
+                      console.log('Disc Collection Milestones achievements:', discMilestonesAchievements.map(a => `${a.id}: ${a.title}`));
+                      return discMilestonesAchievements.map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         title={achievement.title}
@@ -1794,7 +1797,10 @@ export default function DashboardPage() {
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end).map((achievement) => (
+                    {(() => {
+                      const equipmentAchievements = getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end);
+                      console.log('Equipment & Accessories achievements:', equipmentAchievements.map(a => `${a.id}: ${a.title}`));
+                      return equipmentAchievements.map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
