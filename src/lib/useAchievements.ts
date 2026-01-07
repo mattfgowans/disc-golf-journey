@@ -91,8 +91,8 @@ function mergeAchievementsWithTemplate(saved: Achievements, template: Achievemen
   }
 
   const matchRatio = totalMatches / totalSaved;
-  if (matchRatio < 0.5) {
-    console.log('Data structure completely changed. Using template data instead of merging.');
+  if (matchRatio < 1.0) {  // Changed from 0.5 to 1.0 - any mismatch means reset
+    console.log(`Data mismatch detected (${Math.round(matchRatio * 100)}% match). Using template data instead of merging.`);
     return template;
   }
 
