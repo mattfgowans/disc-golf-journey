@@ -381,7 +381,7 @@ const sampleAchievements: Achievements = {
     }
   ],
   social: [
-    // COMMUNITY ENGAGEMENT (0-20)
+    // COMMUNITY ENGAGEMENT (0-14)
     {
       id: "social-0",
       title: "League Night Rookie",
@@ -504,7 +504,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // TEACHING & LEADERSHIP (20-40)
+    // TEACHING & LEADERSHIP (15-21)
     {
       id: "social-15",
       title: "Disc Golf Mentor",
@@ -562,7 +562,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // COMPETITION & EVENTS (40-60)
+    // COMPETITION & EVENTS (22-31)
     {
       id: "social-22",
       title: "Tournament First Timer",
@@ -644,7 +644,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // MEDIA & CONTENT (60-80)
+    // MEDIA & CONTENT (32-35)
     {
       id: "social-32",
       title: "Course Critic",
@@ -678,7 +678,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // GOOD SAMARITAN (80-100)
+    // GOOD SAMARITAN (36-40)
     {
       id: "social-36",
       title: "Lost and Found",
