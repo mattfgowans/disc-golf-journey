@@ -381,7 +381,7 @@ const sampleAchievements: Achievements = {
     }
   ],
   social: [
-    // COMMUNITY ENGAGEMENT (0-14)
+    // COMMUNITY ENGAGEMENT (0-15)
     {
       id: "social-0",
       title: "League Night Rookie",
@@ -504,7 +504,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // TEACHING & LEADERSHIP (15-21)
+    // TEACHING & LEADERSHIP (15-22)
     {
       id: "social-15",
       title: "Disc Golf Mentor",
@@ -562,7 +562,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // COMPETITION & EVENTS (22-31)
+    // COMPETITION & EVENTS (22-32)
     {
       id: "social-22",
       title: "Tournament First Timer",
@@ -644,7 +644,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // MEDIA & CONTENT (32-35)
+    // MEDIA & CONTENT (32-36)
     {
       id: "social-32",
       title: "Course Critic",
@@ -678,7 +678,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // GOOD SAMARITAN (36-40)
+    // GOOD SAMARITAN (36-41)
     {
       id: "social-36",
       title: "Lost and Found",
@@ -1199,10 +1199,10 @@ export default function DashboardPage() {
 
   // Category ranges for social achievements
   const socialCategories = {
-    communityEngagement: { start: 0, end: 14 },
-    teachingLeadership: { start: 14, end: 22 },
-    competitionEvents: { start: 22, end: 31 },
-    mediaContent: { start: 31, end: 36 },
+    communityEngagement: { start: 0, end: 15 },
+    teachingLeadership: { start: 15, end: 22 },
+    competitionEvents: { start: 22, end: 32 },
+    mediaContent: { start: 32, end: 36 },
     goodSamaritan: { start: 36, end: 41 }
   };
 
