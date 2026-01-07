@@ -511,6 +511,14 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
       points: 400,
     },
+    {
+      id: "social-14",
+      title: "Pro Connection",
+      description: "Meet a professional disc golfer",
+      category: "social",
+      isCompleted: false,
+      points: 50,
+    },
 
     // TEACHING & LEADERSHIP (20-40)
     {
@@ -530,7 +538,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-16",
+      id: "social-17",
       title: "Youth Mentor",
       description: "Coach youth players in disc golf",
       category: "social",
@@ -538,7 +546,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-17",
+      id: "social-18",
       title: "School Program",
       description: "Help introduce disc golf to a school program",
       category: "social",
@@ -546,7 +554,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-18",
+      id: "social-20",
       title: "Next Generation",
       description: "Donate discs to youth programs or schools",
       category: "social",
@@ -554,15 +562,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-19",
-      title: "Tournament Director",
-      description: "Direct or help direct a tournament",
-      category: "social",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-20",
+      id: "social-21",
       title: "League Commissioner",
       description: "Organize a league",
       category: "social",
@@ -570,7 +570,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-21",
+      id: "social-22",
       title: "Club Board Member",
       description: "Serve on a local disc golf club board",
       category: "social",
@@ -580,7 +580,7 @@ const sampleAchievements: Achievements = {
 
     // COMPETITION & EVENTS (40-60)
     {
-      id: "social-22",
+      id: "social-23",
       title: "Tournament First Timer",
       description: "Play in your first tournament",
       category: "social",
@@ -588,7 +588,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-23",
+      id: "social-24",
       title: "Scorekeeper",
       description: "Keep score for a tournament card",
       category: "social",
@@ -596,7 +596,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-24",
+      id: "social-25",
       title: "Spotter",
       description: "Volunteer as a spotter in a tournament",
       category: "social",
@@ -604,7 +604,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-25",
+      id: "social-26",
       title: "Registration Desk",
       description: "Help run a tournament registration/check-in",
       category: "social",
@@ -612,7 +612,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-26",
+      id: "social-27",
       title: "Victory Lap",
       description: "Win your first tournament or league night",
       category: "social",
@@ -620,7 +620,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-27",
+      id: "social-28",
       title: "Division Champ",
       description: "Win your division in a tournament",
       category: "social",
@@ -628,7 +628,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-28",
+      id: "social-29",
       title: "Dynamic Duo",
       description: "Participate in a doubles tournament",
       category: "social",
@@ -636,7 +636,15 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-29",
+      id: "social-30",
+      title: "Tournament Director",
+      description: "Direct or help direct a tournament",
+      category: "social",
+      isCompleted: false,
+      points: 50,
+    },
+    {
+      id: "social-31",
       title: "Ace Hunter",
       description: "Participate in an ace race event",
       category: "social",
@@ -644,7 +652,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-30",
+      id: "social-32",
       title: "Night Owl",
       description: "Play a glow round",
       category: "social",
@@ -654,7 +662,7 @@ const sampleAchievements: Achievements = {
 
     // MEDIA & CONTENT (60-80)
     {
-      id: "social-31",
+      id: "social-33",
       title: "Course Critic",
       description: "Review a course on UDisc or a similar platform",
       category: "social",
@@ -662,7 +670,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-32",
+      id: "social-34",
       title: "Content Creator",
       description: "Create disc golf content for others",
       category: "social",
@@ -670,7 +678,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-33",
+      id: "social-35",
       title: "Pro Tour Fan",
       description: "Start watching day-later content of the pro tour on JomezPro or another channel",
       category: "social",
@@ -678,17 +686,9 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-34",
+      id: "social-36",
       title: "Live Coverage Enthusiast",
       description: "Purchase a DGN subscription to watch live pro tour coverage",
-      category: "social",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-35",
-      title: "Pro Connection",
-      description: "Meet a professional disc golfer",
       category: "social",
       isCompleted: false,
       points: 50,
@@ -696,7 +696,7 @@ const sampleAchievements: Achievements = {
 
     // GOOD SAMARITAN (80-100)
     {
-      id: "social-36",
+      id: "social-37",
       title: "Lost and Found",
       description: "Return your first lost disc to its owner",
       category: "social",
@@ -704,7 +704,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-37",
+      id: "social-38",
       title: "Disc Detective",
       description: "Return 5 discs to their owners",
       category: "social",
@@ -712,7 +712,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-38",
+      id: "social-39",
       title: "Disc Guardian",
       description: "Return 10 discs to their owners",
       category: "social",
@@ -720,7 +720,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-39",
+      id: "social-40",
       title: "Disc Recovery Expert",
       description: "Return 25 discs to their owners",
       category: "social",
@@ -728,7 +728,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "social-40",
+      id: "social-41",
       title: "Disc Return Legend",
       description: "Return 50+ discs to their owners",
       category: "social",
