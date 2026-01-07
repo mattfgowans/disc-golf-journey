@@ -48,6 +48,27 @@ function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements
     }
   }
 
+  // Also check if the data structure is completely incompatible (like after major reorganization)
+  let totalMatches = 0;
+  let totalSaved = 0;
+
+  for (const category of categories) {
+    totalSaved += saved[category].length;
+    for (const savedAchievement of saved[category]) {
+      const templateAchievement = template[category].find(a => a.id === savedAchievement.id);
+      if (templateAchievement) {
+        totalMatches++;
+      }
+    }
+  }
+
+  // If less than 50% of achievements match by ID, the data structure has changed too much - reset
+  const matchRatio = totalMatches / totalSaved;
+  if (matchRatio < 0.5) {
+    console.log(`Data structure incompatible: only ${Math.round(matchRatio * 100)}% of achievements match. Resetting to template.`);
+    return true;
+  }
+
   return false;
 }
 
@@ -55,6 +76,27 @@ function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements
 function mergeAchievementsWithTemplate(saved: Achievements, template: Achievements): Achievements {
   const categories: (keyof Achievements)[] = ['skill', 'social', 'collection'];
 
+  // Check if data is completely incompatible
+  let totalMatches = 0;
+  let totalSaved = 0;
+
+  for (const category of categories) {
+    totalSaved += saved[category].length;
+    for (const savedAchievement of saved[category]) {
+      const templateAchievement = template[category].find(a => a.id === savedAchievement.id);
+      if (templateAchievement) {
+        totalMatches++;
+      }
+    }
+  }
+
+  const matchRatio = totalMatches / totalSaved;
+  if (matchRatio < 0.5) {
+    console.log('Data structure completely changed. Using template data instead of merging.');
+    return template;
+  }
+
+  // Normal merge for compatible data
   const merged: Achievements = {
     skill: [],
     social: [],
@@ -118,7 +160,7 @@ export function useAchievements(initialAchievements?: Achievements) {
               });
               setAchievements(achievementsToSave);
             } else {
-              // Check if achievements need points/rarity updates
+              // Check if achievements need updating (points/rarity or complete restructure)
               const needsUpdate = checkAchievementsNeedUpdate(savedAchievements, initialAchievements || defaultAchievements);
               if (needsUpdate) {
                 const updatedAchievements = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
