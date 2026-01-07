@@ -772,7 +772,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // DISC MILESTONES (20-40)
+    // DISC MILESTONES (6-16)
     {
       id: "collection-6",
       title: "Starting Five",
@@ -829,50 +829,8 @@ const sampleAchievements: Achievements = {
       isCompleted: false,
       points: 50,
     },
-
-    // EQUIPMENT & ACCESSORIES (40-60)
-    {
-      id: "collection-13",
-      title: "Bag Upgrade",
-      description: "Upgrade to a larger disc golf bag",
-      category: "collection",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-14",
-      title: "Cart Commander",
-      description: "Purchase a disc golf cart",
-      category: "collection",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-15",
-      title: "Rescue Ready",
-      description: "Get your first disc retriever",
-      category: "collection",
-      isCompleted: false,
-      points: 50,
-    },
     {
       id: "collection-16",
-      title: "Towel Time",
-      description: "Get your first disc golf towel",
-      category: "collection",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-17",
-      title: "Grip Enhancement",
-      description: "Get your first whale sack or other equivalent chalk bag",
-      category: "collection",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-18",
       title: "Shelf Collection",
       description: "Own five different discs that you never use",
       category: "collection",
@@ -880,7 +838,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-19",
+      id: "collection-17",
       title: "Aspirational Purchase",
       description: "Buy a disc that's way too fast for your arm speed",
       category: "collection",
@@ -888,7 +846,57 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
+      id: "collection-18",
+      title: "Glow Getter",
+      description: "Add a glow-in-the-dark disc to your collection",
+      category: "collection",
+      isCompleted: false,
+      points: 50,
+    },
+
+    // EQUIPMENT & ACCESSORIES (16-24)
+    {
+      id: "collection-19",
+      title: "Bag Upgrade",
+      description: "Upgrade to a larger disc golf bag",
+      category: "collection",
+      isCompleted: false,
+      points: 50,
+    },
+    {
       id: "collection-20",
+      title: "Cart Commander",
+      description: "Purchase a disc golf cart",
+      category: "collection",
+      isCompleted: false,
+      points: 50,
+    },
+    {
+      id: "collection-21",
+      title: "Rescue Ready",
+      description: "Get your first disc retriever",
+      category: "collection",
+      isCompleted: false,
+      points: 50,
+    },
+    {
+      id: "collection-19",
+      title: "Towel Time",
+      description: "Get your first disc golf towel",
+      category: "collection",
+      isCompleted: false,
+      points: 50,
+    },
+    {
+      id: "collection-20",
+      title: "Grip Enhancement",
+      description: "Get your first whale sack or other equivalent chalk bag",
+      category: "collection",
+      isCompleted: false,
+      points: 50,
+    },
+    {
+      id: "collection-23",
       title: "Practice Setup",
       description: "Purchase a practice basket",
       category: "collection",
@@ -896,9 +904,9 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // SPECIAL DISCS (60-80)
+    // SPECIAL DISCS (24-37)
     {
-      id: "collection-21",
+      id: "collection-24",
       title: "Tour Series",
       description: "Purchase a tour series disc",
       category: "collection",
@@ -906,7 +914,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-22",
+      id: "collection-25",
       title: "Signature Series",
       description: "Purchase a signature series disc",
       category: "collection",
@@ -914,7 +922,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-23",
+      id: "collection-26",
       title: "First Run",
       description: "Purchase a first run disc",
       category: "collection",
@@ -922,7 +930,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-24",
+      id: "collection-27",
       title: "Limited Release",
       description: "Purchase a limited edition disc",
       category: "collection",
@@ -930,7 +938,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-25",
+      id: "collection-28",
       title: "Pro Support",
       description: "Purchase a tour series disc",
       category: "collection",
@@ -938,7 +946,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-26",
+      id: "collection-29",
       title: "Custom Art",
       description: "Purchase a disc with a custom stamp",
       category: "collection",
@@ -946,7 +954,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-27",
+      id: "collection-30",
       title: "Tournament Treasure",
       description: "Get a disc from a tournament",
       category: "collection",
@@ -954,7 +962,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-28",
+      id: "collection-31",
       title: "Pro Signature",
       description: "Get a disc signed by a professional",
       category: "collection",
@@ -962,7 +970,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-29",
+      id: "collection-32",
       title: "Personal Touch",
       description: "Design your own custom disc",
       category: "collection",
@@ -970,7 +978,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-30",
+      id: "collection-33",
       title: "Dye Artist",
       description: "Dye your first disc",
       category: "collection",
@@ -978,7 +986,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-31",
+      id: "collection-34",
       title: "Dye Merchant",
       description: "Sell a dyed disc",
       category: "collection",
@@ -986,15 +994,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-32",
-      title: "Glow Getter",
-      description: "Add a glow-in-the-dark disc to your collection",
-      category: "collection",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-33",
+      id: "collection-36",
       title: "Vintage Collector",
       description: "Own a disc that's over 20 years old",
       category: "collection",
@@ -1002,9 +1002,9 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // COURSE EXPLORER (80-100)
+    // COURSE EXPLORER (37-45)
     {
-      id: "collection-34",
+      id: "collection-37",
       title: "Course Explorer",
       description: "Play 5 different courses",
       category: "collection",
@@ -1012,7 +1012,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-35",
+      id: "collection-38",
       title: "Course Adventurer",
       description: "Play 10 different courses",
       category: "collection",
@@ -1020,7 +1020,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-36",
+      id: "collection-39",
       title: "Course Conqueror",
       description: "Play 25 different courses",
       category: "collection",
@@ -1028,7 +1028,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-37",
+      id: "collection-40",
       title: "Course Legend",
       description: "Play 50 different courses",
       category: "collection",
@@ -1036,7 +1036,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-38",
+      id: "collection-41",
       title: "Course Explorer",
       description: "Play 100+ different courses",
       category: "collection",
@@ -1044,7 +1044,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-39",
+      id: "collection-42",
       title: "State's Best",
       description: "Play the #1 rated course in your state",
       category: "collection",
@@ -1052,7 +1052,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-40",
+      id: "collection-43",
       title: "Top of the State",
       description: "Play the top 5 courses in your state",
       category: "collection",
@@ -1060,7 +1060,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-41",
+      id: "collection-44",
       title: "National Treasure",
       description: "Play the #1 rated course in the country",
       category: "collection",
@@ -1068,9 +1068,9 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // ROUND MILESTONES (100-120)
+    // ROUND MILESTONES (45-51)
     {
-      id: "collection-42",
+      id: "collection-45",
       title: "First Round",
       description: "Complete your first round of disc golf",
       category: "collection",
@@ -1078,7 +1078,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-43",
+      id: "collection-46",
       title: "Dedicated Player",
       description: "Play 10 rounds of disc golf",
       category: "collection",
@@ -1086,7 +1086,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-44",
+      id: "collection-47",
       title: "Experienced Player",
       description: "Play 50 rounds of disc golf",
       category: "collection",
@@ -1094,7 +1094,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-45",
+      id: "collection-48",
       title: "Seasoned Veteran",
       description: "Play 100 rounds of disc golf",
       category: "collection",
@@ -1102,7 +1102,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-46",
+      id: "collection-49",
       title: "Veteran Player",
       description: "Play 250 rounds of disc golf",
       category: "collection",
@@ -1110,7 +1110,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
     {
-      id: "collection-47",
+      id: "collection-50",
       title: "Elite Player",
       description: "Play 500+ rounds of disc golf",
       category: "collection",
@@ -1209,11 +1209,11 @@ export default function DashboardPage() {
   // Category ranges for collection achievements
   const collectionCategories = {
     discEssentials: { start: 0, end: 6 },
-    discMilestones: { start: 6, end: 13 },
-    equipmentAccessories: { start: 13, end: 21 },
-    specialDiscs: { start: 21, end: 34 },
-    courseExplorer: { start: 34, end: 42 },
-    roundMilestones: { start: 42, end: 48 }
+    discMilestones: { start: 6, end: 16 },
+    equipmentAccessories: { start: 16, end: 24 },
+    specialDiscs: { start: 24, end: 37 },
+    courseExplorer: { start: 37, end: 45 },
+    roundMilestones: { start: 45, end: 51 }
   };
 
   // Calculate completion percentages for each category
