@@ -36,10 +36,6 @@ export function AchievementCard({
 }: AchievementCardProps) {
   const Icon = categoryIcons[category];
 
-  // Debug logging for rarity and points
-  if (title === "Circle One Specialist" || title === "Club Member" || title === "Putting Pioneer" || title === "Ace Race" || title === "Albatross Alert") {
-    console.log(`🎴 ${title}: points=${points}, rarity="${rarity}", shouldShowRarity=${rarity && rarity !== "common"}`);
-  }
 
   return (
     <Card className={`${isCompleted ? 'bg-green-50' : ''} transition-colors`}>

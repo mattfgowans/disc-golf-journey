@@ -121,7 +121,6 @@ export function useAchievements(initialAchievements?: Achievements) {
               // Check if achievements need points/rarity updates
               const needsUpdate = checkAchievementsNeedUpdate(savedAchievements, initialAchievements || defaultAchievements);
               if (needsUpdate) {
-                console.log('📈 Updating achievements with points and rarity data');
                 const updatedAchievements = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
                 await setDoc(userDocRef, {
                   achievements: updatedAchievements,
@@ -182,8 +181,6 @@ export function useAchievements(initialAchievements?: Achievements) {
           return completedDate ? { ...rest, completedDate } : rest;
         }),
       };
-
-      console.log('💾 Saving achievements to Firebase:', cleanAchievements.skill.filter(a => a.id === 'skill-0' || a.id === 'skill-11'));
 
       await updateDoc(userDocRef, {
         achievements: cleanAchievements,

@@ -1171,29 +1171,38 @@ export default function DashboardPage() {
           </TabsList>
         </div>
 
+        {/* Global Stats Header - Shows on all tabs */}
+        <div className="sticky top-[110px] bg-background z-30 pb-2 border-b">
+          <div className="flex justify-center bg-background">
+            <div className="text-center bg-background p-2">
+              <div className="flex items-center gap-4 bg-background">
+                <div className="flex gap-4">
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                    <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
+                    <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
+                  </div>
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                    <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
+                    <div className="text-2xl font-bold">{currentStreak}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <TabsContent value="skill">
-          <div className="sticky top-[110px] bg-background z-30 pb-2 border-b">
+          {/* Category Progress */}
+          <div className="sticky top-[215px] bg-background z-20 pb-2 border-b">
             <div className="flex justify-center bg-background">
               <div className="text-center bg-background p-2">
-                <div className="flex items-center gap-4 bg-background">
-                  <div className="flex items-center gap-2">
-                    <ProgressRing percentage={skillCompletion} size={80} strokeWidth={6} />
-                    <p className="text-sm text-muted-foreground max-w-[160px]">
-                      {qualifiesForPatch(skillCompletion)
-                        ? "Patch Unlocked! 🎉"
-                        : `${Math.round(80 - skillCompletion)}% to Patch`}
-                    </p>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg">
-                      <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
-                      <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
-                    </div>
-                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
-                      <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
-                      <div className="text-2xl font-bold">{currentStreak}</div>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-2 bg-background">
+                  <ProgressRing percentage={skillCompletion} size={60} strokeWidth={4} />
+                  <p className="text-sm text-muted-foreground">
+                    {qualifiesForPatch(skillCompletion)
+                      ? "Patch Unlocked! 🎉"
+                      : `${Math.round(80 - skillCompletion)}% to Patch`}
+                  </p>
                 </div>
               </div>
             </div>
@@ -1353,12 +1362,13 @@ export default function DashboardPage() {
           </div>
         </TabsContent>
         <TabsContent value="social">
-          <div className="sticky top-[110px] bg-background z-30 pb-2 border-b">
+          {/* Category Progress */}
+          <div className="sticky top-[215px] bg-background z-20 pb-2 border-b">
             <div className="flex justify-center bg-background">
               <div className="text-center bg-background p-2">
                 <div className="flex items-center gap-2 bg-background">
-                  <ProgressRing percentage={socialCompletion} size={80} strokeWidth={6} />
-                  <p className="text-sm text-muted-foreground max-w-[160px]">
+                  <ProgressRing percentage={socialCompletion} size={60} strokeWidth={4} />
+                  <p className="text-sm text-muted-foreground">
                     {qualifiesForPatch(socialCompletion)
                       ? "Patch Unlocked! 🎉"
                       : `${Math.round(80 - socialCompletion)}% to Patch`}
@@ -1549,12 +1559,13 @@ export default function DashboardPage() {
           </div>
         </TabsContent>
         <TabsContent value="collection">
-          <div className="sticky top-[110px] bg-background z-30 pb-2 border-b">
+          {/* Category Progress */}
+          <div className="sticky top-[215px] bg-background z-20 pb-2 border-b">
             <div className="flex justify-center bg-background">
               <div className="text-center bg-background p-2">
                 <div className="flex items-center gap-2 bg-background">
-                  <ProgressRing percentage={collectionCompletion} size={80} strokeWidth={6} />
-                  <p className="text-sm text-muted-foreground max-w-[160px]">
+                  <ProgressRing percentage={collectionCompletion} size={60} strokeWidth={4} />
+                  <p className="text-sm text-muted-foreground">
                     {qualifiesForPatch(collectionCompletion)
                       ? "Patch Unlocked! 🎉"
                       : `${Math.round(80 - collectionCompletion)}% to Patch`}
