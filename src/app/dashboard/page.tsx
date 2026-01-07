@@ -9,27 +9,12 @@ import { ProgressRing } from "@/components/ui/progress-ring";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { useAchievements } from "@/lib/useAchievements";
+import { useAchievements, type Achievement, type Achievements } from "@/lib/useAchievements";
 import { useAuth } from "@/lib/firebase-auth";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-type Achievement = {
-  id: string;
-  title: string;
-  description: string;
-  category: "skill" | "social" | "collection";
-  isCompleted: boolean;
-  completedDate?: string;
-};
-
-type Achievements = {
-  skill: Achievement[];
-  social: Achievement[];
-  collection: Achievement[];
-};
-
-// Sample achievements data (we'll replace this with real data later)
+// Sample achievements data with points system (we'll replace this with real data later)
 const sampleAchievements: Achievements = {
   skill: [
     // PUTTING MASTERY (0-20)
@@ -39,6 +24,7 @@ const sampleAchievements: Achievements = {
       description: "Finish your first practice putting session",
       category: "skill",
       isCompleted: false,
+      points: 25,
     },
     {
       id: "skill-1",
@@ -46,6 +32,7 @@ const sampleAchievements: Achievements = {
       description: "Make your first C1 putt (within 33 ft)",
       category: "skill",
       isCompleted: false,
+      points: 50,
     },
     {
       id: "skill-2",
@@ -53,6 +40,8 @@ const sampleAchievements: Achievements = {
       description: "Make 3 C1 putts in a single round",
       category: "skill",
       isCompleted: false,
+      points: 100,
+      rarity: "rare",
     },
     {
       id: "skill-3",
@@ -60,6 +49,7 @@ const sampleAchievements: Achievements = {
       description: "Make your first C2 putt (33-66 ft)",
       category: "skill",
       isCompleted: false,
+      points: 75,
     },
     {
       id: "skill-4",
@@ -67,6 +57,7 @@ const sampleAchievements: Achievements = {
       description: "Make 3 C2 putts in a single round",
       category: "skill",
       isCompleted: false,
+      points: 125,
     },
     {
       id: "skill-5",
@@ -304,6 +295,8 @@ const sampleAchievements: Achievements = {
       description: "Hit your first ace (hole in one)",
       category: "skill",
       isCompleted: false,
+      points: 35,
+      rarity: "rare",
     },
     {
       id: "skill-36",
@@ -311,6 +304,8 @@ const sampleAchievements: Achievements = {
       description: "Card your first albatross",
       category: "skill",
       isCompleted: false,
+      points: 50,
+      rarity: "epic",
     },
     {
       id: "skill-37",
@@ -356,6 +351,7 @@ const sampleAchievements: Achievements = {
       description: "Participate in your first league night",
       category: "social",
       isCompleted: false,
+      points: 75,
     },
     {
       id: "social-1",
@@ -363,6 +359,8 @@ const sampleAchievements: Achievements = {
       description: "Join your local disc golf club",
       category: "social",
       isCompleted: false,
+      points: 100,
+      rarity: "epic",
     },
     {
       id: "social-2",
@@ -370,6 +368,7 @@ const sampleAchievements: Achievements = {
       description: "Help maintain or improve a local course",
       category: "social",
       isCompleted: false,
+      points: 80,
     },
     {
       id: "social-3",
@@ -377,6 +376,7 @@ const sampleAchievements: Achievements = {
       description: "Participate in three course cleanup events",
       category: "social",
       isCompleted: false,
+      points: 120,
     },
     {
       id: "social-4",
@@ -654,6 +654,7 @@ const sampleAchievements: Achievements = {
       description: "Purchase your first disc",
       category: "collection",
       isCompleted: false,
+      points: 30,
     },
     {
       id: "collection-1",
@@ -661,6 +662,8 @@ const sampleAchievements: Achievements = {
       description: "Add your first putter to your collection",
       category: "collection",
       isCompleted: false,
+      points: 40,
+      rarity: "rare",
     },
     {
       id: "collection-2",
@@ -668,6 +671,7 @@ const sampleAchievements: Achievements = {
       description: "Add your first midrange disc to your collection",
       category: "collection",
       isCompleted: false,
+      points: 35,
     },
     {
       id: "collection-3",
@@ -675,6 +679,7 @@ const sampleAchievements: Achievements = {
       description: "Add your first distance driver to your collection",
       category: "collection",
       isCompleted: false,
+      points: 45,
     },
     {
       id: "collection-4",
@@ -1104,6 +1109,35 @@ export default function DashboardPage() {
   const socialCompletion = getCompletionPercentage("social");
   const collectionCompletion = getCompletionPercentage("collection");
 
+  // Calculate total points earned
+  const getTotalPoints = () => {
+    const allAchievements = [...currentAchievements.skill, ...currentAchievements.social, ...currentAchievements.collection];
+    return allAchievements
+      .filter(achievement => achievement.isCompleted)
+      .reduce((total, achievement) => total + (achievement.points ?? 0), 0);
+  };
+
+  const totalPoints = getTotalPoints();
+
+  // Calculate daily streak (simplified - counts unique completion days)
+  const getCurrentStreak = () => {
+    const completedAchievements = [...currentAchievements.skill, ...currentAchievements.social, ...currentAchievements.collection]
+      .filter(a => a.isCompleted && a.completedDate);
+
+    if (completedAchievements.length === 0) return 0;
+
+    // Group by date and count unique days
+    const uniqueDays = new Set(
+      completedAchievements.map(a =>
+        new Date(a.completedDate!).toDateString()
+      )
+    );
+
+    return uniqueDays.size;
+  };
+
+  const currentStreak = getCurrentStreak();
+
   // Check if category qualifies for patch
   const qualifiesForPatch = (percentage: number) => percentage >= 80;
 
@@ -1141,13 +1175,25 @@ export default function DashboardPage() {
           <div className="sticky top-[110px] bg-background z-30 pb-2 border-b">
             <div className="flex justify-center bg-background">
               <div className="text-center bg-background p-2">
-                <div className="flex items-center gap-2 bg-background">
-                  <ProgressRing percentage={skillCompletion} size={80} strokeWidth={6} />
-                  <p className="text-sm text-muted-foreground max-w-[160px]">
-                    {qualifiesForPatch(skillCompletion) 
-                      ? "Patch Unlocked! 🎉" 
-                      : `${Math.round(80 - skillCompletion)}% to Patch`}
-                  </p>
+                <div className="flex items-center gap-4 bg-background">
+                  <div className="flex items-center gap-2">
+                    <ProgressRing percentage={skillCompletion} size={80} strokeWidth={6} />
+                    <p className="text-sm text-muted-foreground max-w-[160px]">
+                      {qualifiesForPatch(skillCompletion)
+                        ? "Patch Unlocked! 🎉"
+                        : `${Math.round(80 - skillCompletion)}% to Patch`}
+                    </p>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                      <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
+                      <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
+                    </div>
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                      <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
+                      <div className="text-2xl font-bold">{currentStreak}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1181,7 +1227,13 @@ export default function DashboardPage() {
                     {currentAchievements.skill.slice(skillCategories.puttingMastery.start, skillCategories.puttingMastery.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
-                        {...achievement}
+                        title={achievement.title}
+                        description={achievement.description}
+                        category={achievement.category}
+                        isCompleted={achievement.isCompleted}
+                        completedDate={achievement.completedDate}
+                        points={achievement.points}
+                        rarity={achievement.rarity ?? "common"}
                         onToggle={() => toggleAchievement("skill", achievement.id)}
                       />
                     ))}
@@ -1216,7 +1268,13 @@ export default function DashboardPage() {
                     {currentAchievements.skill.slice(skillCategories.distanceControl.start, skillCategories.distanceControl.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
-                        {...achievement}
+                        title={achievement.title}
+                        description={achievement.description}
+                        category={achievement.category}
+                        isCompleted={achievement.isCompleted}
+                        completedDate={achievement.completedDate}
+                        points={achievement.points}
+                        rarity={achievement.rarity ?? "common"}
                         onToggle={() => toggleAchievement("skill", achievement.id)}
                       />
                     ))}
@@ -1338,7 +1396,13 @@ export default function DashboardPage() {
                     {currentAchievements.social.slice(socialCategories.communityEngagement.start, socialCategories.communityEngagement.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
-                        {...achievement}
+                        title={achievement.title}
+                        description={achievement.description}
+                        category={achievement.category}
+                        isCompleted={achievement.isCompleted}
+                        completedDate={achievement.completedDate}
+                        points={achievement.points}
+                        rarity={achievement.rarity ?? "common"}
                         onToggle={() => toggleAchievement("social", achievement.id)}
                       />
                     ))}
@@ -1529,6 +1593,8 @@ export default function DashboardPage() {
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
+                        points={achievement.points}
+                        rarity={achievement.rarity ?? "common"}
                         onToggle={() => toggleAchievement("collection", achievement.id)}
                       />
                     ))}
@@ -1562,7 +1628,13 @@ export default function DashboardPage() {
                     {getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end).map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
-                        {...achievement}
+                        title={achievement.title}
+                        description={achievement.description}
+                        category={achievement.category}
+                        isCompleted={achievement.isCompleted}
+                        completedDate={achievement.completedDate}
+                        points={achievement.points}
+                        rarity={achievement.rarity ?? "common"}
                         onToggle={() => toggleAchievement("collection", achievement.id)}
                       />
                     ))}

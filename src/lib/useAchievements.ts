@@ -12,6 +12,8 @@ export type Achievement = {
   category: "skill" | "social" | "collection";
   isCompleted: boolean;
   completedDate?: string;
+  points?: number;
+  rarity?: "common" | "rare" | "epic" | "legendary";
 };
 
 export type Achievements = {
@@ -25,6 +27,57 @@ const defaultAchievements: Achievements = {
   social: [],
   collection: [],
 };
+
+// Helper function to check if achievements need updating with points/rarity
+function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements): boolean {
+  // Check if any achievements are missing points or rarity
+  const categories: (keyof Achievements)[] = ['skill', 'social', 'collection'];
+
+  for (const category of categories) {
+    for (let i = 0; i < saved[category].length; i++) {
+      const savedAchievement = saved[category][i];
+      const templateAchievement = template[category].find(a => a.id === savedAchievement.id);
+
+      if (templateAchievement) {
+        // Check if points or rarity are missing or different
+        if (savedAchievement.points !== templateAchievement.points ||
+            savedAchievement.rarity !== templateAchievement.rarity) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+// Helper function to merge saved achievements with template data
+function mergeAchievementsWithTemplate(saved: Achievements, template: Achievements): Achievements {
+  const categories: (keyof Achievements)[] = ['skill', 'social', 'collection'];
+
+  const merged: Achievements = {
+    skill: [],
+    social: [],
+    collection: []
+  };
+
+  for (const category of categories) {
+    merged[category] = saved[category].map(savedAchievement => {
+      const templateAchievement = template[category].find(a => a.id === savedAchievement.id);
+      if (templateAchievement) {
+        // Merge saved data with template data, preserving completion status
+        return {
+          ...templateAchievement,
+          isCompleted: savedAchievement.isCompleted,
+          completedDate: savedAchievement.completedDate
+        };
+      }
+      return savedAchievement;
+    });
+  }
+
+  return merged;
+}
 
 export function useAchievements(initialAchievements?: Achievements) {
   const { user } = useAuth();
@@ -65,7 +118,19 @@ export function useAchievements(initialAchievements?: Achievements) {
               });
               setAchievements(achievementsToSave);
             } else {
-              setAchievements(savedAchievements);
+              // Check if achievements need points/rarity updates
+              const needsUpdate = checkAchievementsNeedUpdate(savedAchievements, initialAchievements || defaultAchievements);
+              if (needsUpdate) {
+                console.log('📈 Updating achievements with points and rarity data');
+                const updatedAchievements = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
+                await setDoc(userDocRef, {
+                  achievements: updatedAchievements,
+                  createdAt: new Date().toISOString(),
+                });
+                setAchievements(updatedAchievements);
+              } else {
+                setAchievements(savedAchievements);
+              }
             }
           } else {
             // Initialize with default achievements if provided, otherwise empty
