@@ -8,6 +8,7 @@ import confetti from 'canvas-confetti';
 type AchievementCategory = "skill" | "social" | "collection";
 
 interface AchievementCardProps {
+  id: string;
   title: string;
   description: string;
   category: AchievementCategory;
@@ -25,6 +26,7 @@ const categoryIcons = {
 };
 
 export function AchievementCard({
+  id,
   title,
   description,
   category,
