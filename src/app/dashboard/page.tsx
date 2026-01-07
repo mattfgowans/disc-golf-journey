@@ -112,6 +112,7 @@ const sampleAchievements: Achievements = {
       description: "Make your first throw in from 66+ ft (not off the tee shot)",
       category: "skill",
       isCompleted: false,
+      points: 95,
     },
 
     // DISTANCE CONTROL (20-40)
@@ -121,6 +122,7 @@ const sampleAchievements: Achievements = {
       description: "Record your first throw over 100 ft",
       category: "skill",
       isCompleted: false,
+      points: 45,
     },
     {
       id: "skill-13",
@@ -128,6 +130,7 @@ const sampleAchievements: Achievements = {
       description: "Record your first throw over 200 ft",
       category: "skill",
       isCompleted: false,
+      points: 65,
     },
     {
       id: "skill-14",
@@ -135,6 +138,7 @@ const sampleAchievements: Achievements = {
       description: "Record your first throw over 300 ft",
       category: "skill",
       isCompleted: false,
+      points: 85,
     },
     {
       id: "skill-15",
@@ -142,6 +146,7 @@ const sampleAchievements: Achievements = {
       description: "Record your first throw over 400 ft",
       category: "skill",
       isCompleted: false,
+      points: 105,
     },
     {
       id: "skill-16",
@@ -149,6 +154,7 @@ const sampleAchievements: Achievements = {
       description: "Record your first throw over 500+ ft",
       category: "skill",
       isCompleted: false,
+      points: 130,
     },
     {
       id: "skill-17",
@@ -156,6 +162,7 @@ const sampleAchievements: Achievements = {
       description: "Park your first hole off a drive (landing within 10 ft)",
       category: "skill",
       isCompleted: false,
+      points: 70,
     },
     {
       id: "skill-18",
@@ -163,6 +170,7 @@ const sampleAchievements: Achievements = {
       description: "Park 3 holes in one round",
       category: "skill",
       isCompleted: false,
+      points: 125,
     },
     {
       id: "skill-19",
@@ -170,6 +178,7 @@ const sampleAchievements: Achievements = {
       description: "Land within 20 feet of target on 3 consecutive holes",
       category: "skill",
       isCompleted: false,
+      points: 90,
     },
     {
       id: "skill-20",
@@ -177,6 +186,7 @@ const sampleAchievements: Achievements = {
       description: "Successfully birdie a hole in 20+ mph winds",
       category: "skill",
       isCompleted: false,
+      points: 100,
     },
     {
       id: "skill-21",
@@ -184,6 +194,7 @@ const sampleAchievements: Achievements = {
       description: "Execute a perfect hyzer flip that lands within 10 feet",
       category: "skill",
       isCompleted: false,
+      points: 95,
     },
 
     // SPECIALTY SHOTS (40-60)
@@ -217,6 +228,7 @@ const sampleAchievements: Achievements = {
       description: "Birdie with a roller off tee",
       category: "skill",
       isCompleted: false,
+      points: 118,
     },
     {
       id: "skill-26",
@@ -224,6 +236,7 @@ const sampleAchievements: Achievements = {
       description: "Birdie while skipping a disc off the water off the tee",
       category: "skill",
       isCompleted: false,
+      points: 125,
     },
     {
       id: "skill-27",
@@ -231,6 +244,7 @@ const sampleAchievements: Achievements = {
       description: "Execute a successful roller shot",
       category: "skill",
       isCompleted: false,
+      points: 55,
     },
     {
       id: "skill-28",
@@ -238,6 +252,7 @@ const sampleAchievements: Achievements = {
       description: "Save par from 3 different lies off the fairway in one round",
       category: "skill",
       isCompleted: false,
+      points: 85,
     },
     {
       id: "skill-29",
@@ -245,6 +260,7 @@ const sampleAchievements: Achievements = {
       description: "Execute a successful thumber shot",
       category: "skill",
       isCompleted: false,
+      points: 60,
     },
     {
       id: "skill-30",
@@ -252,6 +268,7 @@ const sampleAchievements: Achievements = {
       description: "Execute a successful forehand shot",
       category: "skill",
       isCompleted: false,
+      points: 65,
     },
     {
       id: "skill-31",
@@ -259,6 +276,7 @@ const sampleAchievements: Achievements = {
       description: "Execute a successful flex shot",
       category: "skill",
       isCompleted: false,
+      points: 70,
     },
 
     // SCORING ACHIEVEMENTS (60-80)
@@ -308,7 +326,7 @@ const sampleAchievements: Achievements = {
       description: "Hit your first ace (hole in one)",
       category: "skill",
       isCompleted: false,
-      points: 35,
+      points: 200,
       rarity: "rare",
     },
     {
@@ -326,6 +344,7 @@ const sampleAchievements: Achievements = {
       description: "Record your first turkey (3 birdies in a row)",
       category: "skill",
       isCompleted: false,
+      points: 135,
     },
     {
       id: "skill-38",
@@ -457,6 +476,7 @@ const sampleAchievements: Achievements = {
       description: "Play 10 rounds with the same person",
       category: "social",
       isCompleted: false,
+      points: 120,
     },
     {
       id: "social-11",
@@ -464,6 +484,7 @@ const sampleAchievements: Achievements = {
       description: "Play 25 rounds with the same person",
       category: "social",
       isCompleted: false,
+      points: 180,
     },
     {
       id: "social-12",
@@ -471,6 +492,7 @@ const sampleAchievements: Achievements = {
       description: "Play 50 rounds with the same person",
       category: "social",
       isCompleted: false,
+      points: 250,
     },
     {
       id: "social-13",
@@ -478,6 +500,7 @@ const sampleAchievements: Achievements = {
       description: "Play 100 rounds with the same person",
       category: "social",
       isCompleted: false,
+      points: 400,
     },
 
     // TEACHING & LEADERSHIP (20-40)
@@ -487,6 +510,7 @@ const sampleAchievements: Achievements = {
       description: "Teach someone how to play disc golf",
       category: "social",
       isCompleted: false,
+      points: 95,
     },
     {
       id: "social-15",
@@ -750,6 +774,7 @@ const sampleAchievements: Achievements = {
       description: "Own five different discs",
       category: "collection",
       isCompleted: false,
+      points: 55,
     },
     {
       id: "collection-7",
@@ -757,6 +782,7 @@ const sampleAchievements: Achievements = {
       description: "Own 10 different discs",
       category: "collection",
       isCompleted: false,
+      points: 85,
     },
     {
       id: "collection-8",
@@ -764,6 +790,7 @@ const sampleAchievements: Achievements = {
       description: "Own 25 different discs",
       category: "collection",
       isCompleted: false,
+      points: 125,
     },
     {
       id: "collection-9",
