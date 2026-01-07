@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    serverComponentsExternalPackages: [],
+  },
+  // Disable features that don't work with static export
+  typescript: {
+    ignoreBuildErrors: false,
+  },
 };
 
 export default nextConfig;
