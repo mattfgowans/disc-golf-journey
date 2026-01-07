@@ -772,7 +772,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // DISC MILESTONES (6-16)
+    // DISC MILESTONES (6-13)
     {
       id: "collection-6",
       title: "Starting Five",
@@ -854,7 +854,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // EQUIPMENT & ACCESSORIES (16-21)
+    // EQUIPMENT & ACCESSORIES (13-18)
     {
       id: "collection-16",
       title: "Bag Upgrade",
@@ -904,7 +904,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // SPECIAL DISCS (21-34)
+    // SPECIAL DISCS (18-31)
     {
       id: "collection-21",
       title: "Tour Series",
@@ -1002,7 +1002,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // COURSE EXPLORER (34-42)
+    // COURSE EXPLORER (31-39)
     {
       id: "collection-34",
       title: "Course Explorer",
@@ -1068,7 +1068,7 @@ const sampleAchievements: Achievements = {
       points: 50,
     },
 
-    // ROUND MILESTONES (42-48)
+    // ROUND MILESTONES (39-45)
     {
       id: "collection-42",
       title: "First Round",
@@ -1209,11 +1209,11 @@ export default function DashboardPage() {
   // Category ranges for collection achievements
   const collectionCategories = {
     discEssentials: { start: 0, end: 6 },
-    discMilestones: { start: 6, end: 16 },
-    equipmentAccessories: { start: 16, end: 21 },
-    specialDiscs: { start: 21, end: 34 },
-    courseExplorer: { start: 34, end: 42 },
-    roundMilestones: { start: 42, end: 48 }
+    discMilestones: { start: 6, end: 13 },
+    equipmentAccessories: { start: 13, end: 18 },
+    specialDiscs: { start: 18, end: 31 },
+    courseExplorer: { start: 31, end: 39 },
+    roundMilestones: { start: 39, end: 45 }
   };
 
   // Calculate completion percentages for each category
