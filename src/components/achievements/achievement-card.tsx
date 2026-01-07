@@ -44,7 +44,8 @@ export function AchievementCard({
           <Icon className={`w-6 h-6 ${isCompleted ? 'text-green-600' : 'text-gray-500'}`} />
         </div>
         <div className="flex-1">
-          <CardTitle className="text-lg">{title}</CardTitle>
+              <CardTitle className="text-lg">{title}</CardTitle>
+              <div className="text-xs text-gray-500 mt-1">ID: {id}</div>
           <CardDescription>{description}</CardDescription>
           <div className="mt-1 flex gap-1">
             {points && (
