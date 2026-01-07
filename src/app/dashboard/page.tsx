@@ -1353,6 +1353,7 @@ export default function DashboardPage() {
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
                     {currentAchievements.skill.slice(skillCategories.puttingMastery.start, skillCategories.puttingMastery.end).map((achievement) => (
                       <AchievementCard
+                        id={achievement.id}
                         key={achievement.id}
                         title={achievement.title}
                         description={achievement.description}
@@ -1394,6 +1395,7 @@ export default function DashboardPage() {
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
                     {currentAchievements.skill.slice(skillCategories.distanceControl.start, skillCategories.distanceControl.end).map((achievement) => (
                       <AchievementCard
+                        id={achievement.id}
                         key={achievement.id}
                         title={achievement.title}
                         description={achievement.description}
@@ -1523,6 +1525,7 @@ export default function DashboardPage() {
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
                     {currentAchievements.social.slice(socialCategories.communityEngagement.start, socialCategories.communityEngagement.end).map((achievement) => (
                       <AchievementCard
+                        id={achievement.id}
                         key={achievement.id}
                         title={achievement.title}
                         description={achievement.description}
@@ -1756,6 +1759,7 @@ export default function DashboardPage() {
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
                     {getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end).map((achievement) => (
                       <AchievementCard
+                        id={achievement.id}
                         key={achievement.id}
                         title={achievement.title}
                         description={achievement.description}
