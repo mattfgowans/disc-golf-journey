@@ -76,25 +76,9 @@ function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements
 function mergeAchievementsWithTemplate(saved: Achievements, template: Achievements): Achievements {
   const categories: (keyof Achievements)[] = ['skill', 'social', 'collection'];
 
-  // Check if data is completely incompatible
-  let totalMatches = 0;
-  let totalSaved = 0;
-
-  for (const category of categories) {
-    totalSaved += saved[category].length;
-    for (const savedAchievement of saved[category]) {
-      const templateAchievement = template[category].find(a => a.id === savedAchievement.id);
-      if (templateAchievement) {
-        totalMatches++;
-      }
-    }
-  }
-
-  const matchRatio = totalMatches / totalSaved;
-  if (matchRatio < 1.0) {  // Changed from 0.5 to 1.0 - any mismatch means reset
-    console.log(`Data mismatch detected (${Math.round(matchRatio * 100)}% match). Using template data instead of merging.`);
-    return template;
-  }
+  // For now, always use template data to ensure correct organization
+  console.log('Using template data to ensure correct achievement organization.');
+  return template;
 
   // Normal merge for compatible data
   const merged: Achievements = {
