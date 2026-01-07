@@ -47,7 +47,6 @@ export function AchievementCard({
         </div>
         <div className="flex-1">
               <CardTitle className="text-lg">{title}</CardTitle>
-              <div className="text-xs text-gray-500 mt-1">ID: {id}</div>
           <CardDescription>{description}</CardDescription>
           <div className="mt-1 flex gap-1">
             {points && (
