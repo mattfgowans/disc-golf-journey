@@ -10,6 +10,7 @@ export type Achievement = {
   title: string;
   description: string;
   category: "skill" | "social" | "collection";
+  subcategory?: string; // For collection achievements
   isCompleted: boolean;
   completedDate?: string;
   points?: number;
@@ -44,6 +45,28 @@ function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements
             savedAchievement.rarity !== templateAchievement.rarity) {
           return true;
         }
+        // Check if collection achievements are missing subcategory field
+        if (category === 'collection' && templateAchievement.subcategory && !savedAchievement.subcategory) {
+          console.log(`Collection achievement ${savedAchievement.id} missing subcategory field`);
+          return true;
+        }
+      }
+    }
+  }
+
+  // Check if template has new achievements that saved data doesn't have
+  for (const category of categories) {
+    if (template[category].length !== saved[category].length) {
+      console.log(`Achievement count mismatch in ${category}: template has ${template[category].length}, saved has ${saved[category].length}`);
+      return true;
+    }
+    
+    // Check if there are achievements in template that aren't in saved data
+    for (const templateAchievement of template[category]) {
+      const savedAchievement = saved[category].find(a => a.id === templateAchievement.id);
+      if (!savedAchievement) {
+        console.log(`New achievement detected in template: ${templateAchievement.id} - ${templateAchievement.title}`);
+        return true;
       }
     }
   }

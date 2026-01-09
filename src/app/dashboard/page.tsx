@@ -727,6 +727,7 @@ const sampleAchievements: Achievements = {
       title: "First Disc",
       description: "Purchase your first disc",
       category: "collection",
+      subcategory: "discEssentials",
       isCompleted: false,
       points: 30,
     },
@@ -734,7 +735,9 @@ const sampleAchievements: Achievements = {
       id: "collection-1",
       title: "Putting Pioneer",
       description: "Add your first putter to your collection",
+      
       category: "collection",
+      subcategory: "discEssentials",
       isCompleted: false,
       points: 40,
       rarity: "rare",
@@ -743,7 +746,9 @@ const sampleAchievements: Achievements = {
       id: "collection-2",
       title: "Mid Range Master",
       description: "Add your first midrange disc to your collection",
+      
       category: "collection",
+      subcategory: "discEssentials",
       isCompleted: false,
       points: 35,
     },
@@ -751,7 +756,9 @@ const sampleAchievements: Achievements = {
       id: "collection-3",
       title: "Distance Driver",
       description: "Add your first distance driver to your collection",
+      
       category: "collection",
+      subcategory: "discEssentials",
       isCompleted: false,
       points: 45,
     },
@@ -759,7 +766,9 @@ const sampleAchievements: Achievements = {
       id: "collection-4",
       title: "Mini Marker",
       description: "Get your first mini marker",
+      
       category: "collection",
+      subcategory: "discEssentials",
       isCompleted: false,
       points: 20,
     },
@@ -767,7 +776,9 @@ const sampleAchievements: Achievements = {
       id: "collection-5",
       title: "Disc Carrier",
       description: "Get your first disc golf bag",
+      
       category: "collection",
+      subcategory: "discEssentials",
       isCompleted: false,
       points: 50,
     },
@@ -777,7 +788,9 @@ const sampleAchievements: Achievements = {
       id: "collection-6",
       title: "Starting Five",
       description: "Own five different discs",
+      
       category: "collection",
+      subcategory: "discMilestones",
       isCompleted: false,
       points: 55,
     },
@@ -785,7 +798,9 @@ const sampleAchievements: Achievements = {
       id: "collection-7",
       title: "Double Digits",
       description: "Own 10 different discs",
+      
       category: "collection",
+      subcategory: "discMilestones",
       isCompleted: false,
       points: 85,
     },
@@ -793,7 +808,9 @@ const sampleAchievements: Achievements = {
       id: "collection-8",
       title: "Disc Enthusiast",
       description: "Own 25 different discs",
+      
       category: "collection",
+      subcategory: "discMilestones",
       isCompleted: false,
       points: 125,
     },
@@ -801,7 +818,9 @@ const sampleAchievements: Achievements = {
       id: "collection-9",
       title: "Disc Collector",
       description: "Own 50 different discs",
+      
       category: "collection",
+      subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -809,7 +828,9 @@ const sampleAchievements: Achievements = {
       id: "collection-10",
       title: "Century Club",
       description: "Own 100 different discs",
+      
       category: "collection",
+      subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -817,7 +838,9 @@ const sampleAchievements: Achievements = {
       id: "collection-11",
       title: "Brand Explorer",
       description: "Own discs from 5 different manufacturers",
+      
       category: "collection",
+      subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -825,7 +848,9 @@ const sampleAchievements: Achievements = {
       id: "collection-12",
       title: "Plastic Connoisseur",
       description: "Own discs in 5 different plastic types",
+      
       category: "collection",
+      subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -833,7 +858,9 @@ const sampleAchievements: Achievements = {
       id: "collection-13",
       title: "Shelf Collection",
       description: "Own five different discs that you never use",
+      
       category: "collection",
+      subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -841,7 +868,9 @@ const sampleAchievements: Achievements = {
       id: "collection-14",
       title: "Aspirational Purchase",
       description: "Buy a disc that's way too fast for your arm speed",
+      
       category: "collection",
+      subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -849,17 +878,41 @@ const sampleAchievements: Achievements = {
       id: "collection-15",
       title: "Glow Getter",
       description: "Add a glow-in-the-dark disc to your collection",
+      
       category: "collection",
+      subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
     },
 
     // EQUIPMENT & ACCESSORIES (16-21)
     {
+      id: "collection-50",
+      title: "Towel Time",
+      description: "Get your first disc golf towel",
+      
+      category: "collection",
+      subcategory: "equipmentAccessories",
+      isCompleted: false,
+      points: 50,
+    },
+    {
+      id: "collection-51",
+      title: "Grip Enhancement",
+      description: "Get your first whale sack or other equivalent chalk bag",
+      
+      category: "collection",
+      subcategory: "equipmentAccessories",
+      isCompleted: false,
+      points: 50,
+    },
+    {
       id: "collection-16",
       title: "Bag Upgrade",
       description: "Upgrade to a larger disc golf bag",
+      
       category: "collection",
+      subcategory: "equipmentAccessories",
       isCompleted: false,
       points: 50,
     },
@@ -867,23 +920,29 @@ const sampleAchievements: Achievements = {
       id: "collection-17",
       title: "Cart Commander",
       description: "Purchase a disc golf cart",
+      
       category: "collection",
+      subcategory: "equipmentAccessories",
       isCompleted: false,
       points: 50,
     },
     {
-      id: "collection-16",
+      id: "collection-52",
       title: "Rescue Ready",
       description: "Get your first disc retriever",
+      
       category: "collection",
+      subcategory: "equipmentAccessories",
       isCompleted: false,
       points: 50,
     },
     {
-      id: "collection-17",
+      id: "collection-53",
       title: "Practice Setup",
       description: "Purchase a practice basket",
+      
       category: "collection",
+      subcategory: "equipmentAccessories",
       isCompleted: false,
       points: 50,
     },
@@ -893,7 +952,9 @@ const sampleAchievements: Achievements = {
       id: "collection-18",
       title: "Tour Series",
       description: "Purchase a tour series disc",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -901,7 +962,9 @@ const sampleAchievements: Achievements = {
       id: "collection-19",
       title: "Signature Series",
       description: "Purchase a signature series disc",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -909,7 +972,9 @@ const sampleAchievements: Achievements = {
       id: "collection-20",
       title: "First Run",
       description: "Purchase a first run disc",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -917,7 +982,9 @@ const sampleAchievements: Achievements = {
       id: "collection-21",
       title: "Limited Release",
       description: "Purchase a limited edition disc",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -925,7 +992,9 @@ const sampleAchievements: Achievements = {
       id: "collection-22",
       title: "Pro Support",
       description: "Purchase a tour series disc",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -933,7 +1002,9 @@ const sampleAchievements: Achievements = {
       id: "collection-23",
       title: "Custom Art",
       description: "Purchase a disc with a custom stamp",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -941,7 +1012,9 @@ const sampleAchievements: Achievements = {
       id: "collection-24",
       title: "Tournament Treasure",
       description: "Get a disc from a tournament",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -949,7 +1022,9 @@ const sampleAchievements: Achievements = {
       id: "collection-25",
       title: "Pro Signature",
       description: "Get a disc signed by a professional",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -957,7 +1032,9 @@ const sampleAchievements: Achievements = {
       id: "collection-26",
       title: "Personal Touch",
       description: "Design your own custom disc",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -965,7 +1042,9 @@ const sampleAchievements: Achievements = {
       id: "collection-27",
       title: "Dye Artist",
       description: "Dye your first disc",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -973,7 +1052,9 @@ const sampleAchievements: Achievements = {
       id: "collection-28",
       title: "Dye Merchant",
       description: "Sell a dyed disc",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -981,7 +1062,9 @@ const sampleAchievements: Achievements = {
       id: "collection-30",
       title: "Vintage Collector",
       description: "Own a disc that's over 20 years old",
+      
       category: "collection",
+      subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
     },
@@ -991,7 +1074,9 @@ const sampleAchievements: Achievements = {
       id: "collection-31",
       title: "Course Explorer",
       description: "Play 5 different courses",
+      
       category: "collection",
+      subcategory: "courseExplorer",
       isCompleted: false,
       points: 50,
     },
@@ -999,7 +1084,9 @@ const sampleAchievements: Achievements = {
       id: "collection-32",
       title: "Course Adventurer",
       description: "Play 10 different courses",
+      
       category: "collection",
+      subcategory: "courseExplorer",
       isCompleted: false,
       points: 50,
     },
@@ -1007,7 +1094,9 @@ const sampleAchievements: Achievements = {
       id: "collection-33",
       title: "Course Conqueror",
       description: "Play 25 different courses",
+      
       category: "collection",
+      subcategory: "courseExplorer",
       isCompleted: false,
       points: 50,
     },
@@ -1015,7 +1104,9 @@ const sampleAchievements: Achievements = {
       id: "collection-34",
       title: "Course Legend",
       description: "Play 50 different courses",
+      
       category: "collection",
+      subcategory: "courseExplorer",
       isCompleted: false,
       points: 50,
     },
@@ -1023,7 +1114,9 @@ const sampleAchievements: Achievements = {
       id: "collection-35",
       title: "Course Explorer",
       description: "Play 100+ different courses",
+      
       category: "collection",
+      subcategory: "courseExplorer",
       isCompleted: false,
       points: 50,
     },
@@ -1031,7 +1124,9 @@ const sampleAchievements: Achievements = {
       id: "collection-36",
       title: "State's Best",
       description: "Play the #1 rated course in your state",
+      
       category: "collection",
+      subcategory: "courseExplorer",
       isCompleted: false,
       points: 50,
     },
@@ -1039,7 +1134,9 @@ const sampleAchievements: Achievements = {
       id: "collection-37",
       title: "Top of the State",
       description: "Play the top 5 courses in your state",
+      
       category: "collection",
+      subcategory: "courseExplorer",
       isCompleted: false,
       points: 50,
     },
@@ -1047,7 +1144,9 @@ const sampleAchievements: Achievements = {
       id: "collection-38",
       title: "National Treasure",
       description: "Play the #1 rated course in the country",
+      
       category: "collection",
+      subcategory: "courseExplorer",
       isCompleted: false,
       points: 50,
     },
@@ -1057,7 +1156,9 @@ const sampleAchievements: Achievements = {
       id: "collection-39",
       title: "First Round",
       description: "Complete your first round of disc golf",
+      
       category: "collection",
+      subcategory: "roundMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -1065,7 +1166,9 @@ const sampleAchievements: Achievements = {
       id: "collection-40",
       title: "Dedicated Player",
       description: "Play 10 rounds of disc golf",
+      
       category: "collection",
+      subcategory: "roundMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -1073,7 +1176,9 @@ const sampleAchievements: Achievements = {
       id: "collection-41",
       title: "Experienced Player",
       description: "Play 50 rounds of disc golf",
+      
       category: "collection",
+      subcategory: "roundMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -1081,7 +1186,9 @@ const sampleAchievements: Achievements = {
       id: "collection-42",
       title: "Seasoned Veteran",
       description: "Play 100 rounds of disc golf",
+      
       category: "collection",
+      subcategory: "roundMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -1089,7 +1196,9 @@ const sampleAchievements: Achievements = {
       id: "collection-43",
       title: "Veteran Player",
       description: "Play 250 rounds of disc golf",
+      
       category: "collection",
+      subcategory: "roundMilestones",
       isCompleted: false,
       points: 50,
     },
@@ -1097,7 +1206,9 @@ const sampleAchievements: Achievements = {
       id: "collection-44",
       title: "Elite Player",
       description: "Play 500+ rounds of disc golf",
+      
       category: "collection",
+      subcategory: "roundMilestones",
       isCompleted: false,
       points: 50,
     }
@@ -1117,16 +1228,16 @@ export default function DashboardPage() {
     competitionEvents: false,
     mediaContent: false,
     goodSamaritan: false,
-    discEssentials: false,
-    discMilestones: false,
-    equipmentAccessories: false,
+    discEssentials: true,
+    discMilestones: true,
+    equipmentAccessories: true,
     specialDiscs: false,
     courseExplorer: false,
     roundMilestones: false
   });
 
   // Use achievements from Firebase, or fallback to sample if not loaded yet
-  const currentAchievements = (achievements && achievements.skill.length > 0)
+  const currentAchievements = (achievements && achievements.skill.length > 0 && achievements.social.length > 0 && achievements.collection.length > 0)
     ? achievements
     : sampleAchievements;
 
@@ -1168,9 +1279,17 @@ export default function DashboardPage() {
     return (completed / total) * 100;
   };
 
-  // Get achievements for a specific category and range
-  const getCategoryAchievements = (category: keyof Achievements, startIndex: number, endIndex: number) => {
-    return achievements[category].slice(startIndex, endIndex);
+  // Get achievements for a specific category and range/subcategory
+  const getCategoryAchievements = (category: keyof Achievements, startIndex: number, endIndex: number, subcategory?: string) => {
+    if (category === 'collection' && subcategory) {
+      // For collection, filter by subcategory
+      const filtered = currentAchievements[category].filter(achievement => achievement.subcategory === subcategory);
+      console.log(`getCategoryAchievements: ${category}.${subcategory} = ${filtered.length} achievements (using currentAchievements)`);
+      return filtered;
+    } else {
+      // For skill and social, use index ranges
+      return currentAchievements[category].slice(startIndex, endIndex);
+    }
   };
 
   // Category ranges for skill achievements
@@ -1193,8 +1312,8 @@ export default function DashboardPage() {
   // Category ranges for collection achievements
   const collectionCategories = {
     discEssentials: { start: 0, end: 6 },
-    discMilestones: { start: 6, end: 16 },
-    equipmentAccessories: { start: 16, end: 21 },
+    discMilestones: { start: 6, end: 13 },
+    equipmentAccessories: { start: 13, end: 21 },
     specialDiscs: { start: 21, end: 34 },
     courseExplorer: { start: 34, end: 42 },
     roundMilestones: { start: 42, end: 48 }
@@ -1265,7 +1384,7 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto py-4" data-gramm="false">
       <Tabs defaultValue="skill" className="w-full">
-        <div className="sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-40 pb-2 border-b">
+        <div className="sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-[100] pb-2 border-b">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="skill">Skill</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
@@ -1273,39 +1392,29 @@ export default function DashboardPage() {
           </TabsList>
         </div>
 
-        {/* Global Stats Header - Shows on all tabs */}
-        <div className="sticky top-[110px] bg-background z-30 pb-2 border-b">
-          <div className="flex justify-center bg-background">
-            <div className="text-center bg-background p-2">
-              <div className="flex items-center gap-4 bg-background">
-                <div className="flex gap-4">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg">
-                    <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
-                    <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
-                  </div>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
-                    <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
-                    <div className="text-2xl font-bold">{currentStreak}</div>
-                  </div>
+        <TabsContent value="skill">
+          {/* Combined Stats Header with Progress Ring */}
+          <div className="sticky top-[112px] bg-background z-[100] pb-[20px] border-b w-full">
+            <div className="flex flex-col items-center w-full gap-2">
+              {/* Points and Days */}
+              <div className="flex gap-4 p-2">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                  <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
+                  <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
+                </div>
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                  <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
+                  <div className="text-2xl font-bold">{currentStreak}</div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <TabsContent value="skill">
-          {/* Category Progress */}
-          <div className="sticky top-[215px] bg-background z-20 pb-2 border-b">
-            <div className="flex justify-center bg-background">
-              <div className="text-center bg-background p-2">
-                <div className="flex items-center gap-2 bg-background">
-                  <ProgressRing percentage={skillCompletion} size={60} strokeWidth={4} />
-                  <p className="text-sm text-muted-foreground">
-                    {qualifiesForPatch(skillCompletion)
-                      ? "Patch Unlocked! 🎉"
-                      : `${Math.round(80 - skillCompletion)}% to Patch`}
-                  </p>
-                </div>
+              {/* Progress Ring */}
+              <div className="flex items-center gap-2">
+                <ProgressRing percentage={skillCompletion} size={60} strokeWidth={4} />
+                <p className="text-sm text-muted-foreground">
+                  {qualifiesForPatch(skillCompletion)
+                    ? "Patch Unlocked! 🎉"
+                    : `${Math.round(80 - skillCompletion)}% to Patch`}
+                </p>
               </div>
             </div>
           </div>
@@ -1314,23 +1423,23 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Putting Mastery Section with Sticky Header and Collapse Button Working */}
               <Collapsible open={openSections.puttingMastery}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('puttingMastery')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Putting Mastery</h2>
+                      <h2 className="text-2xl font-bold text-white">Putting Mastery</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
+                        "text-sm font-semibold text-white",
                         getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.puttingMastery.start, skillCategories.puttingMastery.end)))
                       )}>
                         ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.puttingMastery.start, skillCategories.puttingMastery.end)))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.puttingMastery ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.puttingMastery ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
@@ -1356,23 +1465,23 @@ export default function DashboardPage() {
 
               {/* Distance Control Section */}
               <Collapsible open={openSections.distanceControl}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('distanceControl')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Distance Control</h2>
+                      <h2 className="text-2xl font-bold text-white">Distance Control</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
+                        "text-sm font-semibold text-white",
                         getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.distanceControl.start, skillCategories.distanceControl.end)))
                       )}>
                         ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.distanceControl.start, skillCategories.distanceControl.end)))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.distanceControl ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.distanceControl ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
@@ -1397,23 +1506,23 @@ export default function DashboardPage() {
 
               {/* Specialty Shots Section */}
               <Collapsible open={openSections.specialtyShots}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('specialtyShots')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Specialty Shots</h2>
+                      <h2 className="text-2xl font-bold text-white">Specialty Shots</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
+                        "text-sm font-semibold text-white",
                         getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.specialtyShots.start, skillCategories.specialtyShots.end)))
                       )}>
                         ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.specialtyShots.start, skillCategories.specialtyShots.end)))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.specialtyShots ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.specialtyShots ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
@@ -1431,23 +1540,23 @@ export default function DashboardPage() {
 
               {/* Scoring Achievements Section */}
               <Collapsible open={openSections.scoringAchievements}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('scoringAchievements')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Scoring Achievements</h2>
+                      <h2 className="text-2xl font-bold text-white">Scoring Achievements</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
+                        "text-sm font-semibold text-white",
                         getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))
                       )}>
                         ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", skillCategories.scoringAchievements.start, skillCategories.scoringAchievements.end)))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.scoringAchievements ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.scoringAchievements ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
@@ -1466,18 +1575,28 @@ export default function DashboardPage() {
           </div>
         </TabsContent>
         <TabsContent value="social">
-          {/* Category Progress */}
-          <div className="sticky top-[215px] bg-background z-20 pb-2 border-b">
-            <div className="flex justify-center bg-background">
-              <div className="text-center bg-background p-2">
-                <div className="flex items-center gap-2 bg-background">
-                  <ProgressRing percentage={socialCompletion} size={60} strokeWidth={4} />
-                  <p className="text-sm text-muted-foreground">
-                    {qualifiesForPatch(socialCompletion)
-                      ? "Patch Unlocked! 🎉"
-                      : `${Math.round(80 - socialCompletion)}% to Patch`}
-                  </p>
+          {/* Combined Stats Header with Progress Ring */}
+          <div className="sticky top-[112px] bg-background z-[100] pb-[20px] border-b w-full">
+            <div className="flex flex-col items-center w-full gap-2">
+              {/* Points and Days */}
+              <div className="flex gap-4 p-2">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                  <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
+                  <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
                 </div>
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                  <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
+                  <div className="text-2xl font-bold">{currentStreak}</div>
+                </div>
+              </div>
+              {/* Progress Ring */}
+              <div className="flex items-center gap-2">
+                <ProgressRing percentage={socialCompletion} size={60} strokeWidth={4} />
+                <p className="text-sm text-muted-foreground">
+                  {qualifiesForPatch(socialCompletion)
+                    ? "Patch Unlocked! 🎉"
+                    : `${Math.round(80 - socialCompletion)}% to Patch`}
+                </p>
               </div>
             </div>
           </div>
@@ -1486,23 +1605,23 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Community Engagement Section */}
               <Collapsible open={openSections.communityEngagement}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('communityEngagement')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Community Engagement</h2>
+                      <h2 className="text-2xl font-bold text-white">Community Engagement</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
+                        "text-sm font-semibold text-white",
                         getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", socialCategories.communityEngagement.start, socialCategories.communityEngagement.end)))
                       )}>
                         ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.communityEngagement.start, socialCategories.communityEngagement.end)))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.communityEngagement ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.communityEngagement ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
@@ -1527,23 +1646,23 @@ export default function DashboardPage() {
 
               {/* Teaching & Leadership Section */}
               <Collapsible open={openSections.teachingLeadership}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('teachingLeadership')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Teaching & Leadership</h2>
+                      <h2 className="text-2xl font-bold text-white">Teaching & Leadership</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
+                        "text-sm font-semibold text-white",
                         getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end)))
                       )}>
                         ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.teachingLeadership.start, socialCategories.teachingLeadership.end)))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.teachingLeadership ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.teachingLeadership ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
@@ -1561,23 +1680,23 @@ export default function DashboardPage() {
 
               {/* Competition & Events Section */}
               <Collapsible open={openSections.competitionEvents}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('competitionEvents')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Competition & Events</h2>
+                      <h2 className="text-2xl font-bold text-white">Competition & Events</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
+                        "text-sm font-semibold text-white",
                         getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", socialCategories.competitionEvents.start, socialCategories.competitionEvents.end)))
                       )}>
                         ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.competitionEvents.start, socialCategories.competitionEvents.end)))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.competitionEvents ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.competitionEvents ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
@@ -1595,23 +1714,23 @@ export default function DashboardPage() {
 
               {/* Media Content Section */}
               <Collapsible open={openSections.mediaContent}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('mediaContent')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Media & Content</h2>
+                      <h2 className="text-2xl font-bold text-white">Media & Content</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
+                        "text-sm font-semibold text-white",
                         getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", socialCategories.mediaContent.start, socialCategories.mediaContent.end)))
                       )}>
                         ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.mediaContent.start, socialCategories.mediaContent.end)))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.mediaContent ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.mediaContent ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
@@ -1629,23 +1748,23 @@ export default function DashboardPage() {
 
               {/* Good Samaritan Section */}
               <Collapsible open={openSections.goodSamaritan}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('goodSamaritan')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Good Samaritan</h2>
+                      <h2 className="text-2xl font-bold text-white">Good Samaritan</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
+                        "text-sm font-semibold text-white",
                         getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", socialCategories.goodSamaritan.start, socialCategories.goodSamaritan.end)))
                       )}>
                         ({Math.round(getCategoryCompletion(getCategoryAchievements("social", socialCategories.goodSamaritan.start, socialCategories.goodSamaritan.end)))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.goodSamaritan ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.goodSamaritan ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
@@ -1664,18 +1783,28 @@ export default function DashboardPage() {
           </div>
         </TabsContent>
         <TabsContent value="collection">
-          {/* Category Progress */}
-          <div className="sticky top-[215px] bg-background z-20 pb-2 border-b">
-            <div className="flex justify-center bg-background">
-              <div className="text-center bg-background p-2">
-                <div className="flex items-center gap-2 bg-background">
-                  <ProgressRing percentage={collectionCompletion} size={60} strokeWidth={4} />
-                  <p className="text-sm text-muted-foreground">
-                    {qualifiesForPatch(collectionCompletion)
-                      ? "Patch Unlocked! 🎉"
-                      : `${Math.round(80 - collectionCompletion)}% to Patch`}
-                  </p>
+          {/* Combined Stats Header with Progress Ring */}
+          <div className="sticky top-[112px] bg-background z-[100] pb-[20px] border-b w-full">
+            <div className="flex flex-col items-center w-full gap-2">
+              {/* Points and Days */}
+              <div className="flex gap-4 p-2">
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                  <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
+                  <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
                 </div>
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                  <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
+                  <div className="text-2xl font-bold">{currentStreak}</div>
+                </div>
+              </div>
+              {/* Progress Ring */}
+              <div className="flex items-center gap-2">
+                <ProgressRing percentage={collectionCompletion} size={60} strokeWidth={4} />
+                <p className="text-sm text-muted-foreground">
+                  {qualifiesForPatch(collectionCompletion)
+                    ? "Patch Unlocked! 🎉"
+                    : `${Math.round(80 - collectionCompletion)}% to Patch`}
+                </p>
               </div>
             </div>
           </div>
@@ -1684,105 +1813,124 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Disc Essentials Section */}
               <Collapsible open={openSections.discEssentials}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('discEssentials')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Disc Essentials</h2>
+                      <h2 className="text-2xl font-bold text-white">Disc Essentials</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end)))
+                        "text-sm font-semibold text-white",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "discEssentials")))
                       )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end)))}%)
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "discEssentials")))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.discEssentials ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.discEssentials ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {getCategoryAchievements("collection", collectionCategories.discEssentials.start, collectionCategories.discEssentials.end).map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        points={achievement.points}
-                        rarity={achievement.rarity ?? "common"}
-                        onToggle={() => toggleAchievement("collection", achievement.id)}
-                      />
-                    ))}
+                    {(() => {
+                      const discEssentialsAchievements = getCategoryAchievements("collection", 0, 0, "discEssentials");
+                      console.log('Rendering discEssentials:', discEssentialsAchievements.length, 'achievements');
+                      return discEssentialsAchievements.map((achievement) => {
+                        console.log('Rendering achievement:', achievement.title);
+                        return (
+                          <AchievementCard
+                            id={achievement.id}
+                            key={achievement.id}
+                            title={achievement.title}
+                            description={achievement.description}
+                            category={achievement.category}
+                            isCompleted={achievement.isCompleted}
+                            completedDate={achievement.completedDate}
+                            points={achievement.points}
+                            rarity={achievement.rarity ?? "common"}
+                            onToggle={() => toggleAchievement("collection", achievement.id)}
+                          />
+                        );
+                      });
+                    })()}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
 
               {/* Disc Collection Milestones Section */}
               <Collapsible open={openSections.discMilestones}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('discMilestones')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Disc Collection Milestones</h2>
+                      <h2 className="text-2xl font-bold text-white">Disc Collection Milestones</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end)))
+                        "text-sm font-semibold text-white",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "discMilestones")))
                       )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end)))}%)
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "discMilestones")))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.discMilestones ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.discMilestones ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {getCategoryAchievements("collection", collectionCategories.discMilestones.start, collectionCategories.discMilestones.end).map((achievement) => (
-                      <AchievementCard
-                        id={achievement.id}
-                        key={achievement.id}
-                        title={achievement.title}
-                        description={achievement.description}
-                        category={achievement.category}
-                        isCompleted={achievement.isCompleted}
-                        completedDate={achievement.completedDate}
-                        points={achievement.points}
-                        rarity={achievement.rarity ?? "common"}
-                        onToggle={() => toggleAchievement("collection", achievement.id)}
-                      />
-                    ))}
+                    {(() => {
+                      const discMilestonesAchievements = getCategoryAchievements("collection", 0, 0, "discMilestones");
+                      console.log('Rendering discMilestones:', discMilestonesAchievements.length, 'achievements');
+                      return discMilestonesAchievements.map((achievement) => {
+                        console.log('Rendering achievement:', achievement.title);
+                        return (
+                          <AchievementCard
+                            id={achievement.id}
+                            key={achievement.id}
+                            title={achievement.title}
+                            description={achievement.description}
+                            category={achievement.category}
+                            isCompleted={achievement.isCompleted}
+                            completedDate={achievement.completedDate}
+                            points={achievement.points}
+                            rarity={achievement.rarity ?? "common"}
+                            onToggle={() => toggleAchievement("collection", achievement.id)}
+                          />
+                        );
+                      });
+                    })()}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
 
               {/* Equipment & Accessories Section */}
               <Collapsible open={openSections.equipmentAccessories}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('equipmentAccessories')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Equipment & Accessories</h2>
+                      <h2 className="text-2xl font-bold text-white">Equipment & Accessories</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end)))
+                        "text-sm font-semibold text-white",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "equipmentAccessories")))
                       )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end)))}%)
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "equipmentAccessories")))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.equipmentAccessories ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.equipmentAccessories ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {getCategoryAchievements("collection", collectionCategories.equipmentAccessories.start, collectionCategories.equipmentAccessories.end).map((achievement) => (
+                    {getCategoryAchievements("collection", 0, 0, "equipmentAccessories").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1795,28 +1943,28 @@ export default function DashboardPage() {
 
               {/* Special Discs Section */}
               <Collapsible open={openSections.specialDiscs}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('specialDiscs')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Special Discs</h2>
+                      <h2 className="text-2xl font-bold text-white">Special Discs</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end)))
+                        "text-sm font-semibold text-white",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "specialDiscs")))
                       )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end)))}%)
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "specialDiscs")))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.specialDiscs ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.specialDiscs ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {getCategoryAchievements("collection", collectionCategories.specialDiscs.start, collectionCategories.specialDiscs.end).map((achievement) => (
+                    {getCategoryAchievements("collection", 0, 0, "specialDiscs").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1829,28 +1977,28 @@ export default function DashboardPage() {
 
               {/* Course Explorer Section */}
               <Collapsible open={openSections.courseExplorer}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('courseExplorer')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Course Explorer</h2>
+                      <h2 className="text-2xl font-bold text-white">Course Explorer</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end)))
+                        "text-sm font-semibold text-white",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "courseExplorer")))
                       )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end)))}%)
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "courseExplorer")))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.courseExplorer ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.courseExplorer ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {getCategoryAchievements("collection", collectionCategories.courseExplorer.start, collectionCategories.courseExplorer.end).map((achievement) => (
+                    {getCategoryAchievements("collection", 0, 0, "courseExplorer").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}
@@ -1863,28 +2011,28 @@ export default function DashboardPage() {
 
               {/* Round Milestones Section */}
               <Collapsible open={openSections.roundMilestones}>
-                <div className="sticky top-[215px] z-20 bg-background border-b">
+                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('roundMilestones')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer z-10 relative"
+                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
                     style={{ outline: "none", border: "none", background: "none" }}
                   >
                     <div>
-                      <h2 className="text-2xl font-bold">Round Milestones</h2>
+                      <h2 className="text-2xl font-bold text-white">Round Milestones</h2>
                       <span className={cn(
-                        "text-sm font-semibold",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.roundMilestones.start, collectionCategories.roundMilestones.end)))
+                        "text-sm font-semibold text-white",
+                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "roundMilestones")))
                       )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", collectionCategories.roundMilestones.start, collectionCategories.roundMilestones.end)))}%)
+                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", 0, 0, "roundMilestones")))}%)
                       </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 transform transition-transform ${openSections.roundMilestones ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.roundMilestones ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
                 <CollapsibleContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                    {getCategoryAchievements("collection", collectionCategories.roundMilestones.start, collectionCategories.roundMilestones.end).map((achievement) => (
+                    {getCategoryAchievements("collection", 0, 0, "roundMilestones").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
                         {...achievement}

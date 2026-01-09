@@ -67,4 +67,4 @@ A web application for tracking disc golf achievements across different categorie
 - Add more achievements
 - Add achievement tiers/levels
 - Implement data persistence
-- Add social features 
+- Add social features
