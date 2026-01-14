@@ -1551,7 +1551,7 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Putting Mastery Section with Sticky Header and Collapse Button Working */}
               <Collapsible open={openSections.puttingMastery}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('puttingMastery')}
@@ -1593,7 +1593,7 @@ export default function DashboardPage() {
 
               {/* Distance Control Section */}
               <Collapsible open={openSections.distanceControl}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('distanceControl')}
@@ -1634,7 +1634,7 @@ export default function DashboardPage() {
 
               {/* Specialty Shots Section */}
               <Collapsible open={openSections.specialtyShots}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('specialtyShots')}
@@ -1668,7 +1668,7 @@ export default function DashboardPage() {
 
               {/* Scoring Achievements Section */}
               <Collapsible open={openSections.scoringAchievements}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('scoringAchievements')}
@@ -1760,7 +1760,7 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Community Engagement Section */}
               <Collapsible open={openSections.communityEngagement}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('communityEngagement')}
@@ -1801,7 +1801,7 @@ export default function DashboardPage() {
 
               {/* Teaching & Leadership Section */}
               <Collapsible open={openSections.teachingLeadership}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('teachingLeadership')}
@@ -1835,7 +1835,7 @@ export default function DashboardPage() {
 
               {/* Competition & Events Section */}
               <Collapsible open={openSections.competitionEvents}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('competitionEvents')}
@@ -1869,7 +1869,7 @@ export default function DashboardPage() {
 
               {/* Media Content Section */}
               <Collapsible open={openSections.mediaContent}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('mediaContent')}
@@ -1903,7 +1903,7 @@ export default function DashboardPage() {
 
               {/* Good Samaritan Section */}
               <Collapsible open={openSections.goodSamaritan}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('goodSamaritan')}
@@ -1995,7 +1995,7 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Disc Essentials Section */}
               <Collapsible open={openSections.discEssentials}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('discEssentials')}
@@ -2036,7 +2036,7 @@ export default function DashboardPage() {
 
               {/* Disc Collection Milestones Section */}
               <Collapsible open={openSections.discMilestones}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('discMilestones')}
@@ -2077,7 +2077,7 @@ export default function DashboardPage() {
 
               {/* Equipment & Accessories Section */}
               <Collapsible open={openSections.equipmentAccessories}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('equipmentAccessories')}
@@ -2111,7 +2111,7 @@ export default function DashboardPage() {
 
               {/* Special Discs Section */}
               <Collapsible open={openSections.specialDiscs}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('specialDiscs')}
@@ -2145,7 +2145,7 @@ export default function DashboardPage() {
 
               {/* Course Explorer Section */}
               <Collapsible open={openSections.courseExplorer}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('courseExplorer')}
@@ -2179,7 +2179,7 @@ export default function DashboardPage() {
 
               {/* Round Milestones Section */}
               <Collapsible open={openSections.roundMilestones}>
-                <div className="sticky top-[232px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[300px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('roundMilestones')}
