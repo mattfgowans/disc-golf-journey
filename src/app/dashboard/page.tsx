@@ -1485,7 +1485,7 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto py-4" data-gramm="false">
       <Tabs defaultValue="skill" className="w-full">
-        <div className="sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-[100] pb-2 border-b">
+        <div className="sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-[100] border-b">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="skill">Skill</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
@@ -1495,14 +1495,14 @@ export default function DashboardPage() {
 
         <TabsContent value="skill">
           {/* Combined Stats Header with Progress Ring */}
-          <div className="sticky top-[112px] bg-background z-[100] pb-[20px] border-b w-full">
-            <div className="flex flex-col w-full gap-2">
+          <div className="sticky top-[100px] bg-background z-[100] border-b w-full">
+            <div className="flex flex-col w-full gap-0.5">
               {/* Rank and Points/Days row */}
-              <div className="flex flex-col md:flex-row gap-4 p-2 items-center justify-center">
+              <div className="flex flex-col md:flex-row gap-1.5 md:gap-2 p-0.5 items-center justify-center">
                 {/* Rank Display - Responsive positioning */}
-                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
-                  <div className="text-xs font-semibold uppercase tracking-wide mb-1">Rank</div>
-                  <div className="text-xl font-bold mb-2">{currentRank.name}</div>
+                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-2 py-1 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
+                  <div className="text-xs font-semibold uppercase tracking-wide mb-0.5">Rank</div>
+                  <div className="text-base font-bold mb-0.5">{currentRank.name}</div>
                   {nextRank ? (
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
@@ -1524,20 +1524,20 @@ export default function DashboardPage() {
                   )}
                 </div>
                 {/* Points and Days - Centered, aligned with progress ring */}
-                <div className="flex gap-4 w-full md:w-auto justify-center">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
+                <div className="flex gap-1.5 md:gap-2 w-full md:w-auto justify-center">
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
-                    <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
+                    <div className="text-lg font-bold">{totalPoints.toLocaleString()}</div>
                   </div>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
-                    <div className="text-2xl font-bold">{currentStreak}</div>
+                    <div className="text-lg font-bold">{currentStreak}</div>
                   </div>
                 </div>
               </div>
               {/* Progress Ring - Centered below Points/Days */}
-              <div className="flex items-center justify-center gap-2">
-                <ProgressRing percentage={skillCompletion} size={60} strokeWidth={4} />
+              <div className="flex items-center justify-center gap-1.5">
+                <ProgressRing percentage={skillCompletion} size={45} strokeWidth={4} />
                 <p className="text-sm text-muted-foreground">
                   {qualifiesForPatch(skillCompletion)
                     ? "Patch Unlocked! 🎉"
@@ -1551,7 +1551,7 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Putting Mastery Section with Sticky Header and Collapse Button Working */}
               <Collapsible open={openSections.puttingMastery}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('puttingMastery')}
@@ -1571,7 +1571,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("skill", "puttingMastery").map((achievement) => (
                       <AchievementCard
                         id={achievement.id}
@@ -1593,7 +1593,7 @@ export default function DashboardPage() {
 
               {/* Distance Control Section */}
               <Collapsible open={openSections.distanceControl}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('distanceControl')}
@@ -1613,7 +1613,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("skill", "distanceControl").map((achievement) => (
                       <AchievementCard
                         id={achievement.id}
@@ -1634,7 +1634,7 @@ export default function DashboardPage() {
 
               {/* Specialty Shots Section */}
               <Collapsible open={openSections.specialtyShots}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('specialtyShots')}
@@ -1654,7 +1654,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("skill", "specialtyShots").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
@@ -1668,7 +1668,7 @@ export default function DashboardPage() {
 
               {/* Scoring Achievements Section */}
               <Collapsible open={openSections.scoringAchievements}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('scoringAchievements')}
@@ -1688,7 +1688,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("skill", "scoringAchievements").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
@@ -1704,14 +1704,14 @@ export default function DashboardPage() {
         </TabsContent>
         <TabsContent value="social">
           {/* Combined Stats Header with Progress Ring */}
-          <div className="sticky top-[112px] bg-background z-[100] pb-[20px] border-b w-full">
-            <div className="flex flex-col w-full gap-2">
+          <div className="sticky top-[100px] bg-background z-[100] border-b w-full">
+            <div className="flex flex-col w-full gap-0.5">
               {/* Rank, Points and Days */}
-              <div className="flex flex-col md:flex-row gap-4 p-2 items-center justify-center">
+              <div className="flex flex-col md:flex-row gap-1.5 md:gap-2 p-0.5 items-center justify-center">
                 {/* Rank Display - Responsive positioning */}
-                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
-                  <div className="text-xs font-semibold uppercase tracking-wide mb-1">Rank</div>
-                  <div className="text-xl font-bold mb-2">{currentRank.name}</div>
+                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-2 py-1 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
+                  <div className="text-xs font-semibold uppercase tracking-wide mb-0.5">Rank</div>
+                  <div className="text-base font-bold mb-0.5">{currentRank.name}</div>
                   {nextRank ? (
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
@@ -1733,20 +1733,20 @@ export default function DashboardPage() {
                   )}
                 </div>
                 {/* Points and Days - Centered */}
-                <div className="flex gap-4 w-full md:w-auto justify-center">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
+                <div className="flex gap-1.5 md:gap-2 w-full md:w-auto justify-center">
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
-                    <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
+                    <div className="text-lg font-bold">{totalPoints.toLocaleString()}</div>
                   </div>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
-                    <div className="text-2xl font-bold">{currentStreak}</div>
+                    <div className="text-lg font-bold">{currentStreak}</div>
                   </div>
                 </div>
               </div>
               {/* Progress Ring */}
-              <div className="flex items-center justify-center gap-2">
-                <ProgressRing percentage={socialCompletion} size={60} strokeWidth={4} />
+              <div className="flex items-center justify-center gap-1.5">
+                <ProgressRing percentage={socialCompletion} size={45} strokeWidth={4} />
                 <p className="text-sm text-muted-foreground">
                   {qualifiesForPatch(socialCompletion)
                     ? "Patch Unlocked! 🎉"
@@ -1760,7 +1760,7 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Community Engagement Section */}
               <Collapsible open={openSections.communityEngagement}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('communityEngagement')}
@@ -1780,7 +1780,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("social", "communityEngagement").map((achievement) => (
                       <AchievementCard
                         id={achievement.id}
@@ -1801,7 +1801,7 @@ export default function DashboardPage() {
 
               {/* Teaching & Leadership Section */}
               <Collapsible open={openSections.teachingLeadership}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('teachingLeadership')}
@@ -1821,7 +1821,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("social", "teachingLeadership").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
@@ -1835,7 +1835,7 @@ export default function DashboardPage() {
 
               {/* Competition & Events Section */}
               <Collapsible open={openSections.competitionEvents}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('competitionEvents')}
@@ -1855,7 +1855,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("social", "competitionEvents").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
@@ -1869,7 +1869,7 @@ export default function DashboardPage() {
 
               {/* Media Content Section */}
               <Collapsible open={openSections.mediaContent}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('mediaContent')}
@@ -1889,7 +1889,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("social", "mediaContent").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
@@ -1903,7 +1903,7 @@ export default function DashboardPage() {
 
               {/* Good Samaritan Section */}
               <Collapsible open={openSections.goodSamaritan}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('goodSamaritan')}
@@ -1923,7 +1923,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("social", "goodSamaritan").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
@@ -1939,14 +1939,14 @@ export default function DashboardPage() {
         </TabsContent>
         <TabsContent value="collection">
           {/* Combined Stats Header with Progress Ring */}
-          <div className="sticky top-[112px] bg-background z-[100] pb-[20px] border-b w-full">
-            <div className="flex flex-col w-full gap-2">
+          <div className="sticky top-[100px] bg-background z-[100] border-b w-full">
+            <div className="flex flex-col w-full gap-0.5">
               {/* Rank, Points and Days */}
-              <div className="flex flex-col md:flex-row gap-4 p-2 items-center justify-center">
+              <div className="flex flex-col md:flex-row gap-1.5 md:gap-2 p-0.5 items-center justify-center">
                 {/* Rank Display - Responsive positioning */}
-                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
-                  <div className="text-xs font-semibold uppercase tracking-wide mb-1">Rank</div>
-                  <div className="text-xl font-bold mb-2">{currentRank.name}</div>
+                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-2 py-1 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
+                  <div className="text-xs font-semibold uppercase tracking-wide mb-0.5">Rank</div>
+                  <div className="text-base font-bold mb-0.5">{currentRank.name}</div>
                   {nextRank ? (
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
@@ -1968,20 +1968,20 @@ export default function DashboardPage() {
                   )}
                 </div>
                 {/* Points and Days - Centered */}
-                <div className="flex gap-4 w-full md:w-auto justify-center">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
+                <div className="flex gap-1.5 md:gap-2 w-full md:w-auto justify-center">
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
-                    <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
+                    <div className="text-lg font-bold">{totalPoints.toLocaleString()}</div>
                   </div>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
-                    <div className="text-2xl font-bold">{currentStreak}</div>
+                    <div className="text-lg font-bold">{currentStreak}</div>
                   </div>
                 </div>
               </div>
               {/* Progress Ring */}
-              <div className="flex items-center justify-center gap-2">
-                <ProgressRing percentage={collectionCompletion} size={60} strokeWidth={4} />
+              <div className="flex items-center justify-center gap-1.5">
+                <ProgressRing percentage={collectionCompletion} size={45} strokeWidth={4} />
                 <p className="text-sm text-muted-foreground">
                   {qualifiesForPatch(collectionCompletion)
                     ? "Patch Unlocked! 🎉"
@@ -1995,7 +1995,7 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Disc Essentials Section */}
               <Collapsible open={openSections.discEssentials}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('discEssentials')}
@@ -2015,7 +2015,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("collection", "discEssentials").map((achievement) => (
                       <AchievementCard
                         id={achievement.id}
@@ -2036,7 +2036,7 @@ export default function DashboardPage() {
 
               {/* Disc Collection Milestones Section */}
               <Collapsible open={openSections.discMilestones}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('discMilestones')}
@@ -2056,7 +2056,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("collection", "discMilestones").map((achievement) => (
                       <AchievementCard
                         id={achievement.id}
@@ -2077,7 +2077,7 @@ export default function DashboardPage() {
 
               {/* Equipment & Accessories Section */}
               <Collapsible open={openSections.equipmentAccessories}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('equipmentAccessories')}
@@ -2097,7 +2097,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("collection", "equipmentAccessories").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
@@ -2111,7 +2111,7 @@ export default function DashboardPage() {
 
               {/* Special Discs Section */}
               <Collapsible open={openSections.specialDiscs}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('specialDiscs')}
@@ -2131,7 +2131,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("collection", "specialDiscs").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
@@ -2145,7 +2145,7 @@ export default function DashboardPage() {
 
               {/* Course Explorer Section */}
               <Collapsible open={openSections.courseExplorer}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('courseExplorer')}
@@ -2165,7 +2165,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("collection", "courseExplorer").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
@@ -2179,7 +2179,7 @@ export default function DashboardPage() {
 
               {/* Round Milestones Section */}
               <Collapsible open={openSections.roundMilestones}>
-                <div className="sticky top-[280px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+                <div className="sticky top-[272px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
                   <button
                     type="button"
                     onClick={() => toggleSection('roundMilestones')}
@@ -2199,7 +2199,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
                 <CollapsibleContent>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
                     {getCategoryAchievements("collection", "roundMilestones").map((achievement) => (
                       <AchievementCard
                         key={achievement.id}
