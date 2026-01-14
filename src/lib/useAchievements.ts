@@ -10,7 +10,7 @@ export type Achievement = {
   title: string;
   description: string;
   category: "skill" | "social" | "collection";
-  subcategory?: string; // For collection achievements
+  subcategory?: string; // Used for organizing achievements into sections
   isCompleted: boolean;
   completedDate?: string;
   points?: number;
@@ -45,9 +45,9 @@ function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements
             savedAchievement.rarity !== templateAchievement.rarity) {
           return true;
         }
-        // Check if collection achievements are missing subcategory field
-        if (category === 'collection' && templateAchievement.subcategory && !savedAchievement.subcategory) {
-          console.log(`Collection achievement ${savedAchievement.id} missing subcategory field`);
+        // Check if achievements are missing subcategory field
+        if (templateAchievement.subcategory && !savedAchievement.subcategory) {
+          console.log(`Achievement ${savedAchievement.id} missing subcategory field`);
           return true;
         }
       }
