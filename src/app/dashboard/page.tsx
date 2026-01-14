@@ -1498,9 +1498,9 @@ export default function DashboardPage() {
           <div className="sticky top-[112px] bg-background z-[100] pb-[20px] border-b w-full">
             <div className="flex flex-col w-full gap-2">
               {/* Rank and Points/Days row */}
-              <div className="flex flex-col md:flex-row gap-4 p-2 items-center justify-center relative">
+              <div className="flex flex-col md:flex-row gap-4 p-2 items-center justify-center">
                 {/* Rank Display - Responsive positioning */}
-                <div className={`md:absolute md:left-2 md:top-8 bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto`}>
+                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
                   <div className="text-xs font-semibold uppercase tracking-wide mb-1">Rank</div>
                   <div className="text-xl font-bold mb-2">{currentRank.name}</div>
                   {nextRank ? (
@@ -1745,7 +1745,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               {/* Progress Ring */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <ProgressRing percentage={socialCompletion} size={60} strokeWidth={4} />
                 <p className="text-sm text-muted-foreground">
                   {qualifiesForPatch(socialCompletion)
@@ -1980,7 +1980,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               {/* Progress Ring */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <ProgressRing percentage={collectionCompletion} size={60} strokeWidth={4} />
                 <p className="text-sm text-muted-foreground">
                   {qualifiesForPatch(collectionCompletion)
