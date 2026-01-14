@@ -1498,9 +1498,9 @@ export default function DashboardPage() {
           <div className="sticky top-[112px] bg-background z-[100] pb-[20px] border-b w-full">
             <div className="flex flex-col w-full gap-2">
               {/* Rank and Points/Days row */}
-              <div className="flex gap-4 p-2 items-center justify-center relative">
-                {/* Rank Display - Left side, absolute positioned */}
-                <div className={`absolute left-2 top-8 bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px]`}>
+              <div className="flex flex-col md:flex-row gap-4 p-2 items-center justify-center relative">
+                {/* Rank Display - Responsive positioning */}
+                <div className={`md:absolute md:left-2 md:top-8 bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto`}>
                   <div className="text-xs font-semibold uppercase tracking-wide mb-1">Rank</div>
                   <div className="text-xl font-bold mb-2">{currentRank.name}</div>
                   {nextRank ? (
@@ -1524,12 +1524,12 @@ export default function DashboardPage() {
                   )}
                 </div>
                 {/* Points and Days - Centered, aligned with progress ring */}
-                <div className="flex gap-4">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                <div className="flex gap-4 w-full md:w-auto justify-center">
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
                     <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
                   </div>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
                     <div className="text-2xl font-bold">{currentStreak}</div>
                   </div>
@@ -1707,9 +1707,9 @@ export default function DashboardPage() {
           <div className="sticky top-[112px] bg-background z-[100] pb-[20px] border-b w-full">
             <div className="flex flex-col w-full gap-2">
               {/* Rank, Points and Days */}
-              <div className="flex gap-4 p-2 items-center justify-center">
-                {/* Rank Display - Positioned between left and center */}
-                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px] ml-8`}>
+              <div className="flex flex-col md:flex-row gap-4 p-2 items-center justify-center">
+                {/* Rank Display - Responsive positioning */}
+                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
                   <div className="text-xs font-semibold uppercase tracking-wide mb-1">Rank</div>
                   <div className="text-xl font-bold mb-2">{currentRank.name}</div>
                   {nextRank ? (
@@ -1733,12 +1733,12 @@ export default function DashboardPage() {
                   )}
                 </div>
                 {/* Points and Days - Centered */}
-                <div className="flex gap-4">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                <div className="flex gap-4 w-full md:w-auto justify-center">
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
                     <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
                   </div>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
                     <div className="text-2xl font-bold">{currentStreak}</div>
                   </div>
@@ -1942,9 +1942,9 @@ export default function DashboardPage() {
           <div className="sticky top-[112px] bg-background z-[100] pb-[20px] border-b w-full">
             <div className="flex flex-col w-full gap-2">
               {/* Rank, Points and Days */}
-              <div className="flex gap-4 p-2 items-center justify-center">
-                {/* Rank Display - Positioned between left and center */}
-                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px] ml-8`}>
+              <div className="flex flex-col md:flex-row gap-4 p-2 items-center justify-center">
+                {/* Rank Display - Responsive positioning */}
+                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-4 py-3 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
                   <div className="text-xs font-semibold uppercase tracking-wide mb-1">Rank</div>
                   <div className="text-xl font-bold mb-2">{currentRank.name}</div>
                   {nextRank ? (
@@ -1968,12 +1968,12 @@ export default function DashboardPage() {
                   )}
                 </div>
                 {/* Points and Days - Centered */}
-                <div className="flex gap-4">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                <div className="flex gap-4 w-full md:w-auto justify-center">
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
                     <div className="text-2xl font-bold">{totalPoints.toLocaleString()}</div>
                   </div>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg flex-1 md:flex-none">
                     <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
                     <div className="text-2xl font-bold">{currentStreak}</div>
                   </div>
