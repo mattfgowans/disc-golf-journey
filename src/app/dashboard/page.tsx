@@ -2,18 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AchievementCard } from "@/components/achievements/achievement-card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
 import { useAchievements, type Achievement, type Achievements } from "@/lib/useAchievements";
 import { useAuth } from "@/lib/firebase-auth";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { ACHIEVEMENTS_CATALOG } from "@/data/achievements";
 import { StatsHeader } from "@/components/dashboard/stats-header";
+import { AchievementSection } from "@/components/dashboard/achievement-section";
+
+// TODO: Add achievement badges (rarity-based and achievement-specific)
 
 // Rank system - similar to video game ranking
 const RANK_TIERS = [
@@ -51,38 +47,56 @@ const SECTIONS = {
   ],
 } as const;
 
+// Derive all section keys from SECTIONS to ensure type safety
+type SectionKey = typeof SECTIONS[keyof typeof SECTIONS][number]['key'];
+
+// Sections that should be open by default
+const DEFAULT_OPEN_SECTIONS: Partial<Record<SectionKey, boolean>> = {
+  discEssentials: true,
+  discMilestones: true,
+  equipmentAccessories: true,
+};
+
+// Generate default openSections object from SECTIONS
+function getDefaultOpenSections(): Record<SectionKey, boolean> {
+  const allKeys: SectionKey[] = [];
+  
+  // Collect all keys from all categories
+  for (const category of Object.values(SECTIONS)) {
+    for (const section of category) {
+      allKeys.push(section.key);
+    }
+  }
+  
+  // Create object with all keys, using defaults where specified
+  const defaults: Record<SectionKey, boolean> = {} as Record<SectionKey, boolean>;
+  for (const key of allKeys) {
+    defaults[key] = DEFAULT_OPEN_SECTIONS[key] ?? false;
+  }
+  
+  return defaults;
+}
+
 export default function DashboardPage() {
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const { achievements, loading: achievementsLoading, toggleAchievement } = useAchievements(ACHIEVEMENTS_CATALOG);
   // Load saved state from localStorage on mount
-  const getInitialOpenSections = () => {
+  const getInitialOpenSections = (): Record<SectionKey, boolean> => {
+    const defaults = getDefaultOpenSections();
+    
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('achievementOpenSections');
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          // Merge saved state with defaults to ensure new sections are included
+          return { ...defaults, ...parsed };
         } catch (e) {
           console.error('Error parsing saved openSections:', e);
         }
       }
     }
-    return {
-    puttingMastery: false,
-    distanceControl: false,
-    scoringAchievements: false,
-    specialtyShots: false,
-    communityEngagement: false,
-    teachingLeadership: false,
-    competitionEvents: false,
-    mediaContent: false,
-    goodSamaritan: false,
-    discEssentials: true,
-    discMilestones: true,
-    equipmentAccessories: true,
-    specialDiscs: false,
-    courseExplorer: false,
-    roundMilestones: false
-    };
+    return defaults;
   };
 
   const getInitialActiveTab = () => {
@@ -114,6 +128,30 @@ export default function DashboardPage() {
   // Only fallback if achievements is null/undefined, not if arrays are empty
   const currentAchievements: Achievements = achievements ?? ACHIEVEMENTS_CATALOG;
 
+  // Helper functions (defined early so they can be used by AchievementSection)
+  // Calculate completion percentage for a specific set of achievements
+  const getCategoryCompletion = (achievements: Achievement[]) => {
+    const total = achievements.length;
+    if (total === 0) return 0;
+    const completed = achievements.filter(a => a.isCompleted).length;
+    return (completed / total) * 100;
+  };
+
+  // Get achievements for a specific category and subcategory
+  const getCategoryAchievements = (category: keyof Achievements, subcategory: string) => {
+    // Filter by subcategory for all categories
+    const filtered = currentAchievements[category].filter(achievement => achievement.subcategory === subcategory);
+    return filtered;
+  };
+
+  const getCompletionColor = (value: number) => {
+    if (value === 0) return "text-gray-400";
+    if (value <= 25) return "text-red-500";
+    if (value <= 60) return "text-yellow-500";
+    if (value <= 99) return "text-green-600";
+    return "text-blue-500";
+  };
+
   // Show loading state
   if (authLoading || achievementsLoading) {
     return (
@@ -138,76 +176,11 @@ export default function DashboardPage() {
     );
   }
 
-  const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections((prev: typeof openSections) => ({
+  const toggleSection = (section: SectionKey) => {
+    setOpenSections((prev) => ({
       ...prev,
       [section]: !prev[section]
     }));
-  };
-
-  // Reusable AchievementSection component
-  const AchievementSection = ({
-    category,
-    subcategory,
-    title,
-  }: {
-    category: keyof Achievements;
-    subcategory: string;
-    title: string;
-  }) => {
-    const sectionKey = subcategory as keyof typeof openSections;
-    const achievements = getCategoryAchievements(category, subcategory);
-    const completion = getCategoryCompletion(achievements);
-
-    return (
-      <Collapsible open={openSections[sectionKey]}>
-        <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-          <button
-            type="button"
-            onClick={() => toggleSection(sectionKey)}
-            className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-            style={{ outline: "none", border: "none", background: "none" }}
-          >
-            <div>
-              <h2 className="text-2xl font-bold text-white">{title}</h2>
-              <span className={cn(
-                "text-sm font-semibold text-white",
-                getCompletionColor(completion)
-              )}>
-                ({Math.round(completion)}%)
-              </span>
-            </div>
-            <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections[sectionKey] ? 'rotate-180' : ''}`} />
-          </button>
-        </div>
-        <CollapsibleContent>
-          <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-            {achievements.map((achievement) => (
-              <AchievementCard
-                key={achievement.id}
-                {...achievement}
-                onToggle={() => toggleAchievement(category, achievement.id)}
-              />
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    );
-  };
-
-  // Calculate completion percentage for a specific set of achievements
-  const getCategoryCompletion = (achievements: Achievement[]) => {
-    const total = achievements.length;
-    if (total === 0) return 0;
-    const completed = achievements.filter(a => a.isCompleted).length;
-    return (completed / total) * 100;
-  };
-
-  // Get achievements for a specific category and subcategory
-  const getCategoryAchievements = (category: keyof Achievements, subcategory: string) => {
-    // Filter by subcategory for all categories
-      const filtered = currentAchievements[category].filter(achievement => achievement.subcategory === subcategory);
-      return filtered;
   };
 
 
@@ -233,42 +206,33 @@ export default function DashboardPage() {
 
   const totalPoints = getTotalPoints();
 
-  const getCurrentRank = () => {
+  // Calculate all rank-related values once
+  const calculateRankInfo = () => {
+    // Find current rank index
+    let currentIndex = 0;
     for (let i = RANK_TIERS.length - 1; i >= 0; i--) {
       if (totalPoints >= RANK_TIERS[i].minPoints) {
-        return RANK_TIERS[i];
+        currentIndex = i;
+        break;
       }
     }
-    return RANK_TIERS[0];
-  };
 
-  const getNextRank = () => {
-    const currentRank = getCurrentRank();
-    const currentIndex = RANK_TIERS.findIndex(r => r.name === currentRank.name);
-    if (currentIndex < RANK_TIERS.length - 1) {
-      return RANK_TIERS[currentIndex + 1];
-    }
-    return null; // Already at max rank
-  };
-
-  const getRankProgress = () => {
-    const currentRank = getCurrentRank();
-    const nextRank = getNextRank();
+    const currentRank = RANK_TIERS[currentIndex];
+    const nextRank = currentIndex < RANK_TIERS.length - 1 ? RANK_TIERS[currentIndex + 1] : null;
     
-    if (!nextRank) {
-      return 100; // Max rank reached
+    // Calculate progress
+    let rankProgress = 100; // Default to max if at highest rank
+    if (nextRank) {
+      const pointsInCurrentTier = totalPoints - currentRank.minPoints;
+      const pointsNeededForNext = nextRank.minPoints - currentRank.minPoints;
+      rankProgress = (pointsInCurrentTier / pointsNeededForNext) * 100;
+      rankProgress = Math.min(100, Math.max(0, rankProgress));
     }
 
-    const pointsInCurrentTier = totalPoints - currentRank.minPoints;
-    const pointsNeededForNext = nextRank.minPoints - currentRank.minPoints;
-    const progress = (pointsInCurrentTier / pointsNeededForNext) * 100;
-    
-    return Math.min(100, Math.max(0, progress));
+    return { currentRank, nextRank, rankProgress };
   };
 
-  const currentRank = getCurrentRank();
-  const nextRank = getNextRank();
-  const rankProgress = getRankProgress();
+  const { currentRank, nextRank, rankProgress } = calculateRankInfo();
 
   // Calculate daily streak (simplified - counts unique completion days)
   const getCurrentStreak = () => {
@@ -301,14 +265,6 @@ export default function DashboardPage() {
     return `linear-gradient(90deg, ${color} 0%, ${color} ${value}%, transparent ${value}%, transparent 100%)`;
   };
 
-  const getCompletionColor = (value: number) => {
-    if (value === 0) return "text-gray-400";
-    if (value <= 25) return "text-red-500";
-    if (value <= 60) return "text-yellow-500";
-    if (value <= 99) return "text-green-600";
-    return "text-blue-500";
-  };
-
   return (
     <div className="container mx-auto py-4" data-gramm="false">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -332,14 +288,26 @@ export default function DashboardPage() {
 
           <div className="mt-4">
             <div className="space-y-4">
-              {SECTIONS.skill.map((section) => (
-                <AchievementSection
-                  key={section.key}
-                  category="skill"
-                  subcategory={section.key}
-                  title={section.title}
-                      />
-                    ))}
+              {SECTIONS.skill.map((section) => {
+                const sectionKey = section.key as SectionKey;
+                const achievements = getCategoryAchievements("skill", section.key);
+                const completion = getCategoryCompletion(achievements);
+                return (
+                  <AchievementSection
+                    key={section.key}
+                    category="skill"
+                    subcategory={section.key}
+                    title={section.title}
+                    sectionKey={sectionKey}
+                    achievements={achievements}
+                    completion={completion}
+                    isOpen={openSections[sectionKey]}
+                    onToggle={() => toggleSection(sectionKey)}
+                    onToggleAchievement={(id) => toggleAchievement("skill", id)}
+                    getCompletionColor={getCompletionColor}
+                  />
+                );
+              })}
                   </div>
                     </div>
         </TabsContent>
@@ -355,14 +323,26 @@ export default function DashboardPage() {
 
           <div className="mt-4">
             <div className="space-y-4">
-              {SECTIONS.social.map((section) => (
-                <AchievementSection
-                  key={section.key}
-                  category="social"
-                  subcategory={section.key}
-                  title={section.title}
-                      />
-                    ))}
+              {SECTIONS.social.map((section) => {
+                const sectionKey = section.key as SectionKey;
+                const achievements = getCategoryAchievements("social", section.key);
+                const completion = getCategoryCompletion(achievements);
+                return (
+                  <AchievementSection
+                    key={section.key}
+                    category="social"
+                    subcategory={section.key}
+                    title={section.title}
+                    sectionKey={sectionKey}
+                    achievements={achievements}
+                    completion={completion}
+                    isOpen={openSections[sectionKey]}
+                    onToggle={() => toggleSection(sectionKey)}
+                    onToggleAchievement={(id) => toggleAchievement("social", id)}
+                    getCompletionColor={getCompletionColor}
+                  />
+                );
+              })}
             </div>
           </div>
         </TabsContent>
@@ -378,14 +358,26 @@ export default function DashboardPage() {
 
           <div className="mt-4">
             <div className="space-y-4">
-              {SECTIONS.collection.map((section) => (
-                <AchievementSection
-                  key={section.key}
-                  category="collection"
-                  subcategory={section.key}
-                  title={section.title}
-                      />
-                    ))}
+              {SECTIONS.collection.map((section) => {
+                const sectionKey = section.key as SectionKey;
+                const achievements = getCategoryAchievements("collection", section.key);
+                const completion = getCategoryCompletion(achievements);
+                return (
+                  <AchievementSection
+                    key={section.key}
+                    category="collection"
+                    subcategory={section.key}
+                    title={section.title}
+                    sectionKey={sectionKey}
+                    achievements={achievements}
+                    completion={completion}
+                    isOpen={openSections[sectionKey]}
+                    onToggle={() => toggleSection(sectionKey)}
+                    onToggleAchievement={(id) => toggleAchievement("collection", id)}
+                    getCompletionColor={getCompletionColor}
+                  />
+                );
+              })}
             </div>
           </div>
         </TabsContent>
