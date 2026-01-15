@@ -85,6 +85,11 @@ function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements
     }
   }
 
+  // If saved data is empty, re-initialize from template
+  if (totalSaved === 0) {
+    return true;
+  }
+
   // If less than 50% of achievements match by ID, the data structure has changed too much - reset
   const matchRatio = totalMatches / totalSaved;
   if (matchRatio < 0.5) {
@@ -96,32 +101,23 @@ function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements
 }
 
 // Helper function to merge saved achievements with template data
+// Keeps template as source of truth for titles/points/order
+// Keeps saved data as source of truth for completion + completedDate
+// Automatically includes new achievements from the template
 function mergeAchievementsWithTemplate(saved: Achievements, template: Achievements): Achievements {
-  const categories: (keyof Achievements)[] = ['skill', 'social', 'collection'];
+  const categories: (keyof Achievements)[] = ["skill", "social", "collection"];
 
-  // For now, always use template data to ensure correct organization
-  console.log('Using template data to ensure correct achievement organization.');
-  return template;
-
-  // Normal merge for compatible data
-  const merged: Achievements = {
-    skill: [],
-    social: [],
-    collection: []
-  };
+  const merged: Achievements = { skill: [], social: [], collection: [] };
 
   for (const category of categories) {
-    merged[category] = saved[category].map(savedAchievement => {
-      const templateAchievement = template[category].find(a => a.id === savedAchievement.id);
-      if (templateAchievement) {
-        // Merge saved data with template data, preserving completion status
-        return {
-          ...templateAchievement,
-          isCompleted: savedAchievement.isCompleted,
-          completedDate: savedAchievement.completedDate
-        };
-      }
-      return savedAchievement;
+    merged[category] = template[category].map((templateAchievement) => {
+      const savedAchievement = saved[category]?.find((a) => a.id === templateAchievement.id);
+
+      return {
+        ...templateAchievement,
+        isCompleted: savedAchievement?.isCompleted ?? false,
+        completedDate: savedAchievement?.completedDate,
+      };
     });
   }
 
@@ -152,8 +148,15 @@ export function useAchievements(initialAchievements?: Achievements) {
           const data = userDoc.data();
           const savedAchievements = data.achievements;
 
+          // Check if user has any saved achievements in any category
+          const hasAnySaved =
+            savedAchievements &&
+            (savedAchievements.skill?.length > 0 ||
+             savedAchievements.social?.length > 0 ||
+             savedAchievements.collection?.length > 0);
+
           // If user has saved achievements, use them; otherwise initialize with defaults
-          if (savedAchievements && savedAchievements.skill?.length > 0) {
+          if (hasAnySaved) {
             // Check if the saved data has duplicate IDs (our bug from before)
             const skillIds = savedAchievements.skill.map((a: Achievement) => a.id);
             const hasDuplicateIds = skillIds.length !== new Set(skillIds).size;
@@ -161,9 +164,9 @@ export function useAchievements(initialAchievements?: Achievements) {
             if (hasDuplicateIds) {
               // Reset to defaults if duplicate IDs found
               const achievementsToSave = initialAchievements || defaultAchievements;
-              await setDoc(userDocRef, {
+              await updateDoc(userDocRef, {
                 achievements: achievementsToSave,
-                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
               });
               setAchievements(achievementsToSave);
             } else {
@@ -172,9 +175,9 @@ export function useAchievements(initialAchievements?: Achievements) {
               // Always merge to ensure template order is used (important for achievement ordering)
               const updatedAchievements = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
               if (needsUpdate) {
-                await setDoc(userDocRef, {
+                await updateDoc(userDocRef, {
                   achievements: updatedAchievements,
-                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
                 });
               }
               setAchievements(updatedAchievements);
@@ -182,9 +185,9 @@ export function useAchievements(initialAchievements?: Achievements) {
           } else {
             // Initialize with default achievements if provided, otherwise empty
             const achievementsToSave = initialAchievements || defaultAchievements;
-            await setDoc(userDocRef, {
+            await updateDoc(userDocRef, {
               achievements: achievementsToSave,
-              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
             });
             setAchievements(achievementsToSave);
           }
@@ -248,6 +251,9 @@ export function useAchievements(initialAchievements?: Achievements) {
   ) => {
     if (!user) return;
 
+    // Snapshot current state before making changes
+    const prev = achievements;
+
     const updatedAchievements = {
       ...achievements,
       [category]: achievements[category].map(achievement =>
@@ -255,7 +261,7 @@ export function useAchievements(initialAchievements?: Achievements) {
           ? {
               ...achievement,
               isCompleted: !achievement.isCompleted,
-              completedDate: !achievement.isCompleted ? new Date().toISOString() : null
+              completedDate: !achievement.isCompleted ? new Date().toISOString() : undefined
             }
           : achievement
       )
@@ -268,9 +274,9 @@ export function useAchievements(initialAchievements?: Achievements) {
     try {
       await saveAchievements(updatedAchievements);
     } catch (error) {
-      // If save fails, revert the local state change
+      // If save fails, revert to the snapshot we took before making changes
       console.error("Failed to save achievement:", error);
-      setAchievements(achievements);
+      setAchievements(prev);
     }
   };
 
