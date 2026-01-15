@@ -169,16 +169,15 @@ export function useAchievements(initialAchievements?: Achievements) {
             } else {
               // Check if achievements need updating (points/rarity or complete restructure)
               const needsUpdate = checkAchievementsNeedUpdate(savedAchievements, initialAchievements || defaultAchievements);
+              // Always merge to ensure template order is used (important for achievement ordering)
+              const updatedAchievements = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
               if (needsUpdate) {
-                const updatedAchievements = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
                 await setDoc(userDocRef, {
                   achievements: updatedAchievements,
                   createdAt: new Date().toISOString(),
                 });
-                setAchievements(updatedAchievements);
-              } else {
-                setAchievements(savedAchievements);
               }
+              setAchievements(updatedAchievements);
             }
           } else {
             // Initialize with default achievements if provided, otherwise empty

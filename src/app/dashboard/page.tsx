@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AchievementCard } from "@/components/achievements/achievement-card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
-import { ProgressRing } from "@/components/ui/progress-ring";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -13,1297 +12,61 @@ import { useAchievements, type Achievement, type Achievements } from "@/lib/useA
 import { useAuth } from "@/lib/firebase-auth";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ACHIEVEMENTS_CATALOG } from "@/data/achievements";
+import { StatsHeader } from "@/components/dashboard/stats-header";
 
-// Sample achievements data with points system (we'll replace this with real data later)
-const sampleAchievements: Achievements = {
+// Rank system - similar to video game ranking
+const RANK_TIERS = [
+  { name: "Beginner", minPoints: 0, color: "from-gray-400 to-gray-600" },
+  { name: "Novice", minPoints: 100, color: "from-green-400 to-green-600" },
+  { name: "Intermediate", minPoints: 300, color: "from-blue-400 to-blue-600" },
+  { name: "Advanced", minPoints: 600, color: "from-purple-400 to-purple-600" },
+  { name: "Expert", minPoints: 1000, color: "from-orange-400 to-orange-600" },
+  { name: "Master", minPoints: 1500, color: "from-red-400 to-red-600" },
+  { name: "Legend", minPoints: 2500, color: "from-yellow-300 to-yellow-500" },
+] as const;
+
+// Section configuration for all achievement categories
+const SECTIONS = {
   skill: [
-    // PUTTING MASTERY
-    {
-      id: "skill-0",
-      title: "Practice Makes Perfect",
-      description: "Finish your first practice putting session",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 10,
-    },
-    {
-      id: "skill-1",
-      title: "Circle One Success",
-      description: "Make your first C1 putt (within 33 ft)",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 15,
-    },
-    {
-      id: "skill-2",
-      title: "Circle One Specialist",
-      description: "Make 3 C1 putts in a single round",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 25,
-      rarity: "rare",
-    },
-    {
-      id: "skill-3",
-      title: "Long Range Sniper",
-      description: "Make your first C2 putt (33-66 ft)",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "skill-4",
-      title: "Distance Demon",
-      description: "Make 3 C2 putts in a single round",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "skill-5",
-      title: "Chain Reaction",
-      description: "Make 5 consecutive putts in a round",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-6",
-      title: "Straddle Star",
-      description: "Make 3 straddle putts in one round",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "skill-7",
-      title: "Jump Putt Pro",
-      description: "Make a jump putt from outside circle 1",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-8",
-      title: "Spin Doctor",
-      description: "Make a putt outside 15 feet, using the turbo putt technique",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-9",
-      title: "Three-Point Shot",
-      description: "Make a putt outside 15 feet, using the Vinnie basketball technique",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-11",
-      title: "Scooby Snack",
-      description: "Make a putt outside 15 feet, using the scoober technique",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-10",
-      title: "Money Shot",
-      description: "Make your first throw in from 66+ ft (not off the tee shot)",
-      category: "skill",
-      subcategory: "puttingMastery",
-      isCompleted: false,
-      points: 150,
-    },
-
-    // DISTANCE CONTROL
-    {
-      id: "skill-12",
-      title: "Noodle Arm",
-      description: "Record your first throw over 100 ft",
-      category: "skill",
-      subcategory: "distanceControl",
-      isCompleted: false,
-      points: 25,
-    },
-    {
-      id: "skill-13",
-      title: "Growing Pains",
-      description: "Record your first throw over 200 ft",
-      category: "skill",
-      subcategory: "distanceControl",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "skill-14",
-      title: "Big Arm Energy",
-      description: "Record your first throw over 300 ft",
-      category: "skill",
-      subcategory: "distanceControl",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "skill-15",
-      title: "Cannon Arm",
-      description: "Record your first throw over 400 ft",
-      category: "skill",
-      subcategory: "distanceControl",
-      isCompleted: false,
-      points: 200,
-    },
-    {
-      id: "skill-16",
-      title: "Crush Boy",
-      description: "Record your first throw over 500+ ft",
-      category: "skill",
-      subcategory: "distanceControl",
-      isCompleted: false,
-      points: 250,
-    },
-    {
-      id: "skill-17",
-      title: "Precision Landing",
-      description: "Park your first hole off a drive (landing within 11 ft)",
-      category: "skill",
-      subcategory: "distanceControl",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "skill-18",
-      title: "Parking Attendant",
-      description: "Park 3 holes in one round",
-      category: "skill",
-      subcategory: "distanceControl",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "skill-19",
-      title: "Distance Control",
-      description: "Land within 20 feet of target on 3 consecutive holes",
-      category: "skill",
-      subcategory: "distanceControl",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-20",
-      title: "Wind Warrior",
-      description: "Successfully birdie a hole in 20+ mph winds",
-      category: "skill",
-      subcategory: "distanceControl",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-21",
-      title: "Hyzer Flip Hero",
-      description: "Execute a hyzer flip that lands withing 11 ft of the pin",
-      category: "skill",
-      subcategory: "distanceControl",
-      isCompleted: false,
-      points: 75,
-    },
-
-    // SPECIALTY SHOTS
-    {
-      id: "skill-22",
-      title: "Thumbs Up",
-      description: "Birdie a hole while throwing a thumber off tee",
-      category: "skill",
-      subcategory: "specialtyShots",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-23",
-      title: "Grenade Launcher",
-      description: "Birdie while throwing a grenade off tee",
-      category: "skill",
-      subcategory: "specialtyShots",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-24",
-      title: "Tomahawk Triumph",
-      description: "Birdie with a tomahawk off tee",
-      category: "skill",
-      subcategory: "specialtyShots",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-25",
-      title: "Rolling Thunder",
-      description: "Birdie with a roller off tee",
-      category: "skill",
-      subcategory: "specialtyShots",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-26",
-      title: "Water Walker",
-      description: "Birdie while skipping a disc off the water off the tee",
-      category: "skill",
-      subcategory: "specialtyShots",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "skill-27",
-      title: "Roller Derby",
-      description: "Execute a roller shot that stays inbounds.",
-      category: "skill",
-      subcategory: "specialtyShots",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "skill-28",
-      title: "Scramble Master",
-      description: "Save par from 3 different lies off the fairway in one round",
-      category: "skill",
-      subcategory: "specialtyShots",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-29",
-      title: "Thumber",
-      description: "Execute a successful thumber shot that stays inbounds.",
-      category: "skill",
-      subcategory: "specialtyShots",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "skill-30",
-      title: "Forehand Finesse",
-      description: "Execute a successful forehand shot that stays inbounds.",
-      category: "skill",
-      subcategory: "specialtyShots",
-      isCompleted: false,
-      points: 25,
-    },
-    {
-      id: "skill-31",
-      title: "Flex Master",
-      description: "Execute a successful flex shot that stays inbounds.",
-      category: "skill",
-      subcategory: "specialtyShots",
-      isCompleted: false,
-      points: 25,
-    },
-
-    // SCORING ACHIEVEMENTS
-    {
-      id: "skill-32",
-      title: "First Par",
-      description: "Card your first par",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 25,
-    },
-    {
-      id: "skill-33",
-      title: "Birdie Breakthrough",
-      description: "Score your first birdie",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "skill-33a",
-      title: "Par 4 Breakthrough",
-      description: "Birdie your first par 4 hole",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "skill-33b",
-      title: "Par 5 Breakthrough",
-      description: "Birdie your first par 5 hole",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-34",
-      title: "Eagle Eye",
-      description: "Score your first eagle",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "skill-35",
-      title: "Ace Race",
-      description: "Hit your first ace (hole in one)",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 500,
-      rarity: "rare",
-    },
-    {
-      id: "skill-36",
-      title: "Albatross Alert",
-      description: "Card your first albatross",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 250,
-      rarity: "epic",
-    },
-    {
-      id: "skill-37",
-      title: "Bird Watching",
-      description: "Record your first turkey (3 birdies in a row)",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "skill-38",
-      title: "Under Achiever",
-      description: "Score under par at a course",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "skill-39",
-      title: "Disc Golf Domination",
-      description: "Go double digits under par",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "skill-40",
-      title: "Zero Mistakes",
-      description: "Record a perfect round (birdied every hole)",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 250,
-    },
-    {
-      id: "skill-41",
-      title: "Damage Control",
-      description: "Save par after a bad drive (going OB)",
-      category: "skill",
-      subcategory: "scoringAchievements",
-      isCompleted: false,
-      points: 50,
-    }
+    { key: "puttingMastery", title: "Putting Mastery" },
+    { key: "distanceControl", title: "Distance Control" },
+    { key: "specialtyShots", title: "Specialty Shots" },
+    { key: "scoringAchievements", title: "Scoring Achievements" },
   ],
   social: [
-    // COMMUNITY ENGAGEMENT
-    {
-      id: "social-0",
-      title: "League Night Rookie",
-      description: "Participate in your first league night",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-1",
-      title: "Club Member",
-      description: "Join your local disc golf club",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 75,
-      rarity: "epic",
-    },
-    {
-      id: "social-2",
-      title: "Course Steward",
-      description: "Help maintain or improve a local course",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "social-3",
-      title: "Cleanup Crew",
-      description: "Participate in three course cleanup events",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "social-4",
-      title: "Tree Guardian",
-      description: "Help plant trees, or maintain landscaping at a course",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "social-5",
-      title: "PDGA Official",
-      description: "Purchase a PDGA membership and receive your player number",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 200,
-    },
-    {
-      id: "social-6",
-      title: "Group Player",
-      description: "Play a round with three or more people",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-7",
-      title: "Social Butterfly",
-      description: "Play with 10 different people",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "social-8",
-      title: "Disc Trader",
-      description: "Participate in your first disc swap event in person or online",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-9",
-      title: "Disc Golf Buddy",
-      description: "Play five rounds with the same person",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 25,
-    },
-    {
-      id: "social-10",
-      title: "Regular Partner",
-      description: "Play 10 rounds with the same person",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-11",
-      title: "Dedicated Duo",
-      description: "Play 25 rounds with the same person",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "social-12",
-      title: "Dynamic Partnership",
-      description: "Play 50 rounds with the same person",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "social-13",
-      title: "Disc Golf Soulmates",
-      description: "Play 100 rounds with the same person",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 200,
-    },
-    {
-      id: "social-14",
-      title: "Pro Connection",
-      description: "Meet a professional disc golfer",
-      category: "social",
-      subcategory: "communityEngagement",
-      isCompleted: false,
-      points: 75,
-    },
-
-    // TEACHING & LEADERSHIP
-    {
-      id: "social-15",
-      title: "Disc Golf Mentor",
-      description: "Teach someone how to play disc golf",
-      category: "social",
-      subcategory: "teachingLeadership",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-16",
-      title: "Local Guide",
-      description: "Show a new player around your local course",
-      category: "social",
-      subcategory: "teachingLeadership",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-17",
-      title: "Youth Mentor",
-      description: "Coach youth players in disc golf",
-      category: "social",
-      subcategory: "teachingLeadership",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "social-18",
-      title: "School Program",
-      description: "Help introduce disc golf to a school program",
-      category: "social",
-      subcategory: "teachingLeadership",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "social-19",
-      title: "Next Generation",
-      description: "Donate discs to youth programs or schools",
-      category: "social",
-      subcategory: "teachingLeadership",
-      isCompleted: false,
-      points: 200,
-    },
-    {
-      id: "social-20",
-      title: "League Commissioner",
-      description: "Organize a league",
-      category: "social",
-      subcategory: "teachingLeadership",
-      isCompleted: false,
-      points: 250,
-    },
-    {
-      id: "social-21",
-      title: "Club Board Member",
-      description: "Serve on a local disc golf club board",
-      category: "social",
-      subcategory: "teachingLeadership",
-      isCompleted: false,
-      points: 500,
-    },
-
-    // COMPETITION & EVENTS
-    {
-      id: "social-22",
-      title: "Tournament First Timer",
-      description: "Play in your first tournament",
-      category: "social",
-      subcategory: "competitionEvents",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-23",
-      title: "Scorekeeper",
-      description: "Keep score for a tournament card",
-      category: "social",
-      subcategory: "competitionEvents",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "social-24",
-      title: "Spotter",
-      description: "Volunteer as a spotter in a tournament",
-      category: "social",
-      subcategory: "competitionEvents",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "social-25",
-      title: "Registration Desk",
-      description: "Help run a tournament registration/check-in",
-      category: "social",
-      subcategory: "competitionEvents",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "social-26",
-      title: "Victory Lap",
-      description: "Place on the podium at a league night",
-      category: "social",
-      subcategory: "competitionEvents",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "social-27",
-      title: "Division Champ",
-      description: "Win your division in a tournament",
-      category: "social",
-      subcategory: "competitionEvents",
-      isCompleted: false,
-      points: 200,
-    },
-    {
-      id: "social-28",
-      title: "Dynamic Duo",
-      description: "Participate in a doubles tournament",
-      category: "social",
-      subcategory: "competitionEvents",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-29",
-      title: "Tournament Director",
-      description: "Direct or help direct a tournament",
-      category: "social",
-      subcategory: "competitionEvents",
-      isCompleted: false,
-      points: 250,
-    },
-    {
-      id: "social-30",
-      title: "Ace Hunter",
-      description: "Participate in an ace race event",
-      category: "social",
-      subcategory: "competitionEvents",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "social-31",
-      title: "Night Owl",
-      description: "Play a glow round",
-      category: "social",
-      subcategory: "competitionEvents",
-      isCompleted: false,
-      points: 50,
-    },
-
-    // MEDIA & CONTENT
-    {
-      id: "social-32",
-      title: "Course Critic",
-      description: "Review a course on UDisc or a similar platform",
-      category: "social",
-      subcategory: "mediaContent",
-      isCompleted: false,
-      points: 10,
-    },
-    {
-      id: "social-33",
-      title: "Content Creator",
-      description: "Create disc golf content for others",
-      category: "social",
-      subcategory: "mediaContent",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-34",
-      title: "Pro Tour Fan",
-      description: "Start watching day-later content of the pro tour on JomezPro or another channel",
-      category: "social",
-      subcategory: "mediaContent",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-35",
-      title: "Live Coverage Enthusiast",
-      description: "Purchase a DGN subscription to watch live pro tour coverage",
-      category: "social",
-      subcategory: "mediaContent",
-      isCompleted: false,
-      points: 150,
-    },
-
-    // GOOD SAMARITAN
-    {
-      id: "social-36",
-      title: "Lost and Found",
-      description: "Return your first lost disc to its owner",
-      category: "social",
-      subcategory: "goodSamaritan",
-      isCompleted: false,
-      points: 25,
-    },
-    {
-      id: "social-37",
-      title: "Disc Detective",
-      description: "Return 5 discs to their owners",
-      category: "social",
-      subcategory: "goodSamaritan",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "social-38",
-      title: "Disc Guardian",
-      description: "Return 10 discs to their owners",
-      category: "social",
-      subcategory: "goodSamaritan",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "social-39",
-      title: "Disc Recovery Expert",
-      description: "Return 25 discs to their owners",
-      category: "social",
-      subcategory: "goodSamaritan",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "social-40",
-      title: "Disc Return Legend",
-      description: "Return 50+ discs to their owners",
-      category: "social",
-      subcategory: "goodSamaritan",
-      isCompleted: false,
-      points: 200,
-    }
+    { key: "communityEngagement", title: "Community Engagement" },
+    { key: "teachingLeadership", title: "Teaching & Leadership" },
+    { key: "competitionEvents", title: "Competition & Events" },
+    { key: "mediaContent", title: "Media & Content" },
+    { key: "goodSamaritan", title: "Good Samaritan" },
   ],
   collection: [
-    // DISC ESSENTIALS (0-20)
-    {
-      id: "collection-0",
-      title: "First Disc",
-      description: "Purchase your first disc",
-      category: "collection",
-      subcategory: "discEssentials",
-      isCompleted: false,
-      points: 25,
-    },
-    {
-      id: "collection-1",
-      title: "Putting Pioneer",
-      description: "Add your first putter to your collection",
-      
-      category: "collection",
-      subcategory: "discEssentials",
-      isCompleted: false,
-      points: 10,
-      rarity: "rare",
-    },
-    {
-      id: "collection-2",
-      title: "Mid Range Master",
-      description: "Add your first midrange disc to your collection",
-      
-      category: "collection",
-      subcategory: "discEssentials",
-      isCompleted: false,
-      points: 10,
-    },
-    {
-      id: "collection-3",
-      title: "Distance Driver",
-      description: "Add your first distance driver to your collection",
-      
-      category: "collection",
-      subcategory: "discEssentials",
-      isCompleted: false,
-      points: 10,
-    },
-    {
-      id: "collection-4",
-      title: "Mini Marker",
-      description: "Get your first mini marker",
-      
-      category: "collection",
-      subcategory: "discEssentials",
-      isCompleted: false,
-      points: 25,
-    },
-    {
-      id: "collection-5",
-      title: "Disc Carrier",
-      description: "Get your first disc golf bag or satchel",
-      
-      category: "collection",
-      subcategory: "discEssentials",
-      isCompleted: false,
-      points: 75,
-    },
-
-    // DISC MILESTONES (6-16)
-    {
-      id: "collection-6",
-      title: "Starting Five",
-      description: "Own five different discs",
-      
-      category: "collection",
-      subcategory: "discMilestones",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-7",
-      title: "Double Digits",
-      description: "Own 10 different discs",
-      
-      category: "collection",
-      subcategory: "discMilestones",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "collection-8",
-      title: "Disc Enthusiast",
-      description: "Own 25 different discs",
-      
-      category: "collection",
-      subcategory: "discMilestones",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "collection-9",
-      title: "Disc Collector",
-      description: "Own 50 different discs",
-      
-      category: "collection",
-      subcategory: "discMilestones",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "collection-10",
-      title: "Century Club",
-      description: "Own 100 different discs",
-      
-      category: "collection",
-      subcategory: "discMilestones",
-      isCompleted: false,
-      points: 200,
-    },
-    {
-      id: "collection-11",
-      title: "Brand Explorer",
-      description: "Own discs from 5 different manufacturers",
-      
-      category: "collection",
-      subcategory: "discMilestones",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-12",
-      title: "Plastic Connoisseur",
-      description: "Own discs in 5 different plastic types",
-      
-      category: "collection",
-      subcategory: "discMilestones",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-13",
-      title: "Collecting Dust",
-      description: "Own five different discs that you never use",
-      
-      category: "collection",
-      subcategory: "discMilestones",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-14",
-      title: "Aspirational Purchase",
-      description: "Buy a disc that's way too fast for your arm speed",
-      
-      category: "collection",
-      subcategory: "discMilestones",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-15",
-      title: "Glow Getter",
-      description: "Add a glow-in-the-dark disc to your collection",
-      
-      category: "collection",
-      subcategory: "discMilestones",
-      isCompleted: false,
-      points: 50,
-    },
-
-    // EQUIPMENT & ACCESSORIES (16-21)
-    {
-      id: "collection-50",
-      title: "Towel Time",
-      description: "Get your first disc golf towel",
-      
-      category: "collection",
-      subcategory: "equipmentAccessories",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-51",
-      title: "Grip Enhancement",
-      description: "Get your first whale sack or other equivalent chalk bag",
-      
-      category: "collection",
-      subcategory: "equipmentAccessories",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-16",
-      title: "Bag Upgrade",
-      description: "Upgrade to a larger/better disc golf bag",
-      
-      category: "collection",
-      subcategory: "equipmentAccessories",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "collection-17",
-      title: "Cart Commander",
-      description: "Purchase a disc golf cart",
-      
-      category: "collection",
-      subcategory: "equipmentAccessories",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "collection-52",
-      title: "Rescue Ready",
-      description: "Get your first disc retriever",
-      
-      category: "collection",
-      subcategory: "equipmentAccessories",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "collection-53",
-      title: "Practice Setup",
-      description: "Purchase a practice basket",
-      
-      category: "collection",
-      subcategory: "equipmentAccessories",
-      isCompleted: false,
-      points: 100,
-    },
-
-    // SPECIAL DISCS (21-34)
-    {
-      id: "collection-18",
-      title: "Tour Series",
-      description: "Purchase a tour series disc",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "collection-19",
-      title: "Signature Series",
-      description: "Purchase a signature series disc",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "collection-20",
-      title: "First Run",
-      description: "Purchase a first run disc",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "collection-21",
-      title: "Limited Release",
-      description: "Purchase a limited/special edition disc",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "collection-22",
-      title: "Pro Support",
-      description: "Purchase a tour series disc",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-23",
-      title: "Custom Art",
-      description: "Purchase a disc with a custom stamp",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "collection-24",
-      title: "Tournament Treasure",
-      description: "Get a disc from a tournament",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-25",
-      title: "Pro Signature",
-      description: "Get a disc signed by a professional",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "collection-26",
-      title: "Personal Touch",
-      description: "Design your own custom stamp",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "collection-27",
-      title: "Dye Artist",
-      description: "Dye your first disc",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 75,
-    },
-    {
-      id: "collection-28",
-      title: "Dye Merchant",
-      description: "Sell a dyed disc",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "collection-30",
-      title: "Vintage Collector",
-      description: "Own a disc that's over 20 years old",
-      
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 150,
-    },
-
-    // COURSE EXPLORER (34-42)
-    {
-      id: "collection-31",
-      title: "Course Explorer",
-      description: "Play 5 different courses",
-      
-      category: "collection",
-      subcategory: "courseExplorer",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-32",
-      title: "Course Adventurer",
-      description: "Play 10 different courses",
-      
-      category: "collection",
-      subcategory: "courseExplorer",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "collection-33",
-      title: "Course Conqueror",
-      description: "Play 25 different courses",
-      
-      category: "collection",
-      subcategory: "courseExplorer",
-      isCompleted: false,
-      points: 150,
-    },
-    {
-      id: "collection-34",
-      title: "Course Legend",
-      description: "Play 50 different courses",
-      
-      category: "collection",
-      subcategory: "courseExplorer",
-      isCompleted: false,
-      points: 300,
-    },
-    {
-      id: "collection-35",
-      title: "Course Explorer",
-      description: "Play 100+ different courses",
-      
-      category: "collection",
-      subcategory: "courseExplorer",
-      isCompleted: false,
-      points: 500,
-    },
-    {
-      id: "collection-36",
-      title: "State's Best",
-      description: "Play the #1 rated course in your state",
-      
-      category: "collection",
-      subcategory: "courseExplorer",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "collection-37",
-      title: "Top of the State",
-      description: "Play the top 5 courses in your state",
-      
-      category: "collection",
-      subcategory: "courseExplorer",
-      isCompleted: false,
-      points: 250,
-    },
-    {
-      id: "collection-38",
-      title: "National Treasure",
-      description: "Play the #1 rated course in the country",
-      
-      category: "collection",
-      subcategory: "courseExplorer",
-      isCompleted: false,
-      points: 250,
-    },
-
-    // ROUND MILESTONES (42-48)
-    {
-      id: "collection-39",
-      title: "First Round",
-      description: "Complete your first round of disc golf",
-      
-      category: "collection",
-      subcategory: "roundMilestones",
-      isCompleted: false,
-      points: 10,
-    },
-    {
-      id: "collection-40",
-      title: "Dedicated Player",
-      description: "Play 10 rounds of disc golf",
-      
-      category: "collection",
-      subcategory: "roundMilestones",
-      isCompleted: false,
-      points: 25,
-    },
-    {
-      id: "collection-41",
-      title: "Experienced Player",
-      description: "Play 50 rounds of disc golf",
-      
-      category: "collection",
-      subcategory: "roundMilestones",
-      isCompleted: false,
-      points: 50,
-    },
-    {
-      id: "collection-42",
-      title: "Seasoned Veteran",
-      description: "Play 100 rounds of disc golf",
-      
-      category: "collection",
-      subcategory: "roundMilestones",
-      isCompleted: false,
-      points: 100,
-    },
-    {
-      id: "collection-43",
-      title: "Veteran Player",
-      description: "Play 250 rounds of disc golf",
-      
-      category: "collection",
-      subcategory: "roundMilestones",
-      isCompleted: false,
-      points: 250,
-    },
-    {
-      id: "collection-44",
-      title: "Elite Player",
-      description: "Play 500+ rounds of disc golf",
-      
-      category: "collection",
-      subcategory: "roundMilestones",
-      isCompleted: false,
-      points: 500,
-    }
-  ]
-};
+    { key: "discEssentials", title: "Disc Essentials" },
+    { key: "discMilestones", title: "Disc Collection Milestones" },
+    { key: "equipmentAccessories", title: "Equipment & Accessories" },
+    { key: "specialDiscs", title: "Special Discs" },
+    { key: "courseExplorer", title: "Course Explorer" },
+    { key: "roundMilestones", title: "Round Milestones" },
+  ],
+} as const;
 
 export default function DashboardPage() {
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
-  const { achievements, loading: achievementsLoading, toggleAchievement } = useAchievements(sampleAchievements);
-  const [openSections, setOpenSections] = useState({
+  const { achievements, loading: achievementsLoading, toggleAchievement } = useAchievements(ACHIEVEMENTS_CATALOG);
+  // Load saved state from localStorage on mount
+  const getInitialOpenSections = () => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('achievementOpenSections');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Error parsing saved openSections:', e);
+        }
+      }
+    }
+    return {
     puttingMastery: false,
     distanceControl: false,
     scoringAchievements: false,
@@ -1313,18 +76,43 @@ export default function DashboardPage() {
     competitionEvents: false,
     mediaContent: false,
     goodSamaritan: false,
-    discEssentials: false,
-    discMilestones: false,
-    equipmentAccessories: false,
+    discEssentials: true,
+    discMilestones: true,
+    equipmentAccessories: true,
     specialDiscs: false,
     courseExplorer: false,
     roundMilestones: false
-  });
+    };
+  };
 
-  // Use achievements from Firebase, or fallback to sample if not loaded yet
-  const currentAchievements = (achievements && achievements.skill.length > 0 && achievements.social.length > 0 && achievements.collection.length > 0)
-    ? achievements
-    : sampleAchievements;
+  const getInitialActiveTab = () => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('achievementActiveTab');
+      return saved || 'skill';
+    }
+    return 'skill';
+  };
+
+  const [openSections, setOpenSections] = useState(getInitialOpenSections);
+  const [activeTab, setActiveTab] = useState(getInitialActiveTab);
+
+  // Save openSections to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('achievementOpenSections', JSON.stringify(openSections));
+    }
+  }, [openSections]);
+
+  // Save activeTab to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('achievementActiveTab', activeTab);
+    }
+  }, [activeTab]);
+
+  // Use achievements from Firebase, or fallback to catalog if not loaded yet
+  // Only fallback if achievements is null/undefined, not if arrays are empty
+  const currentAchievements: Achievements = achievements ?? ACHIEVEMENTS_CATALOG;
 
   // Show loading state
   if (authLoading || achievementsLoading) {
@@ -1351,15 +139,66 @@ export default function DashboardPage() {
   }
 
   const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections(prev => ({
+    setOpenSections((prev: typeof openSections) => ({
       ...prev,
       [section]: !prev[section]
     }));
   };
 
+  // Reusable AchievementSection component
+  const AchievementSection = ({
+    category,
+    subcategory,
+    title,
+  }: {
+    category: keyof Achievements;
+    subcategory: string;
+    title: string;
+  }) => {
+    const sectionKey = subcategory as keyof typeof openSections;
+    const achievements = getCategoryAchievements(category, subcategory);
+    const completion = getCategoryCompletion(achievements);
+
+    return (
+      <Collapsible open={openSections[sectionKey]}>
+        <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
+          <button
+            type="button"
+            onClick={() => toggleSection(sectionKey)}
+            className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
+            style={{ outline: "none", border: "none", background: "none" }}
+          >
+            <div>
+              <h2 className="text-2xl font-bold text-white">{title}</h2>
+              <span className={cn(
+                "text-sm font-semibold text-white",
+                getCompletionColor(completion)
+              )}>
+                ({Math.round(completion)}%)
+              </span>
+            </div>
+            <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections[sectionKey] ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+        <CollapsibleContent>
+          <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
+            {achievements.map((achievement) => (
+              <AchievementCard
+                key={achievement.id}
+                {...achievement}
+                onToggle={() => toggleAchievement(category, achievement.id)}
+              />
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  };
+
   // Calculate completion percentage for a specific set of achievements
   const getCategoryCompletion = (achievements: Achievement[]) => {
     const total = achievements.length;
+    if (total === 0) return 0;
     const completed = achievements.filter(a => a.isCompleted).length;
     return (completed / total) * 100;
   };
@@ -1367,14 +206,15 @@ export default function DashboardPage() {
   // Get achievements for a specific category and subcategory
   const getCategoryAchievements = (category: keyof Achievements, subcategory: string) => {
     // Filter by subcategory for all categories
-    const filtered = currentAchievements[category].filter(achievement => achievement.subcategory === subcategory);
-    return filtered;
+      const filtered = currentAchievements[category].filter(achievement => achievement.subcategory === subcategory);
+      return filtered;
   };
 
 
   // Calculate completion percentages for each category
   const getCompletionPercentage = (category: keyof Achievements) => {
     const totalAchievements = currentAchievements[category].length;
+    if (totalAchievements === 0) return 0;
     const completedAchievements = currentAchievements[category].filter(a => a.isCompleted).length;
     return (completedAchievements / totalAchievements) * 100;
   };
@@ -1393,31 +233,20 @@ export default function DashboardPage() {
 
   const totalPoints = getTotalPoints();
 
-  // Rank system - similar to video game ranking
-  const rankTiers = [
-    { name: "Beginner", minPoints: 0, color: "from-gray-400 to-gray-600" },
-    { name: "Novice", minPoints: 100, color: "from-green-400 to-green-600" },
-    { name: "Intermediate", minPoints: 300, color: "from-blue-400 to-blue-600" },
-    { name: "Advanced", minPoints: 600, color: "from-purple-400 to-purple-600" },
-    { name: "Expert", minPoints: 1000, color: "from-orange-400 to-orange-600" },
-    { name: "Master", minPoints: 1500, color: "from-red-400 to-red-600" },
-    { name: "Legend", minPoints: 2500, color: "from-yellow-300 to-yellow-500" },
-  ];
-
   const getCurrentRank = () => {
-    for (let i = rankTiers.length - 1; i >= 0; i--) {
-      if (totalPoints >= rankTiers[i].minPoints) {
-        return rankTiers[i];
+    for (let i = RANK_TIERS.length - 1; i >= 0; i--) {
+      if (totalPoints >= RANK_TIERS[i].minPoints) {
+        return RANK_TIERS[i];
       }
     }
-    return rankTiers[0];
+    return RANK_TIERS[0];
   };
 
   const getNextRank = () => {
     const currentRank = getCurrentRank();
-    const currentIndex = rankTiers.findIndex(r => r.name === currentRank.name);
-    if (currentIndex < rankTiers.length - 1) {
-      return rankTiers[currentIndex + 1];
+    const currentIndex = RANK_TIERS.findIndex(r => r.name === currentRank.name);
+    if (currentIndex < RANK_TIERS.length - 1) {
+      return RANK_TIERS[currentIndex + 1];
     }
     return null; // Already at max rank
   };
@@ -1460,8 +289,6 @@ export default function DashboardPage() {
 
   const currentStreak = getCurrentStreak();
 
-  // Check if category qualifies for patch
-  const qualifiesForPatch = (percentage: number) => percentage >= 80;
 
   const getProgressBackground = (value: number) => {
     let color;
@@ -1484,7 +311,7 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto py-4" data-gramm="false">
-      <Tabs defaultValue="skill" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-[100] border-b">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="skill">Skill</TabsTrigger>
@@ -1494,722 +321,71 @@ export default function DashboardPage() {
         </div>
 
         <TabsContent value="skill">
-          {/* Combined Stats Header with Progress Ring */}
-          <div className="sticky top-[100px] bg-background z-[100] border-b w-full">
-            <div className="flex flex-col w-full gap-0.5">
-              {/* Rank and Points/Days row */}
-              <div className="flex flex-col md:flex-row gap-1.5 md:gap-2 p-0.5 items-center justify-center">
-                {/* Rank Display - Responsive positioning */}
-                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-2 py-1 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
-                  <div className="text-xs font-semibold uppercase tracking-wide mb-0.5">Rank</div>
-                  <div className="text-base font-bold mb-0.5">{currentRank.name}</div>
-                  {nextRank ? (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span>Progress</span>
-                        <span>{Math.round(rankProgress)}%</span>
-                      </div>
-                      <div className="w-full bg-white/20 rounded-full h-2">
-                        <div 
-                          className={`bg-white rounded-full h-2 transition-all duration-300`}
-                          style={{ width: `${rankProgress}%` }}
-                        />
-                      </div>
-                      <div className="text-xs opacity-90">
-                        {nextRank.minPoints - totalPoints} pts to {nextRank.name}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-xs opacity-90">Max Rank! 🏆</div>
-                  )}
-                </div>
-                {/* Points and Days - Centered, aligned with progress ring */}
-                <div className="flex gap-1.5 md:gap-2 w-full md:w-auto justify-center">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
-                    <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
-                    <div className="text-lg font-bold">{totalPoints.toLocaleString()}</div>
-                  </div>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
-                    <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
-                    <div className="text-lg font-bold">{currentStreak}</div>
-                  </div>
-                </div>
-              </div>
-              {/* Progress Ring - Centered below Points/Days */}
-              <div className="flex items-center justify-center gap-1.5">
-                <ProgressRing percentage={skillCompletion} size={45} strokeWidth={4} />
-                <p className="text-sm text-muted-foreground">
-                  {qualifiesForPatch(skillCompletion)
-                    ? "Patch Unlocked! 🎉"
-                    : `${Math.round(80 - skillCompletion)}% to Patch`}
-                </p>
-              </div>
-            </div>
-          </div>
+          <StatsHeader
+            completionPercentage={skillCompletion}
+            totalPoints={totalPoints}
+            currentStreak={currentStreak}
+            currentRank={currentRank}
+            nextRank={nextRank}
+            rankProgress={rankProgress}
+          />
 
           <div className="mt-4">
             <div className="space-y-4">
-              {/* Putting Mastery Section with Sticky Header and Collapse Button Working */}
-              <Collapsible open={openSections.puttingMastery}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('puttingMastery')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Putting Mastery</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", "puttingMastery")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", "puttingMastery")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.puttingMastery ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("skill", "puttingMastery").map((achievement) => (
-                      <AchievementCard
-                        id={achievement.id}
-                        key={achievement.id}
-                        title={achievement.title}
-                        description={achievement.description}
-                        category={achievement.category}
-                        isCompleted={achievement.isCompleted}
-                        completedDate={achievement.completedDate}
-                        points={achievement.points}
-                        rarity={achievement.rarity ?? "common"}
-                        onToggle={() => toggleAchievement("skill", achievement.id)}
+              {SECTIONS.skill.map((section) => (
+                <AchievementSection
+                  key={section.key}
+                  category="skill"
+                  subcategory={section.key}
+                  title={section.title}
                       />
                     ))}
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-              {/* End Putting Mastery Section */}
-
-              {/* Distance Control Section */}
-              <Collapsible open={openSections.distanceControl}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('distanceControl')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Distance Control</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", "distanceControl")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", "distanceControl")))}%)
-                      </span>
                     </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.distanceControl ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("skill", "distanceControl").map((achievement) => (
-                      <AchievementCard
-                        id={achievement.id}
-                        key={achievement.id}
-                        title={achievement.title}
-                        description={achievement.description}
-                        category={achievement.category}
-                        isCompleted={achievement.isCompleted}
-                        completedDate={achievement.completedDate}
-                        points={achievement.points}
-                        rarity={achievement.rarity ?? "common"}
-                        onToggle={() => toggleAchievement("skill", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Specialty Shots Section */}
-              <Collapsible open={openSections.specialtyShots}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('specialtyShots')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Specialty Shots</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", "specialtyShots")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", "specialtyShots")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.specialtyShots ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("skill", "specialtyShots").map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("skill", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Scoring Achievements Section */}
-              <Collapsible open={openSections.scoringAchievements}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('scoringAchievements')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Scoring Achievements</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("skill", "scoringAchievements")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("skill", "scoringAchievements")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.scoringAchievements ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("skill", "scoringAchievements").map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("skill", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          </div>
         </TabsContent>
         <TabsContent value="social">
-          {/* Combined Stats Header with Progress Ring */}
-          <div className="sticky top-[100px] bg-background z-[100] border-b w-full">
-            <div className="flex flex-col w-full gap-0.5">
-              {/* Rank, Points and Days */}
-              <div className="flex flex-col md:flex-row gap-1.5 md:gap-2 p-0.5 items-center justify-center">
-                {/* Rank Display - Responsive positioning */}
-                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-2 py-1 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
-                  <div className="text-xs font-semibold uppercase tracking-wide mb-0.5">Rank</div>
-                  <div className="text-base font-bold mb-0.5">{currentRank.name}</div>
-                  {nextRank ? (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span>Progress</span>
-                        <span>{Math.round(rankProgress)}%</span>
-                      </div>
-                      <div className="w-full bg-white/20 rounded-full h-2">
-                        <div 
-                          className={`bg-white rounded-full h-2 transition-all duration-300`}
-                          style={{ width: `${rankProgress}%` }}
-                        />
-                      </div>
-                      <div className="text-xs opacity-90">
-                        {nextRank.minPoints - totalPoints} pts to {nextRank.name}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-xs opacity-90">Max Rank! 🏆</div>
-                  )}
-                </div>
-                {/* Points and Days - Centered */}
-                <div className="flex gap-1.5 md:gap-2 w-full md:w-auto justify-center">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
-                    <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
-                    <div className="text-lg font-bold">{totalPoints.toLocaleString()}</div>
-                  </div>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
-                    <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
-                    <div className="text-lg font-bold">{currentStreak}</div>
-                  </div>
-                </div>
-              </div>
-              {/* Progress Ring */}
-              <div className="flex items-center justify-center gap-1.5">
-                <ProgressRing percentage={socialCompletion} size={45} strokeWidth={4} />
-                <p className="text-sm text-muted-foreground">
-                  {qualifiesForPatch(socialCompletion)
-                    ? "Patch Unlocked! 🎉"
-                    : `${Math.round(80 - socialCompletion)}% to Patch`}
-                </p>
-              </div>
-            </div>
-          </div>
+          <StatsHeader
+            completionPercentage={socialCompletion}
+            totalPoints={totalPoints}
+            currentStreak={currentStreak}
+            currentRank={currentRank}
+            nextRank={nextRank}
+            rankProgress={rankProgress}
+          />
 
           <div className="mt-4">
             <div className="space-y-4">
-              {/* Community Engagement Section */}
-              <Collapsible open={openSections.communityEngagement}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('communityEngagement')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Community Engagement</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", "communityEngagement")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("social", "communityEngagement")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.communityEngagement ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("social", "communityEngagement").map((achievement) => (
-                      <AchievementCard
-                        id={achievement.id}
-                        key={achievement.id}
-                        title={achievement.title}
-                        description={achievement.description}
-                        category={achievement.category}
-                        isCompleted={achievement.isCompleted}
-                        completedDate={achievement.completedDate}
-                        points={achievement.points}
-                        rarity={achievement.rarity ?? "common"}
-                        onToggle={() => toggleAchievement("social", achievement.id)}
+              {SECTIONS.social.map((section) => (
+                <AchievementSection
+                  key={section.key}
+                  category="social"
+                  subcategory={section.key}
+                  title={section.title}
                       />
                     ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Teaching & Leadership Section */}
-              <Collapsible open={openSections.teachingLeadership}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('teachingLeadership')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Teaching & Leadership</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", "teachingLeadership")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("social", "teachingLeadership")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.teachingLeadership ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("social", "teachingLeadership").map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("social", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Competition & Events Section */}
-              <Collapsible open={openSections.competitionEvents}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('competitionEvents')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Competition & Events</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", "competitionEvents")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("social", "competitionEvents")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.competitionEvents ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("social", "competitionEvents").map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("social", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Media Content Section */}
-              <Collapsible open={openSections.mediaContent}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('mediaContent')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Media & Content</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", "mediaContent")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("social", "mediaContent")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.mediaContent ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("social", "mediaContent").map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("social", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Good Samaritan Section */}
-              <Collapsible open={openSections.goodSamaritan}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('goodSamaritan')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Good Samaritan</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("social", "goodSamaritan")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("social", "goodSamaritan")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.goodSamaritan ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("social", "goodSamaritan").map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("social", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           </div>
         </TabsContent>
         <TabsContent value="collection">
-          {/* Combined Stats Header with Progress Ring */}
-          <div className="sticky top-[100px] bg-background z-[100] border-b w-full">
-            <div className="flex flex-col w-full gap-0.5">
-              {/* Rank, Points and Days */}
-              <div className="flex flex-col md:flex-row gap-1.5 md:gap-2 p-0.5 items-center justify-center">
-                {/* Rank Display - Responsive positioning */}
-                <div className={`bg-gradient-to-r ${currentRank.color} text-white px-2 py-1 rounded-lg shadow-lg min-w-[140px] w-full md:w-auto md:ml-8`}>
-                  <div className="text-xs font-semibold uppercase tracking-wide mb-0.5">Rank</div>
-                  <div className="text-base font-bold mb-0.5">{currentRank.name}</div>
-                  {nextRank ? (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span>Progress</span>
-                        <span>{Math.round(rankProgress)}%</span>
-                      </div>
-                      <div className="w-full bg-white/20 rounded-full h-2">
-                        <div 
-                          className={`bg-white rounded-full h-2 transition-all duration-300`}
-                          style={{ width: `${rankProgress}%` }}
-                        />
-                      </div>
-                      <div className="text-xs opacity-90">
-                        {nextRank.minPoints - totalPoints} pts to {nextRank.name}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-xs opacity-90">Max Rank! 🏆</div>
-                  )}
-                </div>
-                {/* Points and Days - Centered */}
-                <div className="flex gap-1.5 md:gap-2 w-full md:w-auto justify-center">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
-                    <div className="text-xs font-semibold uppercase tracking-wide">Total Points</div>
-                    <div className="text-lg font-bold">{totalPoints.toLocaleString()}</div>
-                  </div>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-2 py-0.5 rounded-lg shadow-lg flex-1 md:flex-none">
-                    <div className="text-xs font-semibold uppercase tracking-wide">Active Days</div>
-                    <div className="text-lg font-bold">{currentStreak}</div>
-                  </div>
-                </div>
-              </div>
-              {/* Progress Ring */}
-              <div className="flex items-center justify-center gap-1.5">
-                <ProgressRing percentage={collectionCompletion} size={45} strokeWidth={4} />
-                <p className="text-sm text-muted-foreground">
-                  {qualifiesForPatch(collectionCompletion)
-                    ? "Patch Unlocked! 🎉"
-                    : `${Math.round(80 - collectionCompletion)}% to Patch`}
-                </p>
-              </div>
-            </div>
-          </div>
+          <StatsHeader
+            completionPercentage={collectionCompletion}
+            totalPoints={totalPoints}
+            currentStreak={currentStreak}
+            currentRank={currentRank}
+            nextRank={nextRank}
+            rankProgress={rankProgress}
+          />
 
           <div className="mt-4">
             <div className="space-y-4">
-              {/* Disc Essentials Section */}
-              <Collapsible open={openSections.discEssentials}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('discEssentials')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Disc Essentials</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", "discEssentials")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", "discEssentials")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.discEssentials ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("collection", "discEssentials").map((achievement) => (
-                      <AchievementCard
-                        id={achievement.id}
-                        key={achievement.id}
-                        title={achievement.title}
-                        description={achievement.description}
-                        category={achievement.category}
-                        isCompleted={achievement.isCompleted}
-                        completedDate={achievement.completedDate}
-                        points={achievement.points}
-                        rarity={achievement.rarity ?? "common"}
-                        onToggle={() => toggleAchievement("collection", achievement.id)}
+              {SECTIONS.collection.map((section) => (
+                <AchievementSection
+                  key={section.key}
+                  category="collection"
+                  subcategory={section.key}
+                  title={section.title}
                       />
                     ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Disc Collection Milestones Section */}
-              <Collapsible open={openSections.discMilestones}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('discMilestones')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Disc Collection Milestones</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", "discMilestones")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", "discMilestones")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.discMilestones ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("collection", "discMilestones").map((achievement) => (
-                      <AchievementCard
-                        id={achievement.id}
-                        key={achievement.id}
-                        title={achievement.title}
-                        description={achievement.description}
-                        category={achievement.category}
-                        isCompleted={achievement.isCompleted}
-                        completedDate={achievement.completedDate}
-                        points={achievement.points}
-                        rarity={achievement.rarity ?? "common"}
-                        onToggle={() => toggleAchievement("collection", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Equipment & Accessories Section */}
-              <Collapsible open={openSections.equipmentAccessories}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('equipmentAccessories')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Equipment & Accessories</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", "equipmentAccessories")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", "equipmentAccessories")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.equipmentAccessories ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("collection", "equipmentAccessories").map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("collection", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Special Discs Section */}
-              <Collapsible open={openSections.specialDiscs}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('specialDiscs')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Special Discs</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", "specialDiscs")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", "specialDiscs")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.specialDiscs ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("collection", "specialDiscs").map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("collection", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Course Explorer Section */}
-              <Collapsible open={openSections.courseExplorer}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('courseExplorer')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Course Explorer</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", "courseExplorer")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", "courseExplorer")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.courseExplorer ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("collection", "courseExplorer").map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("collection", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              {/* Round Milestones Section */}
-              <Collapsible open={openSections.roundMilestones}>
-                <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleSection('roundMilestones')}
-                    className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
-                    style={{ outline: "none", border: "none", background: "none" }}
-                  >
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">Round Milestones</h2>
-                      <span className={cn(
-                        "text-sm font-semibold text-white",
-                        getCompletionColor(getCategoryCompletion(getCategoryAchievements("collection", "roundMilestones")))
-                      )}>
-                        ({Math.round(getCategoryCompletion(getCategoryAchievements("collection", "roundMilestones")))}%)
-                      </span>
-                    </div>
-                    <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${openSections.roundMilestones ? 'rotate-180' : ''}`} />
-                  </button>
-                </div>
-                <CollapsibleContent>
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-                    {getCategoryAchievements("collection", "roundMilestones").map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        {...achievement}
-                        onToggle={() => toggleAchievement("collection", achievement.id)}
-                      />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           </div>
         </TabsContent>
