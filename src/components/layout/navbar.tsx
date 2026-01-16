@@ -62,7 +62,9 @@ export function Navbar() {
                   <DropdownMenuItem disabled>
                     {user.displayName || user.email}
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">Profile</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem>Settings</DropdownMenuItem>
                   <DropdownMenuItem 
                     className="text-red-600"

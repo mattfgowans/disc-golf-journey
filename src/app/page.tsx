@@ -1,22 +1,35 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+"use client";
+
+import { useAuth } from "@/lib/firebase-auth";
+import { SignInPanel } from "@/components/auth/sign-in-panel";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center">
-      <h1 className="text-4xl font-bold mb-6">Welcome to Disc Golf Journey</h1>
-      <p className="text-xl text-gray-600 mb-8 max-w-2xl">
-        Track your achievements, celebrate your progress, and become a better disc golfer.
-        From your first par to your hundredth ace, we're here to document your journey.
-      </p>
-      <div className="flex gap-4">
-        <Link href="/register">
-          <Button size="lg">Start Your Journey</Button>
-        </Link>
-        <Link href="/login">
-          <Button variant="outline" size="lg">Continue Journey</Button>
-        </Link>
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Redirect to dashboard if already signed in
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center">
+        <p className="text-gray-600">Loading...</p>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // If signed in, this won't render (redirects to dashboard)
+  // But keep it as a fallback
+  if (user) {
+    return null;
+  }
+
+  return <SignInPanel />;
 }

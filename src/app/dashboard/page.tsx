@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAchievements, type Achievement, type Achievements } from "@/lib/useAchievements";
-import { useAuth } from "@/lib/firebase-auth";
 import { Button } from "@/components/ui/button";
 import { ACHIEVEMENTS_CATALOG } from "@/data/achievements";
 import { StatsHeader } from "@/components/dashboard/stats-header";
 import { AchievementSection } from "@/components/dashboard/achievement-section";
+import { RequireAuth } from "@/components/auth/require-auth";
+import Link from "next/link";
+
+
 
 // TODO: Add achievement badges (rarity-based and achievement-specific)
 
@@ -77,35 +80,35 @@ function getDefaultOpenSections(): Record<SectionKey, boolean> {
   return defaults;
 }
 
-export default function DashboardPage() {
-  const { user, loading: authLoading, signInWithGoogle } = useAuth();
-  const { achievements, loading: achievementsLoading, toggleAchievement } = useAchievements(ACHIEVEMENTS_CATALOG);
-  // Load saved state from localStorage on mount
-  const getInitialOpenSections = (): Record<SectionKey, boolean> => {
-    const defaults = getDefaultOpenSections();
-    
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('achievementOpenSections');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          // Merge saved state with defaults to ensure new sections are included
-          return { ...defaults, ...parsed };
-        } catch (e) {
-          console.error('Error parsing saved openSections:', e);
-        }
+// Load saved state from localStorage on mount
+function getInitialOpenSections(): Record<SectionKey, boolean> {
+  const defaults = getDefaultOpenSections();
+  
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('achievementOpenSections');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Merge saved state with defaults to ensure new sections are included
+        return { ...defaults, ...parsed };
+      } catch (e) {
+        console.error('Error parsing saved openSections:', e);
       }
     }
-    return defaults;
-  };
+  }
+  return defaults;
+}
 
-  const getInitialActiveTab = () => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('achievementActiveTab');
-      return saved || 'skill';
-    }
-    return 'skill';
-  };
+function getInitialActiveTab(): string {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('achievementActiveTab');
+    return saved || 'skill';
+  }
+  return 'skill';
+}
+
+export default function DashboardPage() {
+  const { achievements, loading: achievementsLoading, toggleAchievement } = useAchievements(ACHIEVEMENTS_CATALOG);
 
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
@@ -140,8 +143,8 @@ export default function DashboardPage() {
   // Get achievements for a specific category and subcategory
   const getCategoryAchievements = (category: keyof Achievements, subcategory: string) => {
     // Filter by subcategory for all categories
-    const filtered = currentAchievements[category].filter(achievement => achievement.subcategory === subcategory);
-    return filtered;
+      const filtered = currentAchievements[category].filter(achievement => achievement.subcategory === subcategory);
+      return filtered;
   };
 
   const getCompletionColor = (value: number) => {
@@ -153,25 +156,10 @@ export default function DashboardPage() {
   };
 
   // Show loading state
-  if (authLoading || achievementsLoading) {
+  if (achievementsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <p>Loading...</p>
-      </div>
-    );
-  }
-
-  // Show sign-in prompt if not authenticated
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-        <h2 className="text-2xl font-bold mb-4">Sign in to track your achievements</h2>
-        <p className="text-gray-600 mb-6">
-          Sign in with Google to save your progress and track your disc golf journey.
-        </p>
-        <Button onClick={signInWithGoogle} size="lg">
-          Sign in with Google
-        </Button>
       </div>
     );
   }
@@ -223,12 +211,12 @@ export default function DashboardPage() {
     // Calculate progress
     let rankProgress = 100; // Default to max if at highest rank
     if (nextRank) {
-      const pointsInCurrentTier = totalPoints - currentRank.minPoints;
-      const pointsNeededForNext = nextRank.minPoints - currentRank.minPoints;
+    const pointsInCurrentTier = totalPoints - currentRank.minPoints;
+    const pointsNeededForNext = nextRank.minPoints - currentRank.minPoints;
       rankProgress = (pointsInCurrentTier / pointsNeededForNext) * 100;
       rankProgress = Math.min(100, Math.max(0, rankProgress));
     }
-
+    
     return { currentRank, nextRank, rankProgress };
   };
 
@@ -253,22 +241,17 @@ export default function DashboardPage() {
 
   const currentStreak = getCurrentStreak();
 
-
-  const getProgressBackground = (value: number) => {
-    let color;
-    if (value === 0) color = "rgb(156, 163, 175)";
-    else if (value <= 25) color = "rgb(239, 68, 68)";
-    else if (value <= 60) color = "rgb(234, 179, 8)";
-    else if (value <= 99) color = "rgb(22, 163, 74)";
-    else color = "rgb(59, 130, 246)";
-
-    return `linear-gradient(90deg, ${color} 0%, ${color} ${value}%, transparent ${value}%, transparent 100%)`;
-  };
-
   return (
-    <div className="container mx-auto py-4" data-gramm="false">
+    <RequireAuth title="Sign in to track your achievements" subtitle="Sign in with Google to save your progress and track your disc golf journey.">
+      <div className="container mx-auto py-4" data-gramm="false">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-[100] border-b">
+          <div className="flex items-center justify-end px-2 py-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/profile">Profile</Link>
+            </Button>
+          </div>
+
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="skill">Skill</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
@@ -308,8 +291,8 @@ export default function DashboardPage() {
                   />
                 );
               })}
-                  </div>
-                    </div>
+            </div>
+          </div>
         </TabsContent>
         <TabsContent value="social">
           <StatsHeader
@@ -362,7 +345,7 @@ export default function DashboardPage() {
                 const sectionKey = section.key as SectionKey;
                 const achievements = getCategoryAchievements("collection", section.key);
                 const completion = getCategoryCompletion(achievements);
-                return (
+                        return (
                   <AchievementSection
                     key={section.key}
                     category="collection"
@@ -383,5 +366,6 @@ export default function DashboardPage() {
         </TabsContent>
       </Tabs>
     </div>
+    </RequireAuth>
   );
 }

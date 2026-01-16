@@ -1,22 +1,64 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center">
-      <h1 className="text-4xl font-bold mb-6">Welcome to Disc Golf Journey</h1>
-      <p className="text-xl text-gray-600 mb-8 max-w-2xl">
-        Track your achievements, celebrate your progress, and become a better disc golfer.
-        From your first par to your hundredth ace, we're here to document your journey.
-      </p>
-      <div className="flex gap-4">
-        <Link href="/register">
-          <Button size="lg">Start Your Journey</Button>
-        </Link>
-        <Link href="/login">
-          <Button variant="outline" size="lg">Continue Journey</Button>
-        </Link>
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useAuth } from "@/lib/firebase-auth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+export default function LoginPage() {
+  const { user, loading, signInWithGoogle } = useAuth();
+  const router = useRouter();
+
+  // Redirect to dashboard if already signed in
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      // Redirect will happen automatically via useEffect
+    } catch (error) {
+      console.error("Error signing in:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <p className="text-gray-600">Loading...</p>
       </div>
+    );
+  }
+
+  if (user) {
+    return null; // Will redirect via useEffect
+  }
+
+  return (
+    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Continue Your Journey</CardTitle>
+          <CardDescription>
+            Sign in with Google to access your achievements
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={handleSignIn} className="w-full" size="lg">
+            Sign in with Google
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

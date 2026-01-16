@@ -8,20 +8,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { useState } from "react";
+import { useAuth } from "@/lib/firebase-auth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+  const { user, loading, signInWithGoogle } = useAuth();
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement registration logic
-    console.log("Register attempt:", { email, password, username });
+  // Redirect to dashboard if already signed in
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      // Redirect will happen automatically via useEffect
+    } catch (error) {
+      console.error("Error signing in:", error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
+  if (user) {
+    return null; // Will redirect via useEffect
+  }
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
@@ -29,53 +50,13 @@ export default function RegisterPage() {
         <CardHeader>
           <CardTitle>Start Your Journey</CardTitle>
           <CardDescription>
-            Create an account to track your disc golf achievements
+            Sign in with Google to track your disc golf achievements
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="username">Username</label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="discgolfer123"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="email">Email</label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="password">Password</label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              Create Account
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
-            <Link href="/login" className="text-blue-600 hover:underline">
-              Sign in
-            </Link>
-          </div>
+          <Button onClick={handleSignIn} className="w-full" size="lg">
+            Sign in with Google
+          </Button>
         </CardContent>
       </Card>
     </div>
