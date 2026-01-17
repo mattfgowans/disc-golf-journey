@@ -12,6 +12,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 10,
+      kind: "toggle",
     },
     {
       id: "skill-1",
@@ -21,6 +22,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 15,
+      kind: "toggle",
     },
     {
       id: "skill-2",
@@ -30,6 +32,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
       rarity: "rare",
     },
     {
@@ -40,6 +43,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "skill-4",
@@ -49,6 +53,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "skill-5",
@@ -58,6 +63,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-6",
@@ -67,6 +73,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "skill-7",
@@ -76,6 +83,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-8",
@@ -85,6 +93,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-9",
@@ -94,6 +103,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-11",
@@ -103,6 +113,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-10",
@@ -112,6 +123,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "puttingMastery",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
 
     // DISTANCE CONTROL
@@ -123,6 +135,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "distanceControl",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "skill-13",
@@ -132,6 +145,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "distanceControl",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "skill-14",
@@ -141,6 +155,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "distanceControl",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "skill-15",
@@ -150,6 +165,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "distanceControl",
       isCompleted: false,
       points: 200,
+      kind: "toggle",
     },
     {
       id: "skill-16",
@@ -159,6 +175,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "distanceControl",
       isCompleted: false,
       points: 250,
+      kind: "toggle",
     },
     {
       id: "skill-17",
@@ -168,6 +185,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "distanceControl",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "skill-18",
@@ -177,6 +195,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "distanceControl",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "skill-19",
@@ -186,6 +205,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "distanceControl",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-20",
@@ -195,6 +215,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "distanceControl",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-21",
@@ -204,6 +225,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
 
     // SPECIALTY SHOTS
@@ -215,6 +237,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-23",
@@ -224,6 +247,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-24",
@@ -233,6 +257,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-25",
@@ -242,6 +267,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-26",
@@ -251,6 +277,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "skill-27",
@@ -260,6 +287,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "skill-28",
@@ -269,6 +297,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-29",
@@ -278,6 +307,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "skill-30",
@@ -287,6 +317,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "skill-31",
@@ -296,6 +327,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialtyShots",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
 
     // SCORING ACHIEVEMENTS
@@ -307,6 +339,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "skill-32b",
@@ -316,6 +349,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "skill-32a",
@@ -325,6 +359,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "skill-32",
@@ -334,6 +369,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "skill-33",
@@ -343,6 +379,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "skill-33a",
@@ -352,6 +389,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "skill-33b",
@@ -361,6 +399,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-34",
@@ -370,6 +409,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "skill-35",
@@ -379,6 +419,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 500,
+      kind: "toggle",
       rarity: "rare",
     },
     {
@@ -389,6 +430,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 250,
+      kind: "toggle",
       rarity: "epic",
     },
     {
@@ -399,6 +441,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "skill-38",
@@ -408,6 +451,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "skill-39",
@@ -417,6 +461,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "skill-40",
@@ -426,6 +471,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 250,
+      kind: "toggle",
     },
     {
       id: "skill-41",
@@ -435,6 +481,121 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
+    },
+    {
+      id: "skill_bogey_free_round",
+      title: "Clean Card",
+      description: "Record your first bogey-free round",
+      category: "skill",
+      subcategory: "scoringAchievements",
+      isCompleted: false,
+      points: 150,
+      kind: "toggle",
+    },
+    {
+      id: "birdies_10",
+      title: "Hit 10 Birdies",
+      description: "Record 10 birdies across all rounds.",
+      category: "skill",
+      subcategory: "scoringAchievements",
+      isCompleted: false,
+      points: 25,
+      kind: "counter",
+      target: 10,
+      progress: 0,
+    },
+
+    // ROUND RATINGS
+    {
+      id: "skill_rating_100",
+      title: "Century Club",
+      description: "Record first UDisc round rated over 100",
+      category: "skill",
+      subcategory: "roundRatings",
+      isCompleted: false,
+      points: 25,
+      kind: "toggle",
+    },
+    {
+      id: "skill_rating_125",
+      title: "Above Average",
+      description: "Record first UDisc round rated over 125",
+      category: "skill",
+      subcategory: "roundRatings",
+      isCompleted: false,
+      points: 50,
+      kind: "toggle",
+    },
+    {
+      id: "skill_rating_150",
+      title: "Skillful Player",
+      description: "Record first UDisc round rated over 150",
+      category: "skill",
+      subcategory: "roundRatings",
+      isCompleted: false,
+      points: 75,
+      kind: "toggle",
+    },
+    {
+      id: "skill_rating_175",
+      title: "Advanced Player",
+      description: "Record first UDisc round rated over 175",
+      category: "skill",
+      subcategory: "roundRatings",
+      isCompleted: false,
+      points: 100,
+      kind: "toggle",
+    },
+    {
+      id: "skill_rating_200",
+      title: "Expert Level",
+      description: "Record first UDisc round rated over 200",
+      category: "skill",
+      subcategory: "roundRatings",
+      isCompleted: false,
+      points: 150,
+      kind: "toggle",
+    },
+    {
+      id: "skill_rating_225",
+      title: "Elite Player",
+      description: "Record first UDisc round rated over 225",
+      category: "skill",
+      subcategory: "roundRatings",
+      isCompleted: false,
+      points: 200,
+      kind: "toggle",
+    },
+    {
+      id: "skill_rating_250",
+      title: "Master Class",
+      description: "Record first UDisc round rated over 250",
+      category: "skill",
+      subcategory: "roundRatings",
+      isCompleted: false,
+      points: 300,
+      kind: "toggle",
+    },
+    {
+      id: "skill_rating_275",
+      title: "Grandmaster",
+      description: "Record first UDisc round rated over 275",
+      category: "skill",
+      subcategory: "roundRatings",
+      isCompleted: false,
+      points: 400,
+      kind: "toggle",
+    },
+    {
+      id: "skill_rating_300",
+      title: "Legendary",
+      description: "Record first UDisc round rated over 300",
+      category: "skill",
+      subcategory: "roundRatings",
+      isCompleted: false,
+      points: 500,
+      kind: "toggle",
     }
   ],
   social: [
@@ -447,6 +608,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-1",
@@ -456,6 +618,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
       rarity: "epic",
     },
     {
@@ -466,6 +629,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "social-3",
@@ -475,6 +639,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "social-4",
@@ -484,6 +649,17 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
+    },
+    {
+      id: "social-random-card-hero",
+      title: "Random Card Hero",
+      description: "Play a round with someone you've never met before",
+      category: "social",
+      subcategory: "communityEngagement",
+      isCompleted: false,
+      points: 50,
+      kind: "toggle",
     },
     {
       id: "social-5",
@@ -493,6 +669,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 200,
+      kind: "toggle",
     },
     {
       id: "social-6",
@@ -502,6 +679,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-7",
@@ -511,6 +689,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "social-8",
@@ -520,6 +699,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-9",
@@ -529,6 +709,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "social-10",
@@ -538,6 +719,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-11",
@@ -547,6 +729,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "social-12",
@@ -556,6 +739,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "social-13",
@@ -565,6 +749,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 200,
+      kind: "toggle",
     },
     {
       id: "social-14",
@@ -574,6 +759,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "communityEngagement",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
 
     // TEACHING & LEADERSHIP
@@ -585,6 +771,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "teachingLeadership",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-16",
@@ -594,6 +781,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "teachingLeadership",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-17",
@@ -603,6 +791,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "teachingLeadership",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "social-18",
@@ -612,6 +801,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "teachingLeadership",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "social-19",
@@ -621,6 +811,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "teachingLeadership",
       isCompleted: false,
       points: 200,
+      kind: "toggle",
     },
     {
       id: "social-20",
@@ -630,6 +821,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "teachingLeadership",
       isCompleted: false,
       points: 250,
+      kind: "toggle",
     },
     {
       id: "social-21",
@@ -639,6 +831,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "teachingLeadership",
       isCompleted: false,
       points: 500,
+      kind: "toggle",
     },
 
     // COMPETITION & EVENTS
@@ -650,6 +843,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "competitionEvents",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-23",
@@ -659,6 +853,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "competitionEvents",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "social-24",
@@ -668,6 +863,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "competitionEvents",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "social-25",
@@ -677,6 +873,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "competitionEvents",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "social-26",
@@ -686,6 +883,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "competitionEvents",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "social-27",
@@ -695,6 +893,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "competitionEvents",
       isCompleted: false,
       points: 200,
+      kind: "toggle",
     },
     {
       id: "social-28",
@@ -704,6 +903,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "competitionEvents",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-29",
@@ -713,6 +913,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "competitionEvents",
       isCompleted: false,
       points: 250,
+      kind: "toggle",
     },
     {
       id: "social-30",
@@ -722,6 +923,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "competitionEvents",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "social-31",
@@ -731,6 +933,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "competitionEvents",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
 
     // MEDIA & CONTENT
@@ -742,6 +945,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "mediaContent",
       isCompleted: false,
       points: 10,
+      kind: "toggle",
     },
     {
       id: "social-33",
@@ -751,6 +955,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "mediaContent",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-34",
@@ -760,6 +965,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "mediaContent",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-35",
@@ -769,6 +975,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "mediaContent",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
 
     // GOOD SAMARITAN
@@ -780,6 +987,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "goodSamaritan",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "social-37",
@@ -789,6 +997,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "goodSamaritan",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "social-38",
@@ -798,6 +1007,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "goodSamaritan",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "social-39",
@@ -807,6 +1017,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "goodSamaritan",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "social-40",
@@ -816,6 +1027,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "goodSamaritan",
       isCompleted: false,
       points: 200,
+      kind: "toggle",
     }
   ],
   collection: [
@@ -828,6 +1040,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discEssentials",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "collection-1",
@@ -838,6 +1051,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       isCompleted: false,
       points: 10,
       rarity: "rare",
+      kind: "toggle",
     },
     {
       id: "collection-2",
@@ -847,6 +1061,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discEssentials",
       isCompleted: false,
       points: 10,
+      kind: "toggle",
     },
     {
       id: "collection-3",
@@ -856,6 +1071,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discEssentials",
       isCompleted: false,
       points: 10,
+      kind: "toggle",
     },
     {
       id: "collection-4",
@@ -865,6 +1081,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discEssentials",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "collection-5",
@@ -874,6 +1091,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discEssentials",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
 
     // DISC MILESTONES
@@ -885,6 +1103,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-7",
@@ -894,6 +1113,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discMilestones",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "collection-8",
@@ -903,6 +1123,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discMilestones",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "collection-9",
@@ -912,6 +1133,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discMilestones",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "collection-10",
@@ -921,6 +1143,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discMilestones",
       isCompleted: false,
       points: 200,
+      kind: "toggle",
     },
     {
       id: "collection-11",
@@ -930,6 +1153,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-12",
@@ -939,6 +1163,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-13",
@@ -948,6 +1173,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-14",
@@ -957,6 +1183,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-15",
@@ -966,6 +1193,17 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "discMilestones",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
+    },
+    {
+      id: "collection-lost-but-remembered",
+      title: "Lost but Remembered",
+      description: "Lose a disc and never get it back",
+      category: "collection",
+      subcategory: "discMilestones",
+      isCompleted: false,
+      points: 25,
+      kind: "toggle",
     },
 
     // EQUIPMENT & ACCESSORIES
@@ -977,6 +1215,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "equipmentAccessories",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-51",
@@ -986,6 +1225,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "equipmentAccessories",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-16",
@@ -995,6 +1235,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "equipmentAccessories",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "collection-17",
@@ -1004,6 +1245,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "equipmentAccessories",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "collection-52",
@@ -1013,6 +1255,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "equipmentAccessories",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "collection-53",
@@ -1022,6 +1265,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "equipmentAccessories",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
 
     // SPECIAL DISCS
@@ -1033,6 +1277,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "collection-19",
@@ -1042,6 +1287,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "collection-20",
@@ -1051,6 +1297,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "collection-21",
@@ -1060,6 +1307,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "collection-22",
@@ -1069,6 +1317,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-23",
@@ -1078,6 +1327,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "collection-24",
@@ -1087,6 +1337,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-25",
@@ -1096,6 +1347,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "collection-26",
@@ -1105,6 +1357,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "collection-27",
@@ -1114,6 +1367,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 75,
+      kind: "toggle",
     },
     {
       id: "collection-28",
@@ -1123,6 +1377,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "collection-30",
@@ -1132,6 +1387,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "specialDiscs",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
 
     // COURSE EXPLORER
@@ -1143,6 +1399,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "courseExplorer",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-32",
@@ -1152,6 +1409,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "courseExplorer",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "collection-33",
@@ -1161,6 +1419,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "courseExplorer",
       isCompleted: false,
       points: 150,
+      kind: "toggle",
     },
     {
       id: "collection-34",
@@ -1170,6 +1429,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "courseExplorer",
       isCompleted: false,
       points: 300,
+      kind: "toggle",
     },
     {
       id: "collection-35",
@@ -1179,6 +1439,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "courseExplorer",
       isCompleted: false,
       points: 500,
+      kind: "toggle",
     },
     {
       id: "collection-36",
@@ -1188,6 +1449,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "courseExplorer",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "collection-37",
@@ -1197,6 +1459,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "courseExplorer",
       isCompleted: false,
       points: 250,
+      kind: "toggle",
     },
     {
       id: "collection-38",
@@ -1206,6 +1469,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "courseExplorer",
       isCompleted: false,
       points: 250,
+      kind: "toggle",
     },
 
     // ROUND MILESTONES
@@ -1217,6 +1481,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "roundMilestones",
       isCompleted: false,
       points: 10,
+      kind: "toggle",
     },
     {
       id: "collection-40",
@@ -1226,6 +1491,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "roundMilestones",
       isCompleted: false,
       points: 25,
+      kind: "toggle",
     },
     {
       id: "collection-41",
@@ -1235,6 +1501,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "roundMilestones",
       isCompleted: false,
       points: 50,
+      kind: "toggle",
     },
     {
       id: "collection-42",
@@ -1244,6 +1511,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "roundMilestones",
       isCompleted: false,
       points: 100,
+      kind: "toggle",
     },
     {
       id: "collection-43",
@@ -1253,6 +1521,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "roundMilestones",
       isCompleted: false,
       points: 250,
+      kind: "toggle",
     },
     {
       id: "collection-44",
@@ -1262,6 +1531,19 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "roundMilestones",
       isCompleted: false,
       points: 500,
+      kind: "toggle",
+    },
+    {
+      id: "rounds_25",
+      title: "Play 25 Rounds",
+      description: "Complete 25 rounds of disc golf.",
+      category: "collection",
+      subcategory: "roundMilestones",
+      isCompleted: false,
+      points: 50,
+      kind: "counter",
+      target: 25,
+      progress: 0,
     }
   ]
 };

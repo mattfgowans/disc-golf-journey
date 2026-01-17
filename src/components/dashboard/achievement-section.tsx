@@ -18,6 +18,7 @@ interface AchievementSectionProps {
   isOpen: boolean;
   onToggle: () => void;
   onToggleAchievement: (id: string) => void;
+  onIncrementAchievement: (category: keyof Achievements, id: string, amount: number) => void;
   getCompletionColor: (value: number) => string;
 }
 
@@ -31,6 +32,7 @@ export function AchievementSection({
   isOpen,
   onToggle,
   onToggleAchievement,
+  onIncrementAchievement,
   getCompletionColor,
 }: AchievementSectionProps) {
   return (
@@ -42,14 +44,18 @@ export function AchievementSection({
           className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative"
           style={{ outline: "none", border: "none", background: "none" }}
         >
-          <div>
-            <h2 className="text-2xl font-bold text-white">{title}</h2>
-            <span className={cn(
-              "text-sm font-semibold text-white",
-              getCompletionColor(completion)
-            )}>
-              ({Math.round(completion)}%)
-            </span>
+          <div className="flex items-baseline gap-3">
+            <div className="w-[260px] text-left">
+              <h2 className="text-2xl font-bold text-white">{title}</h2>
+            </div>
+            <div className="flex-1 text-left">
+              <span
+                className="inline-flex items-center rounded-full bg-black/25 px-2 py-0.5 text-sm font-bold text-white backdrop-blur-sm"
+                style={{ textShadow: "0 1px 2px rgba(0,0,0,0.35)" }}
+              >
+                {Math.round(completion)}%
+              </span>
+            </div>
           </div>
           <ChevronDown className={`h-6 w-6 text-white transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -60,7 +66,9 @@ export function AchievementSection({
             <AchievementCard
               key={achievement.id}
               {...achievement}
+              category={category}
               onToggle={() => onToggleAchievement(achievement.id)}
+              onIncrementAchievement={onIncrementAchievement}
             />
           ))}
         </div>

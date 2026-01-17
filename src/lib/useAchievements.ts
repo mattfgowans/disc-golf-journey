@@ -1,27 +1,67 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { useAuth } from "./firebase-auth";
 
-export type Achievement = {
+export type AchievementBase = {
   id: string;
   title: string;
   description: string;
   category: "skill" | "social" | "collection";
-  subcategory?: string; // Used for organizing achievements into sections
+  subcategory?: string;
   isCompleted: boolean;
-  completedDate?: string;
+  completedDate?: Timestamp;
   points?: number;
   rarity?: "common" | "rare" | "epic" | "legendary";
 };
+
+export type ToggleAchievement = AchievementBase & {
+  kind?: "toggle"; // optional for backward compatibility
+};
+
+export type CounterAchievement = AchievementBase & {
+  kind: "counter";
+  target: number;
+  progress: number;
+};
+
+export type Achievement = ToggleAchievement | CounterAchievement;
 
 export type Achievements = {
   skill: Achievement[];
   social: Achievement[];
   collection: Achievement[];
 };
+
+// Helper function to determine if an achievement is complete
+export function isAchievementComplete(achievement: Achievement): boolean {
+  if (achievement.kind === "counter") {
+    return achievement.progress >= achievement.target;
+  }
+  return achievement.isCompleted === true;
+}
+
+// Helper functions for Firestore sanitization
+type AnyRecord = Record<string, any>;
+
+function stripUndefined<T extends AnyRecord>(obj: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined)
+  ) as Partial<T>;
+}
+
+function sanitizeAchievementsForFirestore(a: Achievements) {
+  const sanitizeList = (list: Achievement[]) =>
+    list.map((ach) => stripUndefined(ach as AnyRecord));
+
+  return {
+    skill: sanitizeList(a.skill ?? []),
+    social: sanitizeList(a.social ?? []),
+    collection: sanitizeList(a.collection ?? []),
+  };
+}
 
 const defaultAchievements: Achievements = {
   skill: [],
@@ -35,9 +75,13 @@ function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements
   const categories: (keyof Achievements)[] = ['skill', 'social', 'collection'];
 
   for (const category of categories) {
-    for (let i = 0; i < saved[category].length; i++) {
-      const savedAchievement = saved[category][i];
-      const templateAchievement = template[category].find(a => a.id === savedAchievement.id);
+    // Use safe fallbacks - categories might not exist in corrupted data
+    const savedList = saved[category] ?? [];
+    const templateList = template[category] ?? [];
+
+    for (let i = 0; i < savedList.length; i++) {
+      const savedAchievement = savedList[i];
+      const templateAchievement = templateList.find(a => a.id === savedAchievement.id);
 
       if (templateAchievement) {
         // Check if points or rarity are missing or different
@@ -56,14 +100,18 @@ function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements
 
   // Check if template has new achievements that saved data doesn't have
   for (const category of categories) {
-    if (template[category].length !== saved[category].length) {
-      console.log(`Achievement count mismatch in ${category}: template has ${template[category].length}, saved has ${saved[category].length}`);
+    // Use safe fallbacks for length comparison
+    const savedList = saved[category] ?? [];
+    const templateList = template[category] ?? [];
+
+    if (templateList.length !== savedList.length) {
+      console.log(`Achievement count mismatch in ${category}: template has ${templateList.length}, saved has ${savedList.length}`);
       return true;
     }
-    
+
     // Check if there are achievements in template that aren't in saved data
-    for (const templateAchievement of template[category]) {
-      const savedAchievement = saved[category].find(a => a.id === templateAchievement.id);
+    for (const templateAchievement of templateList) {
+      const savedAchievement = savedList.find(a => a.id === templateAchievement.id);
       if (!savedAchievement) {
         console.log(`New achievement detected in template: ${templateAchievement.id} - ${templateAchievement.title}`);
         return true;
@@ -76,9 +124,12 @@ function checkAchievementsNeedUpdate(saved: Achievements, template: Achievements
   let totalSaved = 0;
 
   for (const category of categories) {
-    totalSaved += saved[category].length;
-    for (const savedAchievement of saved[category]) {
-      const templateAchievement = template[category].find(a => a.id === savedAchievement.id);
+    const savedList = saved[category] ?? [];
+    const templateList = template[category] ?? [];
+
+    totalSaved += savedList.length;
+    for (const savedAchievement of savedList) {
+      const templateAchievement = templateList.find(a => a.id === savedAchievement.id);
       if (templateAchievement) {
         totalMatches++;
       }
@@ -113,11 +164,29 @@ function mergeAchievementsWithTemplate(saved: Achievements, template: Achievemen
     merged[category] = template[category].map((templateAchievement) => {
       const savedAchievement = saved[category]?.find((a) => a.id === templateAchievement.id);
 
-      return {
+      // Base merged achievement from template
+      const mergedAchievement: Achievement = {
         ...templateAchievement,
-        isCompleted: savedAchievement?.isCompleted ?? false,
         completedDate: savedAchievement?.completedDate,
       };
+
+      // For counter achievements, preserve progress and recompute isCompleted from progress/target
+      if (templateAchievement.kind === "counter") {
+        const savedProgress =
+          savedAchievement && typeof (savedAchievement as any).progress === "number"
+            ? (savedAchievement as any).progress
+            : (templateAchievement as any).progress;
+
+        (mergedAchievement as CounterAchievement).progress = savedProgress;
+
+        mergedAchievement.isCompleted =
+          savedProgress >= (templateAchievement as CounterAchievement).target;
+      } else {
+        // For toggle achievements, preserve isCompleted from saved data
+        mergedAchievement.isCompleted = savedAchievement?.isCompleted ?? false;
+      }
+
+      return mergedAchievement;
     });
   }
 
@@ -146,7 +215,12 @@ export function useAchievements(initialAchievements?: Achievements) {
 
         if (userDoc.exists()) {
           const data = userDoc.data();
-          const savedAchievements = data.achievements;
+          // Ensure savedAchievements has valid Achievements shape with fallbacks
+          const savedAchievements: Achievements = data.achievements && typeof data.achievements === 'object' ? {
+            skill: Array.isArray(data.achievements.skill) ? data.achievements.skill : [],
+            social: Array.isArray(data.achievements.social) ? data.achievements.social : [],
+            collection: Array.isArray(data.achievements.collection) ? data.achievements.collection : [],
+          } : defaultAchievements;
 
           // Check if user has any saved achievements in any category
           const hasAnySaved =
@@ -165,7 +239,7 @@ export function useAchievements(initialAchievements?: Achievements) {
               // Reset to defaults if duplicate IDs found
               const achievementsToSave = initialAchievements || defaultAchievements;
               await updateDoc(userDocRef, {
-                achievements: achievementsToSave,
+                achievements: sanitizeAchievementsForFirestore(achievementsToSave),
                 updatedAt: new Date().toISOString(),
               });
               setAchievements(achievementsToSave);
@@ -176,7 +250,7 @@ export function useAchievements(initialAchievements?: Achievements) {
               const updatedAchievements = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
               if (needsUpdate) {
                 await updateDoc(userDocRef, {
-                  achievements: updatedAchievements,
+                  achievements: sanitizeAchievementsForFirestore(updatedAchievements),
                   updatedAt: new Date().toISOString(),
                 });
               }
@@ -186,7 +260,7 @@ export function useAchievements(initialAchievements?: Achievements) {
             // Initialize with default achievements if provided, otherwise empty
             const achievementsToSave = initialAchievements || defaultAchievements;
             await updateDoc(userDocRef, {
-              achievements: achievementsToSave,
+              achievements: sanitizeAchievementsForFirestore(achievementsToSave),
               updatedAt: new Date().toISOString(),
             });
             setAchievements(achievementsToSave);
@@ -195,7 +269,7 @@ export function useAchievements(initialAchievements?: Achievements) {
           // Create user document with default achievements if it doesn't exist
           const achievementsToSave = initialAchievements || defaultAchievements;
           await setDoc(userDocRef, {
-            achievements: achievementsToSave,
+            achievements: sanitizeAchievementsForFirestore(achievementsToSave),
             createdAt: new Date().toISOString(),
           });
           setAchievements(achievementsToSave);
@@ -211,71 +285,108 @@ export function useAchievements(initialAchievements?: Achievements) {
   }, [user, initialAchievements]);
 
   // Save achievements to Firestore
-  const saveAchievements = async (newAchievements: Achievements) => {
+  const saveAchievements = async (newAchievements: Achievements, context?: { category: string, id: string }) => {
     if (!user) return;
 
     try {
+      console.log(`Saving achievements${context ? ` for ${context.category}/${context.id}` : ''}...`);
       const userDocRef = doc(db, "users", user.uid);
 
-      // Clean the data before saving (remove null completedDate fields)
-      const cleanAchievements = {
-        skill: newAchievements.skill.map(a => {
-          const { completedDate, ...rest } = a;
-          return completedDate ? { ...rest, completedDate } : rest;
-        }),
-        social: newAchievements.social.map(a => {
-          const { completedDate, ...rest } = a;
-          return completedDate ? { ...rest, completedDate } : rest;
-        }),
-        collection: newAchievements.collection.map(a => {
-          const { completedDate, ...rest } = a;
-          return completedDate ? { ...rest, completedDate } : rest;
-        }),
-      };
-
       await updateDoc(userDocRef, {
-        achievements: cleanAchievements,
+        achievements: sanitizeAchievementsForFirestore(newAchievements),
         updatedAt: new Date().toISOString(),
       });
+
+      console.log(`Successfully saved achievements${context ? ` for ${context.category}/${context.id}` : ''}`);
       setAchievements(newAchievements);
     } catch (error) {
-      console.error("Error saving achievements:", error);
+      console.error(`Failed to save achievements${context ? ` for ${context.category}/${context.id}` : ''}:`, error);
       throw error;
     }
   };
 
-  // Toggle a single achievement
-  const toggleAchievement = async (
-    category: keyof Achievements,
-    id: string
-  ) => {
+  // Toggle a single achievement (only for toggle achievements)
+  const toggleAchievement = async (category: keyof Achievements, id: string) => {
     if (!user) return;
 
-    // Snapshot current state before making changes
     const prev = achievements;
 
-    const updatedAchievements = {
+    const updatedAchievements: Achievements = {
       ...achievements,
-      [category]: achievements[category].map(achievement =>
-        achievement.id === id
-          ? {
-              ...achievement,
-              isCompleted: !achievement.isCompleted,
-              completedDate: !achievement.isCompleted ? new Date().toISOString() : undefined
-            }
-          : achievement
-      )
+      [category]: achievements[category].map((achievement) => {
+        if (achievement.id !== id) return achievement;
+
+        // Skip counter achievements - use incrementAchievement instead
+        if (achievement.kind === "counter") return achievement;
+
+        const nextCompleted = !achievement.isCompleted;
+
+        const nextCompletedDate =
+          nextCompleted
+            ? (achievement.completedDate ?? Timestamp.now())
+            : undefined;
+
+        return {
+          ...achievement,
+          isCompleted: nextCompleted,
+          completedDate: nextCompletedDate,
+        };
+      }),
     };
 
-    // Update local state immediately for UI responsiveness
     setAchievements(updatedAchievements);
 
-    // Save to Firestore (async)
     try {
-      await saveAchievements(updatedAchievements);
+      await saveAchievements(updatedAchievements, { category, id });
     } catch (error) {
-      // If save fails, revert to the snapshot we took before making changes
-      console.error("Failed to save achievement:", error);
+      console.error(`Reverting achievements due to save failure for ${category}/${id}:`, error);
+      setAchievements(prev);
+    }
+  };
+
+  // Increment counter achievement progress
+  const incrementAchievement = async (category: keyof Achievements, id: string, amount: number = 1) => {
+    if (!user) return;
+
+    const prev = achievements;
+
+    const updatedAchievements: Achievements = {
+      ...achievements,
+      [category]: achievements[category].map((achievement) => {
+        if (achievement.id !== id) return achievement;
+
+        // Only increment counter achievements
+        if (achievement.kind !== "counter") return achievement;
+
+        const currentProgress = (achievement as CounterAchievement).progress;
+        const target = (achievement as CounterAchievement).target;
+        const nextProgress = Math.min(target, Math.max(0, currentProgress + amount));
+
+        // Once completed, stay completed forever (progress can fluctuate but completion is permanent)
+        const wasAlreadyCompleted = achievement.isCompleted;
+        const nextCompleted = wasAlreadyCompleted || nextProgress >= target;
+
+        // Set completedDate only the FIRST time it becomes completed
+        const nextCompletedDate =
+          nextCompleted && !achievement.completedDate
+            ? Timestamp.now()
+            : achievement.completedDate;
+
+        return {
+          ...achievement,
+          progress: nextProgress,
+          isCompleted: nextCompleted,
+          completedDate: nextCompletedDate,
+        };
+      }),
+    };
+
+    setAchievements(updatedAchievements);
+
+    try {
+      await saveAchievements(updatedAchievements, { category, id });
+    } catch (error) {
+      console.error(`Reverting achievements due to save failure for ${category}/${id}:`, error);
       setAchievements(prev);
     }
   };
@@ -284,6 +395,7 @@ export function useAchievements(initialAchievements?: Achievements) {
     achievements,
     loading,
     toggleAchievement,
+    incrementAchievement,
     saveAchievements,
   };
 }

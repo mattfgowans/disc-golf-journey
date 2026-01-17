@@ -8,7 +8,6 @@ import { ACHIEVEMENTS_CATALOG } from "@/data/achievements";
 import { StatsHeader } from "@/components/dashboard/stats-header";
 import { AchievementSection } from "@/components/dashboard/achievement-section";
 import { RequireAuth } from "@/components/auth/require-auth";
-import Link from "next/link";
 
 
 
@@ -32,6 +31,7 @@ const SECTIONS = {
     { key: "distanceControl", title: "Distance Control" },
     { key: "specialtyShots", title: "Specialty Shots" },
     { key: "scoringAchievements", title: "Scoring Achievements" },
+    { key: "roundRatings", title: "Round Ratings" },
   ],
   social: [
     { key: "communityEngagement", title: "Community Engagement" },
@@ -108,7 +108,7 @@ function getInitialActiveTab(): string {
 }
 
 export default function DashboardPage() {
-  const { achievements, loading: achievementsLoading, toggleAchievement } = useAchievements(ACHIEVEMENTS_CATALOG);
+  const { achievements, loading: achievementsLoading, toggleAchievement, incrementAchievement } = useAchievements(ACHIEVEMENTS_CATALOG);
 
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
@@ -132,12 +132,29 @@ export default function DashboardPage() {
   const currentAchievements: Achievements = achievements ?? ACHIEVEMENTS_CATALOG;
 
   // Helper functions (defined early so they can be used by AchievementSection)
+
+  // Get completion fraction for a single achievement (0-1)
+  const getAchievementCompletionFraction = (a: Achievement): number => {
+    if (a.kind === "counter") {
+      return Math.min(Math.max(a.progress / a.target, 0), 1);
+    }
+    return a.isCompleted ? 1 : 0;
+  };
+
+  // Check if achievement is fully completed
+  const isAchievementFullyCompleted = (a: Achievement): boolean => {
+    if (a.kind === "counter") {
+      return a.progress >= a.target;
+    }
+    return a.isCompleted;
+  };
+
   // Calculate completion percentage for a specific set of achievements
   const getCategoryCompletion = (achievements: Achievement[]) => {
     const total = achievements.length;
     if (total === 0) return 0;
-    const completed = achievements.filter(a => a.isCompleted).length;
-    return (completed / total) * 100;
+    const totalFraction = achievements.reduce((sum, a) => sum + getAchievementCompletionFraction(a), 0);
+    return (totalFraction / total) * 100;
   };
 
   // Get achievements for a specific category and subcategory
@@ -174,10 +191,11 @@ export default function DashboardPage() {
 
   // Calculate completion percentages for each category
   const getCompletionPercentage = (category: keyof Achievements) => {
-    const totalAchievements = currentAchievements[category].length;
+    const achievements = currentAchievements[category];
+    const totalAchievements = achievements.length;
     if (totalAchievements === 0) return 0;
-    const completedAchievements = currentAchievements[category].filter(a => a.isCompleted).length;
-    return (completedAchievements / totalAchievements) * 100;
+    const totalFraction = achievements.reduce((sum, a) => sum + getAchievementCompletionFraction(a), 0);
+    return (totalFraction / totalAchievements) * 100;
   };
 
   const skillCompletion = getCompletionPercentage("skill");
@@ -188,7 +206,7 @@ export default function DashboardPage() {
   const getTotalPoints = () => {
     const allAchievements = [...currentAchievements.skill, ...currentAchievements.social, ...currentAchievements.collection];
     return allAchievements
-      .filter(achievement => achievement.isCompleted)
+      .filter(achievement => isAchievementFullyCompleted(achievement))
       .reduce((total, achievement) => total + (achievement.points ?? 0), 0);
   };
 
@@ -225,14 +243,16 @@ export default function DashboardPage() {
   // Calculate daily streak (simplified - counts unique completion days)
   const getCurrentStreak = () => {
     const completedAchievements = [...currentAchievements.skill, ...currentAchievements.social, ...currentAchievements.collection]
-      .filter(a => a.isCompleted && a.completedDate);
+      .filter(a => isAchievementFullyCompleted(a) && a.completedDate);
 
     if (completedAchievements.length === 0) return 0;
 
     // Group by date and count unique days
     const uniqueDays = new Set(
       completedAchievements.map(a =>
-        new Date(a.completedDate!).toDateString()
+        a.completedDate
+          ? a.completedDate.toDate().toDateString()
+          : new Date().toDateString() // fallback, though this shouldn't happen
       )
     );
 
@@ -243,15 +263,9 @@ export default function DashboardPage() {
 
   return (
     <RequireAuth title="Sign in to track your achievements" subtitle="Sign in with Google to save your progress and track your disc golf journey.">
-      <div className="container mx-auto py-4" data-gramm="false">
+    <div className="container mx-auto py-4" data-gramm="false">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-[100] border-b">
-          <div className="flex items-center justify-end px-2 py-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href="/profile">Profile</Link>
-            </Button>
-          </div>
-
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="skill">Skill</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
@@ -287,6 +301,7 @@ export default function DashboardPage() {
                     isOpen={openSections[sectionKey]}
                     onToggle={() => toggleSection(sectionKey)}
                     onToggleAchievement={(id) => toggleAchievement("skill", id)}
+                    onIncrementAchievement={incrementAchievement}
                     getCompletionColor={getCompletionColor}
                   />
                 );
@@ -322,6 +337,7 @@ export default function DashboardPage() {
                     isOpen={openSections[sectionKey]}
                     onToggle={() => toggleSection(sectionKey)}
                     onToggleAchievement={(id) => toggleAchievement("social", id)}
+                    onIncrementAchievement={incrementAchievement}
                     getCompletionColor={getCompletionColor}
                   />
                 );
@@ -357,6 +373,7 @@ export default function DashboardPage() {
                     isOpen={openSections[sectionKey]}
                     onToggle={() => toggleSection(sectionKey)}
                     onToggleAchievement={(id) => toggleAchievement("collection", id)}
+                    onIncrementAchievement={incrementAchievement}
                     getCompletionColor={getCompletionColor}
                   />
                 );

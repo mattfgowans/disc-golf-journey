@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Trophy, Users, Library } from "lucide-react";
 import confetti from 'canvas-confetti';
+import { Timestamp } from "firebase/firestore";
 
 type AchievementCategory = "skill" | "social" | "collection";
 
@@ -15,10 +16,14 @@ interface AchievementCardProps {
   description: string;
   category: AchievementCategory;
   isCompleted: boolean;
-  completedDate?: string;
+  completedDate?: Timestamp;
   points?: number;
   rarity?: "common" | "rare" | "epic" | "legendary";
+  kind?: "toggle" | "counter";
+  target?: number;
+  progress?: number;
   onToggle: () => void;
+  onIncrementAchievement: (category: AchievementCategory, id: string, amount: number) => void;
 }
 
 const categoryIcons = {
@@ -36,7 +41,11 @@ export function AchievementCard({
   completedDate,
   points,
   rarity = "common",
+  kind,
+  target,
+  progress,
   onToggle,
+  onIncrementAchievement,
 }: AchievementCardProps) {
   const Icon = categoryIcons[category];
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -92,22 +101,46 @@ export function AchievementCard({
         </CardHeader>
         <CardContent className="pt-1.5 pb-3">
           <div className="flex flex-col gap-1">
-            <Button
-              variant={isCompleted ? "outline" : "default"}
-              size="sm"
-              onClick={handleToggle}
-              className={isCompleted ? "text-green-600 border-green-600 hover:bg-green-50 w-full text-xs" : "w-full text-xs"}
-            >
-              {isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
-            </Button>
+            {kind === "counter" && progress !== undefined && target !== undefined ? (
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onIncrementAchievement(category, id, -1)}
+                  disabled={progress <= 0}
+                  className="px-2"
+                >
+                  -
+                </Button>
+                <span className="text-xs font-medium">
+                  {progress} / {target}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onIncrementAchievement(category, id, 1)}
+                  disabled={progress >= target}
+                  className="px-2"
+                >
+                  +
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant={isCompleted ? "outline" : "default"}
+                size="sm"
+                onClick={handleToggle}
+                className={isCompleted ? "text-green-600 border-green-600 hover:bg-green-50 w-full text-xs" : "w-full text-xs"}
+              >
+                {isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
+              </Button>
+            )}
             {completedDate && (
               <span className="text-xs text-muted-foreground text-center">
-                Completed {new Date(completedDate).toLocaleDateString('en-US', {
+                Completed {completedDate.toDate().toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
-                  year: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric'
+                  year: 'numeric'
                 })}
               </span>
             )}
