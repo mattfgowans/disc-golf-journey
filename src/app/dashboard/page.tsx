@@ -16,12 +16,12 @@ import { RequireAuth } from "@/components/auth/require-auth";
 // Rank system - similar to video game ranking
 const RANK_TIERS = [
   { name: "Beginner", minPoints: 0, color: "from-gray-400 to-gray-600" },
-  { name: "Novice", minPoints: 100, color: "from-green-400 to-green-600" },
-  { name: "Intermediate", minPoints: 300, color: "from-blue-400 to-blue-600" },
-  { name: "Advanced", minPoints: 600, color: "from-purple-400 to-purple-600" },
-  { name: "Expert", minPoints: 1000, color: "from-orange-400 to-orange-600" },
-  { name: "Master", minPoints: 1500, color: "from-red-400 to-red-600" },
-  { name: "Legend", minPoints: 2500, color: "from-yellow-300 to-yellow-500" },
+  { name: "Novice", minPoints: 500, color: "from-green-400 to-green-600" },
+  { name: "Intermediate", minPoints: 1000, color: "from-blue-400 to-blue-600" },
+  { name: "Advanced", minPoints: 2500, color: "from-purple-400 to-purple-600" },
+  { name: "Expert", minPoints: 5000, color: "from-orange-400 to-orange-600" },
+  { name: "Master", minPoints: 10000, color: "from-red-400 to-red-600" },
+  { name: "Legend", minPoints: 15000, color: "from-yellow-300 to-yellow-500" },
 ] as const;
 
 // Section configuration for all achievement categories
