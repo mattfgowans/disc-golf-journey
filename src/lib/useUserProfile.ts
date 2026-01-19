@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { useState, useEffect, useRef } from "react";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { useAuth } from "./firebase-auth";
+import { useUserDoc } from "./useUserDoc";
 
 export interface UserProfile {
   displayName: string;
@@ -12,6 +13,8 @@ export interface UserProfile {
   homeCourse: string;
   handedness: "RHBH" | "RHFH" | "LHBH" | "LHFH";
   isPublic: boolean;
+  username?: string; // unique, lowercase
+  friendCode?: string; // short code like ABC123
 }
 
 const defaultProfile: Omit<UserProfile, 'displayName' | 'photoURL'> = {
@@ -23,10 +26,76 @@ const defaultProfile: Omit<UserProfile, 'displayName' | 'photoURL'> = {
 
 export function useUserProfile() {
   const { user } = useAuth();
+  const { userData, mergeUserData, loading: userDocLoading } = useUserDoc();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load profile from Firestore
+  // Debounced profile save refs
+  const profileSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingProfileRef = useRef<UserProfile | null>(null);
+  const pendingProfileContextRef = useRef<{ source: string } | undefined>(undefined);
+  const pendingUidRef = useRef<string | null>(null);
+
+  // Persist profile to Firestore (internal function)
+  const persistProfile = async (profileToSave: UserProfile, context?: { source: string }) => {
+    if (!user) return;
+
+    console.log(`Saving profile${context ? ` from ${context.source}` : ''}...`);
+    const userDocRef = doc(db, "users", user.uid);
+
+    await updateDoc(userDocRef, {
+      profile: profileToSave,
+      updatedAt: new Date().toISOString(),
+    });
+
+    console.log(`Successfully saved profile${context ? ` from ${context.source}` : ''}`);
+
+      // Update shared userData locally
+      mergeUserData({ profile: profileToSave });
+  };
+
+  // Debounced profile save function
+  const scheduleProfileSave = (profileToSave: UserProfile, context?: { source: string }) => {
+    // Store the latest profile, context, and user UID to save
+    pendingProfileRef.current = profileToSave;
+    pendingProfileContextRef.current = context;
+    pendingUidRef.current = user?.uid ?? null;
+
+    // Clear any existing timer
+    if (profileSaveTimerRef.current) {
+      clearTimeout(profileSaveTimerRef.current);
+    }
+
+    // Schedule save with 800ms debounce
+    profileSaveTimerRef.current = setTimeout(async () => {
+      if (!pendingProfileRef.current) return;
+
+      // Check if user has changed since this save was scheduled
+      if (!user?.uid || pendingUidRef.current !== user.uid) {
+        // User changed or logged out - cancel this save
+        pendingProfileRef.current = null;
+        pendingProfileContextRef.current = undefined;
+        pendingUidRef.current = null;
+        profileSaveTimerRef.current = null;
+        return;
+      }
+
+      try {
+        await persistProfile(pendingProfileRef.current, pendingProfileContextRef.current);
+      } catch (error) {
+        // Log error but don't revert state (optimistic UI - state may have advanced)
+        console.error('Failed to save profile after debounce:', error);
+      }
+
+      // Clear refs after save attempt
+      pendingProfileRef.current = null;
+      pendingProfileContextRef.current = undefined;
+      pendingUidRef.current = null;
+      profileSaveTimerRef.current = null;
+    }, 800);
+  };
+
+  // Load profile from shared user document
   useEffect(() => {
     if (!user) {
       setProfile(null);
@@ -34,13 +103,16 @@ export function useUserProfile() {
       return;
     }
 
+    if (userDocLoading) {
+      setLoading(true);
+      return; // Wait for user doc to load
+    }
+
     const loadProfile = async () => {
       try {
         const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
 
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
+        if (userData) {
           const userProfile = userData.profile;
 
           if (userProfile) {
@@ -60,6 +132,9 @@ export function useUserProfile() {
               updatedAt: new Date().toISOString(),
             }, { merge: true });
 
+            // Update shared userData state directly
+            mergeUserData({ profile: newProfile });
+
             setProfile(newProfile);
           }
         } else {
@@ -75,6 +150,9 @@ export function useUserProfile() {
             createdAt: new Date().toISOString(),
           });
 
+          // Update shared userData state directly
+          mergeUserData({ profile: newProfile });
+
           setProfile(newProfile);
         }
       } catch (error) {
@@ -85,26 +163,42 @@ export function useUserProfile() {
     };
 
     loadProfile();
+  }, [user, userData, userDocLoading]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (profileSaveTimerRef.current) {
+        clearTimeout(profileSaveTimerRef.current);
+        profileSaveTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Clear pending saves when user changes (logout/login)
+  useEffect(() => {
+    if (profileSaveTimerRef.current) {
+      clearTimeout(profileSaveTimerRef.current);
+      profileSaveTimerRef.current = null;
+    }
+    // Clear pending refs to prevent saves for wrong user
+    pendingProfileRef.current = null;
+    pendingProfileContextRef.current = undefined;
+    pendingUidRef.current = null;
   }, [user]);
 
   // Update profile function
-  const updateProfile = async (updates: Partial<UserProfile>) => {
+  const updateProfile = (updates: Partial<UserProfile>) => {
     if (!user || !profile) return;
 
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      const updatedProfile = { ...profile, ...updates };
+    const updatedProfile = { ...profile, ...updates };
 
-      await updateDoc(userDocRef, {
-        profile: updatedProfile,
-        updatedAt: new Date().toISOString(),
-      });
+    // Update UI immediately (optimistic)
+    setProfile(updatedProfile);
+    mergeUserData({ profile: updatedProfile });
 
-      setProfile(updatedProfile);
-    } catch (error) {
-      console.error("Error updating user profile:", error);
-      throw error;
-    }
+    // Schedule debounced save (Firestore write happens later)
+    scheduleProfileSave(updatedProfile, { source: "updateProfile" });
   };
 
   return {

@@ -49,6 +49,9 @@ export function Navbar() {
               <Link href="/dashboard">
                 <Button variant="ghost">Dashboard</Button>
               </Link>
+              <Link href="/leaderboard">
+                <Button variant="ghost">🏆 Leaderboard</Button>
+              </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <Avatar>
