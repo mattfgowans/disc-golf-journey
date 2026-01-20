@@ -18,8 +18,11 @@ import {
   acceptFriendRequest,
 } from "@/lib/friends";
 import type { Friend, FriendRequest } from "@/lib/friends";
+import { resolveUsernameToUid } from "@/lib/usernames";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { useAuth } from "@/lib/firebase-auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 function LeaderboardRow({
   entry,
@@ -147,6 +150,50 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
   const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
   const [friendUid, setFriendUid] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [userProfiles, setUserProfiles] = useState<Record<string, { displayName: string; username?: string; photoURL?: string }>>({});
+
+  const fetchUserProfiles = async (userIds: string[]) => {
+    const uniqueIds = [...new Set(userIds.filter(id => id && !userProfiles[id]))];
+    if (uniqueIds.length === 0) return;
+
+    try {
+      const profilePromises = uniqueIds.map(async (uid) => {
+        try {
+          const userDocRef = doc(db, "users", uid);
+          const userDoc = await getDoc(userDocRef);
+          const profile = userDoc.data()?.profile;
+          return {
+            uid,
+            displayName: profile?.displayName || `User ${uid.slice(0, 8)}`,
+            username: profile?.username,
+            photoURL: profile?.photoURL,
+          };
+        } catch (error) {
+          console.error(`Error fetching profile for ${uid}:`, error);
+          return {
+            uid,
+            displayName: `User ${uid.slice(0, 8)}`,
+            username: undefined,
+            photoURL: undefined,
+          };
+        }
+      });
+
+      const profiles = await Promise.all(profilePromises);
+      const newProfiles: Record<string, { displayName: string; username?: string; photoURL?: string }> = {};
+
+      profiles.forEach(({ uid, displayName, username, photoURL }) => {
+        newProfiles[uid] = { displayName, username, photoURL };
+      });
+
+      setUserProfiles(prev => ({ ...prev, ...newProfiles }));
+    } catch (error) {
+      console.error("Error fetching user profiles:", error);
+    }
+  };
 
   const loadFriendsData = async () => {
     try {
@@ -156,6 +203,10 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
       ]);
       setFriends(friendsData);
       setIncomingRequests(requestsData);
+
+      // Fetch profiles for incoming request senders
+      const senderIds = requestsData.map(request => request.fromUid);
+      await fetchUserProfiles(senderIds);
     } catch (error) {
       console.error("Error loading friends data:", error);
     } finally {
@@ -167,16 +218,43 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
     loadFriendsData();
   }, [currentUserId]);
 
+  // Clear messages when input changes
+  useEffect(() => {
+    if (friendUid) {
+      setErrorMessage("");
+      setSuccessMessage("");
+    }
+  }, [friendUid]);
+
   const handleSendRequest = async () => {
     if (!friendUid.trim()) return;
 
+    setIsSending(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
     try {
-      await sendFriendRequest(currentUserId, friendUid.trim());
+      // Resolve username to UID
+      const targetUid = await resolveUsernameToUid(friendUid.trim());
+
+      if (!targetUid) {
+        setErrorMessage("User not found. Please check the username.");
+        return;
+      }
+
+      if (targetUid === currentUserId) {
+        setErrorMessage("You can't add yourself as a friend.");
+        return;
+      }
+
+      await sendFriendRequest(currentUserId, targetUid);
       setFriendUid("");
-      alert("Friend request sent!");
+      setSuccessMessage("Friend request sent!");
     } catch (error) {
       console.error("Error sending friend request:", error);
-      alert("Failed to send friend request. Please check the user ID.");
+      setErrorMessage("Failed to send friend request. Please try again.");
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -222,14 +300,21 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
           <div className="flex gap-2">
             <Input
               id="friend-uid"
-              placeholder="Enter user ID"
+              placeholder="Enter username (e.g. @johndoe)"
               value={friendUid}
               onChange={(e) => setFriendUid(e.target.value)}
+              disabled={isSending}
             />
-            <Button onClick={handleSendRequest} size="sm">
-              <UserPlus className="h-4 w-4" />
+            <Button onClick={handleSendRequest} size="sm" disabled={isSending}>
+              {isSending ? "Sending..." : <UserPlus className="h-4 w-4" />}
             </Button>
           </div>
+          {errorMessage && (
+            <p className="text-sm text-destructive">{errorMessage}</p>
+          )}
+          {successMessage && (
+            <p className="text-sm text-green-600">{successMessage}</p>
+          )}
         </div>
 
         {/* Incoming Requests */}
@@ -237,20 +322,39 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
           <div className="space-y-2">
             <Label>Incoming Requests</Label>
             <div className="space-y-2">
-              {incomingRequests.map((request) => (
-                <div
-                  key={request.fromUid}
-                  className="flex items-center justify-between p-2 border rounded"
-                >
-                  <span className="text-sm">From: {request.fromUid}</span>
-                  <Button
-                    size="sm"
-                    onClick={() => handleAcceptRequest(request.fromUid)}
+              {incomingRequests.map((request) => {
+                const profile = userProfiles[request.fromUid];
+                const displayName = profile?.displayName || request.fromUid;
+                const username = profile?.username;
+
+                return (
+                  <div
+                    key={request.fromUid}
+                    className="flex items-center justify-between p-2 border rounded"
                   >
-                    Accept
-                  </Button>
-                </div>
-              ))}
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={profile?.photoURL} />
+                        <AvatarFallback className="text-xs">
+                          {displayName.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <span className="text-sm font-medium">{displayName}</span>
+                        {username && (
+                          <span className="text-xs text-muted-foreground ml-1">@{username}</span>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAcceptRequest(request.fromUid)}
+                    >
+                      Accept
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

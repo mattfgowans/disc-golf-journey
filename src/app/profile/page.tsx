@@ -18,7 +18,10 @@ export default function ProfilePage() {
   // Initialize edit form when profile loads
   useEffect(() => {
     if (profile) {
-      setEditForm(profile);
+      setEditForm({
+        ...profile,
+        username: profile.username ?? "", // Ensure username is always a string
+      });
     }
   }, [profile]);
 
@@ -72,10 +75,16 @@ function ProfileContent({
         bio: editForm.bio ?? "",
         homeCourse: editForm.homeCourse ?? "",
         handedness: editForm.handedness ?? "RHBH",
+        username: editForm.username ?? "",
       });
       setIsEditing(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update profile:", error);
+      if (error.message === "Username already taken") {
+        alert("That username is already taken. Please choose a different username.");
+      } else {
+        alert("Failed to update profile. Please try again.");
+      }
     }
   };
 
@@ -165,6 +174,24 @@ function ProfileContent({
                 />
               ) : (
                 <p className="mt-1 text-sm">{profile.homeCourse || "Not set"}</p>
+              )}
+            </div>
+
+            {/* Username */}
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <p className="text-xs text-muted-foreground mb-1">
+                This is how friends can find you. Letters/numbers only.
+              </p>
+              {isEditing ? (
+                <Input
+                  id="username"
+                  value={editForm.username || ""}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
+                  placeholder="@yourname"
+                />
+              ) : (
+                <p className="mt-1 text-sm">{profile.username ? `@${profile.username}` : "Not set"}</p>
               )}
             </div>
 

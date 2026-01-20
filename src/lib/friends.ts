@@ -1,10 +1,10 @@
-import { doc, setDoc, deleteDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, writeBatch, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 
 export interface FriendRequest {
   fromUid: string;
   toUid: string;
-  timestamp: string;
+  createdAt: any; // Firestore Timestamp
   status: "pending" | "accepted" | "declined";
 }
 
@@ -13,7 +13,7 @@ export interface Friend {
   displayName: string;
   username?: string;
   photoURL?: string;
-  addedAt: string;
+  createdAt: any; // Firestore Timestamp
 }
 
 // Send a friend request to another user
@@ -24,66 +24,76 @@ export async function sendFriendRequest(currentUid: string, targetUid: string): 
   const targetUserDoc = await getDoc(doc(db, "users", targetUid));
   if (!targetUserDoc.exists()) throw new Error("User not found");
 
-  const requestData: Omit<FriendRequest, 'status'> = {
-    fromUid: currentUid,
-    toUid: targetUid,
-    timestamp: new Date().toISOString(),
-  };
-
   // Add to sender's outgoing requests
   await setDoc(doc(db, "users", currentUid, "friendRequestsOut", targetUid), {
-    ...requestData,
+    fromUid: currentUid,
+    toUid: targetUid,
+    createdAt: serverTimestamp(),
     status: "pending",
   });
 
   // Add to receiver's incoming requests
   await setDoc(doc(db, "users", targetUid, "friendRequestsIn", currentUid), {
-    ...requestData,
+    fromUid: currentUid,
+    toUid: targetUid,
+    createdAt: serverTimestamp(),
     status: "pending",
   });
 }
 
 // Accept an incoming friend request
 export async function acceptFriendRequest(currentUid: string, fromUid: string): Promise<void> {
-  const timestamp = new Date().toISOString();
+  try {
+    const batch = writeBatch(db);
 
-  // Update the request status
-  await setDoc(doc(db, "users", currentUid, "friendRequestsIn", fromUid), {
-    fromUid,
-    toUid: currentUid,
-    timestamp,
-    status: "accepted",
-  }, { merge: true });
+    // Get user data for both users
+    const [currentUserDoc, fromUserDoc] = await Promise.all([
+      getDoc(doc(db, "users", currentUid)),
+      getDoc(doc(db, "users", fromUid))
+    ]);
 
-  await setDoc(doc(db, "users", fromUid, "friendRequestsOut", currentUid), {
-    fromUid,
-    toUid: currentUid,
-    timestamp,
-    status: "accepted",
-  }, { merge: true });
+    const currentUserData = currentUserDoc.data();
+    const fromUserData = fromUserDoc.data();
 
-  // Add to both users' friends collections
-  const currentUserDoc = await getDoc(doc(db, "users", currentUid));
-  const fromUserDoc = await getDoc(doc(db, "users", fromUid));
+    // 1. Create friend document for current user
+    batch.set(doc(db, "users", currentUid, "friends", fromUid), {
+      uid: fromUid,
+      displayName: fromUserData?.profile?.displayName || "Unknown User",
+      username: fromUserData?.profile?.username || null,
+      photoURL: fromUserData?.profile?.photoURL || null,
+      createdAt: serverTimestamp(),
+    });
 
-  const currentUserData = currentUserDoc.data();
-  const fromUserData = fromUserDoc.data();
+    // 2. Create friend document for the other user
+    batch.set(doc(db, "users", fromUid, "friends", currentUid), {
+      uid: currentUid,
+      displayName: currentUserData?.profile?.displayName || "Unknown User",
+      username: currentUserData?.profile?.username || null,
+      photoURL: currentUserData?.profile?.photoURL || null,
+      createdAt: serverTimestamp(),
+    });
 
-  await setDoc(doc(db, "users", currentUid, "friends", fromUid), {
-    uid: fromUid,
-    displayName: fromUserData?.profile?.displayName || "Unknown User",
-    username: fromUserData?.profile?.username,
-    photoURL: fromUserData?.profile?.photoURL,
-    addedAt: timestamp,
-  });
+    // 3. Delete incoming request from current user
+    batch.delete(doc(db, "users", currentUid, "friendRequestsIn", fromUid));
 
-  await setDoc(doc(db, "users", fromUid, "friends", currentUid), {
-    uid: currentUid,
-    displayName: currentUserData?.profile?.displayName || "Unknown User",
-    username: currentUserData?.profile?.username,
-    photoURL: currentUserData?.profile?.photoURL,
-    addedAt: timestamp,
-  });
+    // 4. Delete outgoing request from the other user
+    batch.delete(doc(db, "users", fromUid, "friendRequestsOut", currentUid));
+
+    // Debug logging before commit
+    console.log("acceptFriendRequest batch operations:");
+    console.log(`  SET /users/${currentUid}/friends/${fromUid}`);
+    console.log(`  SET /users/${fromUid}/friends/${currentUid}`);
+    console.log(`  DELETE /users/${currentUid}/friendRequestsIn/${fromUid}`);
+    console.log(`  DELETE /users/${fromUid}/friendRequestsOut/${currentUid}`);
+
+    // Commit the batch
+    await batch.commit();
+
+    console.log("acceptFriendRequest completed successfully");
+  } catch (error) {
+    console.error("acceptFriendRequest failed", error);
+    throw error;
+  }
 }
 
 // Remove a friend (unilateral)

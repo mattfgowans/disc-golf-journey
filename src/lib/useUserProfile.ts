@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, runTransaction, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { useAuth } from "./firebase-auth";
 import { useUserDoc } from "./useUserDoc";
+import { normalizeUsername } from "./usernames";
 
 export interface UserProfile {
   displayName: string;
@@ -14,6 +15,7 @@ export interface UserProfile {
   handedness: "RHBH" | "RHFH" | "LHBH" | "LHFH";
   isPublic: boolean;
   username?: string; // unique, lowercase
+  usernameLower?: string; // normalized lowercase version for lookups
   friendCode?: string; // short code like ABC123
 }
 
@@ -41,8 +43,51 @@ export function useUserProfile() {
     if (!user) return;
 
     console.log(`Saving profile${context ? ` from ${context.source}` : ''}...`);
-    const userDocRef = doc(db, "users", user.uid);
 
+    // Handle username uniqueness and mapping
+    const currentUsernameLower = profile?.usernameLower || "";
+    const newUsernameLower = profileToSave.usernameLower || "";
+
+    // Use transaction if username is being set/changed
+    if (newUsernameLower !== currentUsernameLower) {
+      await runTransaction(db, async (transaction) => {
+        // If setting a new username, check if it's already taken
+        if (newUsernameLower) {
+          const usernameDocRef = doc(db, "usernames", newUsernameLower);
+          const usernameDoc = await transaction.get(usernameDocRef);
+
+          if (usernameDoc.exists()) {
+            const existingData = usernameDoc.data();
+            if (existingData?.uid !== user.uid) {
+              throw new Error("Username already taken");
+            }
+          }
+
+          // Set the new username mapping
+          transaction.set(usernameDocRef, {
+            uid: user.uid,
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+        }
+
+        // Clean up old username mapping if it exists and belongs to current user
+        if (currentUsernameLower) {
+          const oldUsernameDocRef = doc(db, "usernames", currentUsernameLower);
+          const oldUsernameDoc = await transaction.get(oldUsernameDocRef);
+
+          // Only delete if the document exists and belongs to the current user
+          if (oldUsernameDoc.exists()) {
+            const oldData = oldUsernameDoc.data();
+            if (oldData?.uid === user.uid) {
+              transaction.delete(oldUsernameDocRef);
+            }
+          }
+        }
+      });
+    }
+
+    // Save the profile data
+    const userDocRef = doc(db, "users", user.uid);
     await updateDoc(userDocRef, {
       profile: profileToSave,
       updatedAt: new Date().toISOString(),
@@ -191,7 +236,17 @@ export function useUserProfile() {
   const updateProfile = async (updates: Partial<UserProfile>): Promise<void> => {
     if (!user || !profile) return;
 
-    const updatedProfile = { ...profile, ...updates };
+    // Prepare profile with username normalization
+    const profileUpdates = { ...updates };
+
+    // If username is being updated, normalize it and store both versions
+    if (profileUpdates.username !== undefined) {
+      const normalizedUsername = normalizeUsername(profileUpdates.username);
+      profileUpdates.username = normalizedUsername;
+      profileUpdates.usernameLower = normalizedUsername;
+    }
+
+    const updatedProfile = { ...profile, ...profileUpdates };
 
     // Update UI immediately (optimistic)
     setProfile(updatedProfile);
