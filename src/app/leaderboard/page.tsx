@@ -575,9 +575,9 @@ export default function LeaderboardPage() {
             <CardContent>
               <Tabs defaultValue="weekly" className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="weekly">This Week</TabsTrigger>
-                  <TabsTrigger value="monthly">This Month</TabsTrigger>
-                  <TabsTrigger value="yearly">This Year</TabsTrigger>
+                  <TabsTrigger value="weekly">Week</TabsTrigger>
+                  <TabsTrigger value="monthly">Month</TabsTrigger>
+                  <TabsTrigger value="yearly">Year</TabsTrigger>
                   <TabsTrigger value="allTime">All Time</TabsTrigger>
                 </TabsList>
 
