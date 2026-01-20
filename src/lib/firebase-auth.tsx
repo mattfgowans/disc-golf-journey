@@ -20,6 +20,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+
 function withTimeout<T>(promise: Promise<T>, ms: number, message = "Sign-in timed out") {
   let timeoutId: number | null = null;
 
@@ -59,19 +60,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const attempt = (async () => {
       try {
-        // If Firebase popup hangs, this ensures we still settle and UI can re-enable.
-        await withTimeout(signInWithPopup(auth, provider), 500, "Sign-in popup timed out");
+        // Try popup first (works on most devices) - increased timeout for mobile
+        await withTimeout(signInWithPopup(auth, provider), 10000, "Sign-in popup timed out");
       } catch (err: any) {
         const code = err?.code as string | undefined;
+        const msg = (err?.message ?? "").toLowerCase();
+        const isMissingInitialState =
+          code === "auth/missing-initial-state" ||
+          msg.includes("missing initial state") ||
+          msg.includes("sessionstorage") ||
+          msg.includes("storage-partition");
+
+        // Detect Firebase redirect state issues (common on iOS in-app browsers)
+        if (isMissingInitialState) {
+          throw new Error("Login failed due to browser storage restrictions. If you're on iPhone, open this link in Safari (not inside Messages) and try again.");
+        }
 
         // Normal user behaviors: don't treat as error
         if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
-          return;
-        }
-
-        // If popups are blocked, fall back to redirect
-        if (code === "auth/popup-blocked") {
-          await signInWithRedirect(auth, provider);
           return;
         }
 
@@ -81,8 +87,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        // Handle popup-blocked differently for iOS vs other platforms
+        if (code === "auth/popup-blocked") {
+          const isLikelyIOS =
+            typeof navigator !== "undefined" &&
+            /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+          if (isLikelyIOS) {
+            // On iOS, redirect often fails due to sessionStorage issues in in-app browsers
+            throw new Error("Sign-in can fail when opened inside Messages or other apps. Tap Share → Open in Safari, then try again.");
+          } else {
+            // For non-iOS devices, try redirect as fallback
+            try {
+              console.log("Popup blocked, trying redirect fallback...");
+              await signInWithRedirect(auth, provider);
+              return;
+            } catch (redirectErr: any) {
+              console.error("Both popup and redirect failed:", { popupError: err, redirectError: redirectErr });
+              throw new Error("Sign-in failed. Please check your browser settings and try again.");
+            }
+          }
+        }
+
         console.error("Google sign-in failed:", err);
-        throw err;
+        throw new Error("Sign-in failed. Please try again.");
       } finally {
         // Always clear so the button can be clicked again
         signInPromiseRef.current = null;
