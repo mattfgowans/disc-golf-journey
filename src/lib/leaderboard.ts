@@ -1,6 +1,4 @@
-"use client";
-
-import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 export interface LeaderboardEntry {
@@ -10,29 +8,37 @@ export interface LeaderboardEntry {
   photoURL?: string;
   points: number;
   rank: number;
+  updatedAt?: string;
 }
 
-export type LeaderboardPeriod = "daily" | "weekly" | "yearly";
+export type LeaderboardPeriod = "weekly" | "monthly" | "yearly" | "allTime";
 
 // Generate period keys
 export function getCurrentPeriodKey(period: LeaderboardPeriod): string {
   const now = new Date();
 
   switch (period) {
-    case "daily":
-      return `daily_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
     case "weekly":
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-      const day = now.getDate();
-      const firstDayOfYear = new Date(year, 0, 1);
-      const pastDaysOfYear = (now.getTime() - firstDayOfYear.getTime()) / 86400000;
-      const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-      return `weekly_${year}-W${String(weekNumber).padStart(2, '0')}`;
+      // Calculate Monday of the current week (local time)
+      const monday = new Date(now);
+      const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday (0), subtract 6 to get Monday
+      monday.setDate(now.getDate() - daysToSubtract);
+      monday.setHours(0, 0, 0, 0); // Set to midnight local time
+
+      const mondayYear = monday.getFullYear();
+      const mondayMonth = String(monday.getMonth() + 1).padStart(2, '0');
+      const mondayDay = String(monday.getDate()).padStart(2, '0');
+      return `weekly_${mondayYear}-${mondayMonth}-${mondayDay}`;
+
+    case "monthly":
+      return `monthly_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
     case "yearly":
       return `yearly_${now.getFullYear()}`;
+
+    case "allTime":
+      return "allTime";
 
     default:
       throw new Error(`Unknown period: ${period}`);
@@ -59,6 +65,7 @@ export async function getLeaderboard(period: LeaderboardPeriod): Promise<Leaderb
       photoURL: data.photoURL,
       points: data.points || 0,
       rank: rank++,
+      updatedAt: data.updatedAt,
     });
   }
 
@@ -70,20 +77,29 @@ export async function getUserStats(uid: string) {
   try {
     const statsDoc = await getDoc(doc(db, "users", uid, "stats", "points"));
     if (statsDoc.exists()) {
-      return statsDoc.data();
+      const raw = statsDoc.data() as any;
+      return {
+        allTime: Number(raw.allTime ?? 0),
+        weekly: Number(raw.weekly ?? raw.week ?? 0),
+        monthly: Number(raw.monthly ?? raw.month ?? 0),
+        yearly: Number(raw.yearly ?? raw.year ?? 0),
+        updatedAt: raw.updatedAt ?? new Date().toISOString(),
+      };
     }
     return {
-      pointsToday: 0,
-      pointsWeek: 0,
-      pointsYear: 0,
+      allTime: 0,
+      weekly: 0,
+      monthly: 0,
+      yearly: 0,
       updatedAt: new Date().toISOString(),
     };
   } catch (error) {
     console.error("Error fetching user stats:", error);
     return {
-      pointsToday: 0,
-      pointsWeek: 0,
-      pointsYear: 0,
+      allTime: 0,
+      weekly: 0,
+      monthly: 0,
+      yearly: 0,
       updatedAt: new Date().toISOString(),
     };
   }
@@ -91,6 +107,10 @@ export async function getUserStats(uid: string) {
 
 // Development helper: Add sample leaderboard entries
 export async function addSampleLeaderboardEntries() {
+  if (process.env.NODE_ENV !== "development") {
+    console.warn("addSampleLeaderboardEntries() can only be used in development mode");
+    return;
+  }
   const sampleUsers = [
     { uid: "sample1", displayName: "Alice Johnson", points: 250 },
     { uid: "sample2", displayName: "Bob Smith", points: 220 },
@@ -99,7 +119,7 @@ export async function addSampleLeaderboardEntries() {
     { uid: "sample5", displayName: "Eve Wilson", points: 160 },
   ];
 
-  const periodKey = getCurrentPeriodKey("daily");
+  const periodKey = getCurrentPeriodKey("weekly");
 
   for (const user of sampleUsers) {
     await setDoc(doc(db, "leaderboards", periodKey, "entries", user.uid), {

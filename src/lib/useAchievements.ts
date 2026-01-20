@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { doc, setDoc, updateDoc, Timestamp } from "firebase/firestore";
+import { doc, setDoc, updateDoc, Timestamp, writeBatch } from "firebase/firestore";
 import { db } from "./firebase";
 import { useAuth } from "./firebase-auth";
 import { useUserDoc } from "./useUserDoc";
+import { computePointTotals, getPeriodKeys } from "./points";
 
 // Schema version for achievements - increment when template structure changes
 const ACHIEVEMENTS_SCHEMA_VERSION = 1;
@@ -135,13 +136,71 @@ export function useAchievements(initialAchievements?: Achievements) {
 
     try {
       console.log(`Saving achievements${context ? ` for ${context.category}/${context.id}` : ''}...`);
-      const userDocRef = doc(db, "users", user.uid);
 
-      await updateDoc(userDocRef, {
+      // Use writeBatch for atomic updates
+      const batch = writeBatch(db);
+      const now = new Date().toISOString();
+
+      // Update user achievements
+      const userDocRef = doc(db, "users", user.uid);
+      batch.update(userDocRef, {
         achievements: sanitizeAchievementsForFirestore(newAchievements),
         achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION,
-        updatedAt: new Date().toISOString(),
+        updatedAt: now,
       });
+
+      // Compute point totals and update stats
+      const allAchievements = [
+        ...newAchievements.skill,
+        ...newAchievements.social,
+        ...newAchievements.collection,
+      ];
+      const pointTotals = computePointTotals(allAchievements);
+      const statsRef = doc(db, "users", user.uid, "stats", "points");
+      batch.set(statsRef, {
+        ...pointTotals,
+        updatedAt: now,
+      }, { merge: true });
+
+      // Update leaderboard entries for all periods
+      const periodKeys = getPeriodKeys();
+      const userInfo = {
+        displayName: userData?.profile?.displayName || user.displayName || "Anonymous",
+        username: userData?.profile?.username || null,
+        photoURL: userData?.profile?.photoURL || user.photoURL || null,
+        updatedAt: now,
+      };
+
+      // Weekly leaderboard
+      const weeklyEntryRef = doc(db, "leaderboards", periodKeys.weeklyKey, "entries", user.uid);
+      batch.set(weeklyEntryRef, {
+        ...userInfo,
+        points: pointTotals.week,
+      }, { merge: true });
+
+      // Monthly leaderboard
+      const monthlyEntryRef = doc(db, "leaderboards", periodKeys.monthlyKey, "entries", user.uid);
+      batch.set(monthlyEntryRef, {
+        ...userInfo,
+        points: pointTotals.month,
+      }, { merge: true });
+
+      // Yearly leaderboard
+      const yearlyEntryRef = doc(db, "leaderboards", periodKeys.yearlyKey, "entries", user.uid);
+      batch.set(yearlyEntryRef, {
+        ...userInfo,
+        points: pointTotals.year,
+      }, { merge: true });
+
+      // All-time leaderboard
+      const allTimeEntryRef = doc(db, "leaderboards", "allTime", "entries", user.uid);
+      batch.set(allTimeEntryRef, {
+        ...userInfo,
+        points: pointTotals.allTime,
+      }, { merge: true });
+
+      // Commit all writes atomically
+      await batch.commit();
 
       console.log(`Successfully saved achievements${context ? ` for ${context.category}/${context.id}` : ''}`);
       // Update shared userData state locally

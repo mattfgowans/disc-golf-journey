@@ -1,8 +1,5 @@
-"use client";
-
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
-import { useAuth } from "./firebase-auth";
 
 export interface FriendRequest {
   fromUid: string;
@@ -20,11 +17,7 @@ export interface Friend {
 }
 
 // Send a friend request to another user
-export async function sendFriendRequest(targetUid: string): Promise<void> {
-  const { user } = useAuth();
-  if (!user?.uid) throw new Error("Not authenticated");
-
-  const currentUid = user.uid;
+export async function sendFriendRequest(currentUid: string, targetUid: string): Promise<void> {
   if (currentUid === targetUid) throw new Error("Cannot send friend request to yourself");
 
   // Check if target user exists
@@ -44,18 +37,14 @@ export async function sendFriendRequest(targetUid: string): Promise<void> {
   });
 
   // Add to receiver's incoming requests
-  await setDoc(doc(db, "users", currentUid, "friendRequestsIn", targetUid), {
+  await setDoc(doc(db, "users", targetUid, "friendRequestsIn", currentUid), {
     ...requestData,
     status: "pending",
   });
 }
 
 // Accept an incoming friend request
-export async function acceptFriendRequest(fromUid: string): Promise<void> {
-  const { user } = useAuth();
-  if (!user?.uid) throw new Error("Not authenticated");
-
-  const currentUid = user.uid;
+export async function acceptFriendRequest(currentUid: string, fromUid: string): Promise<void> {
   const timestamp = new Date().toISOString();
 
   // Update the request status
@@ -98,11 +87,7 @@ export async function acceptFriendRequest(fromUid: string): Promise<void> {
 }
 
 // Remove a friend (unilateral)
-export async function removeFriend(friendUid: string): Promise<void> {
-  const { user } = useAuth();
-  if (!user?.uid) throw new Error("Not authenticated");
-
-  const currentUid = user.uid;
+export async function removeFriend(currentUid: string, friendUid: string): Promise<void> {
 
   // Remove from both users' friends collections
   await deleteDoc(doc(db, "users", currentUid, "friends", friendUid));
@@ -120,28 +105,19 @@ export async function removeFriend(friendUid: string): Promise<void> {
 }
 
 // Get user's friends list
-export async function getFriends(): Promise<Friend[]> {
-  const { user } = useAuth();
-  if (!user?.uid) return [];
-
-  const friendsSnapshot = await getDocs(collection(db, "users", user.uid, "friends"));
+export async function getFriends(currentUid: string): Promise<Friend[]> {
+  const friendsSnapshot = await getDocs(collection(db, "users", currentUid, "friends"));
   return friendsSnapshot.docs.map(doc => doc.data() as Friend);
 }
 
 // Get incoming friend requests
-export async function getIncomingFriendRequests(): Promise<FriendRequest[]> {
-  const { user } = useAuth();
-  if (!user?.uid) return [];
-
-  const requestsSnapshot = await getDocs(collection(db, "users", user.uid, "friendRequestsIn"));
+export async function getIncomingFriendRequests(currentUid: string): Promise<FriendRequest[]> {
+  const requestsSnapshot = await getDocs(collection(db, "users", currentUid, "friendRequestsIn"));
   return requestsSnapshot.docs.map(doc => doc.data() as FriendRequest);
 }
 
 // Get outgoing friend requests
-export async function getOutgoingFriendRequests(): Promise<FriendRequest[]> {
-  const { user } = useAuth();
-  if (!user?.uid) return [];
-
-  const requestsSnapshot = await getDocs(collection(db, "users", user.uid, "friendRequestsOut"));
+export async function getOutgoingFriendRequests(currentUid: string): Promise<FriendRequest[]> {
+  const requestsSnapshot = await getDocs(collection(db, "users", currentUid, "friendRequestsOut"));
   return requestsSnapshot.docs.map(doc => doc.data() as FriendRequest);
 }
