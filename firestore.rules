@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection
+    match /users/{userId} {
+      // Allow users to read and manage their own user document
+      allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+
+      match /friendRequestsOut/{toUid} {
+        allow read, create, update: if request.auth != null && request.auth.uid == userId;
+
+        // allow either party to delete, so accept/cancel/cleanup works
+        allow delete: if request.auth != null && (request.auth.uid == userId || request.auth.uid == toUid);
+      }
+
+      match /friendRequestsIn/{fromUid} {
+        // Receiver can read their incoming requests
+        allow read: if request.auth != null && request.auth.uid == userId;
+
+        // Sender can create/update ONLY the request doc whose id matches their uid
+        allow create, update: if request.auth != null && request.auth.uid == fromUid;
+
+        // Either party can delete (receiver declines OR sender cancels/cleanup)
+        allow delete: if request.auth != null && (request.auth.uid == userId || request.auth.uid == fromUid);
+      }
+
+      match /friends/{friendUid} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+
+        // Owner can create/update as before
+        allow create, update: if request.auth != null && request.auth.uid == userId;
+
+        // ALSO allow the friend to create the doc whose id == their uid,
+        // but only if there is a matching incoming request doc on the friend's side
+        // (i.e., the friend is accepting a real request)
+        allow create: if request.auth != null
+                      && request.auth.uid == friendUid
+                      && exists(/databases/$(database)/documents/users/$(friendUid)/friendRequestsIn/$(userId));
+
+        // Keep delete as-is (unfriend)
+        allow delete: if request.auth != null && (request.auth.uid == userId || request.auth.uid == friendUid);
+      }
+    }
+
+    // Leaderboards collection - allow authenticated users to read/write
+    match /leaderboards/{period} {
+      match /entries/{userId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Usernames collection - for username uniqueness
+    match /usernames/{username} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == resource.data.uid;
+    }
+  }
+}
