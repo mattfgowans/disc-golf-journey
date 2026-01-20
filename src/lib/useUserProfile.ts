@@ -188,7 +188,7 @@ export function useUserProfile() {
   }, [user]);
 
   // Update profile function
-  const updateProfile = (updates: Partial<UserProfile>) => {
+  const updateProfile = async (updates: Partial<UserProfile>): Promise<void> => {
     if (!user || !profile) return;
 
     const updatedProfile = { ...profile, ...updates };
