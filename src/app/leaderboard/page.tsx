@@ -8,9 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Trophy, Medal, Award, Users, UserPlus } from "lucide-react";
-import { getLeaderboard } from "@/lib/leaderboard";
-import type { LeaderboardEntry, LeaderboardPeriod } from "@/lib/leaderboard";
+import { Users, UserPlus } from "lucide-react";
+import { LeaderboardTab } from "@/components/leaderboard/leaderboard-tab";
 import {
   getFriends,
   getIncomingFriendRequests,
@@ -26,127 +25,6 @@ import type { Friend, FriendRequest } from "@/lib/friends";
 import { resolveUsernameToUid } from "@/lib/usernames";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { useAuth } from "@/lib/firebase-auth";
-
-function LeaderboardRow({
-  entry,
-  rank,
-  isCurrentUser,
-}: {
-  entry: LeaderboardEntry;
-  rank: number;
-  isCurrentUser: boolean;
-}) {
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Trophy className="h-5 w-5 text-yellow-500" />;
-      case 2:
-        return <Medal className="h-5 w-5 text-gray-400" />;
-      case 3:
-        return <Award className="h-5 w-5 text-amber-600" />;
-      default:
-        return (
-          <span className="text-sm font-bold text-muted-foreground">
-            #{rank}
-          </span>
-        );
-    }
-  };
-
-  return (
-    <div
-      className={`flex items-center space-x-4 p-4 rounded-lg border ${
-        isCurrentUser ? "bg-primary/5 border-primary/20" : "bg-card"
-      } hover:bg-accent/50 transition-colors`}
-    >
-      <div className="flex items-center justify-center w-10">
-        {getRankIcon(rank)}
-      </div>
-      <Avatar className="h-10 w-10">
-        <AvatarImage src={entry.photoURL} />
-        <AvatarFallback className="text-sm">
-          {entry.displayName.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1 min-w-0">
-        <p
-          className={`font-semibold truncate ${isCurrentUser ? "text-primary" : ""}`}
-        >
-          {entry.displayName}
-          {isCurrentUser && <span className="ml-2 text-xs">(You)</span>}
-        </p>
-        {entry.username && (
-          <p className="text-sm text-muted-foreground">@{entry.username}</p>
-        )}
-      </div>
-      <Badge variant="secondary" className="font-bold">
-        {entry.points.toLocaleString()} XP
-      </Badge>
-    </div>
-  );
-}
-
-function LeaderboardTab({
-  period,
-  currentUserId,
-}: {
-  period: LeaderboardPeriod;
-  currentUserId: string;
-}) {
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadLeaderboard = async () => {
-      setLoading(true);
-      try {
-        const data = await getLeaderboard(period);
-        setEntries(data);
-      } catch (error) {
-        console.error("Error loading leaderboard:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadLeaderboard();
-  }, [period]);
-
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="h-16 bg-muted rounded-lg animate-pulse" />
-        ))}
-      </div>
-    );
-  }
-
-  if (entries.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-semibold mb-2">No entries yet</h3>
-        <p className="text-muted-foreground">
-          Be the first to earn XP and claim the top spot!
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-2">
-      {entries.map((entry, index) => (
-        <LeaderboardRow
-          key={entry.uid}
-          entry={entry}
-          rank={index + 1}
-          isCurrentUser={entry.uid === currentUserId}
-        />
-      ))}
-    </div>
-  );
-}
 
 function FriendsSection({ currentUserId }: { currentUserId: string }) {
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -535,6 +413,7 @@ export default function LeaderboardPage() {
       subtitle="Sign in with Google to see how you rank against other players."
     >
       <div className="container mx-auto py-8 max-w-4xl">
+        <div className="text-xs text-muted-foreground">Leaderboard render OK</div>
         {/* DEV-ONLY: Friend Requests Self-Test */}
         {process.env.NODE_ENV !== "production" && (
           <div className="mb-4 flex justify-center">
@@ -572,7 +451,7 @@ export default function LeaderboardPage() {
             <CardHeader>
               <CardTitle>Rankings</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-visible">
               <Tabs defaultValue="weekly" className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="weekly">Week</TabsTrigger>

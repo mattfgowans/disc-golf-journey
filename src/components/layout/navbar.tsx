@@ -21,8 +21,8 @@ export function Navbar() {
   if (loading) {
     return (
       <nav className="sticky top-0 z-50 bg-background border-b">
-        <div className="flex h-16 items-center px-4 container mx-auto bg-background">
-          <Link href="/" className="font-bold text-xl">
+        <div className="flex items-center px-4 container mx-auto bg-background min-h-16 py-2 sm:h-16 sm:py-0">
+          <Link href="/" className="font-bold text-xl leading-tight">
             Disc Golf Journey
           </Link>
         </div>
@@ -32,12 +32,12 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-background border-b">
-      <div className="flex h-16 items-center px-4 container mx-auto bg-background">
-        <Link href="/" className="font-bold text-xl">
+      <div className="flex items-center px-4 container mx-auto bg-background min-h-16 py-2 sm:h-16 sm:py-0">
+        <Link href="/" className="font-bold text-xl leading-tight">
           Disc Golf Journey
         </Link>
         
-        <div className="ml-auto flex items-center space-x-4">
+        <div className="ml-auto flex items-center gap-2 sm:gap-4 shrink-0">
           {!user ? (
             <>
               <Button variant="ghost" onClick={signInWithGoogle}>

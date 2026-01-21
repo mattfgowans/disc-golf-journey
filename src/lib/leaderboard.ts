@@ -1,5 +1,17 @@
-import { collection, query, orderBy, limit, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  limit as fsLimit,
+  orderBy,
+  query,
+  startAfter,
+  DocumentSnapshot,
+  doc,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
 import { db } from "./firebase";
+import { getPeriodKeys } from "./points";
 
 export interface LeaderboardEntry {
   uid: string;
@@ -7,54 +19,60 @@ export interface LeaderboardEntry {
   username?: string;
   photoURL?: string;
   points: number;
-  rank: number;
   updatedAt?: string;
 }
 
 export type LeaderboardPeriod = "weekly" | "monthly" | "yearly" | "allTime";
 
+export type LeaderboardPage = {
+  entries: LeaderboardEntry[];
+  cursor: DocumentSnapshot | null;
+  hasMore: boolean;
+};
+
 // Generate period keys
 export function getCurrentPeriodKey(period: LeaderboardPeriod): string {
-  const now = new Date();
+  const periodKeys = getPeriodKeys();
 
   switch (period) {
     case "weekly":
-      // Calculate Monday of the current week (local time)
-      const monday = new Date(now);
-      const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday (0), subtract 6 to get Monday
-      monday.setDate(now.getDate() - daysToSubtract);
-      monday.setHours(0, 0, 0, 0); // Set to midnight local time
-
-      const mondayYear = monday.getFullYear();
-      const mondayMonth = String(monday.getMonth() + 1).padStart(2, '0');
-      const mondayDay = String(monday.getDate()).padStart(2, '0');
-      return `weekly_${mondayYear}-${mondayMonth}-${mondayDay}`;
-
+      return periodKeys.weeklyKey;
     case "monthly":
-      return `monthly_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
+      return periodKeys.monthlyKey;
     case "yearly":
-      return `yearly_${now.getFullYear()}`;
-
+      return periodKeys.yearlyKey;
     case "allTime":
       return "allTime";
-
     default:
       throw new Error(`Unknown period: ${period}`);
   }
 }
 
-// Get leaderboard entries for a period
-export async function getLeaderboard(period: LeaderboardPeriod): Promise<LeaderboardEntry[]> {
+// Get leaderboard entries for a period with pagination
+export async function getLeaderboard(
+  period: LeaderboardPeriod,
+  opts?: { pageSize?: number; cursor?: DocumentSnapshot | null }
+): Promise<LeaderboardPage> {
   const periodKey = getCurrentPeriodKey(period);
+  const pageSize = opts?.pageSize ?? 50;
+  const cursor = opts?.cursor ?? null;
+
   const leaderboardRef = collection(db, "leaderboards", periodKey, "entries");
 
-  const q = query(leaderboardRef, orderBy("points", "desc"), limit(50));
+  let q = query(
+    leaderboardRef,
+    orderBy("points", "desc"),
+    orderBy("updatedAt", "desc"),
+    fsLimit(pageSize)
+  );
+
+  if (cursor) {
+    q = query(q, startAfter(cursor));
+  }
+
   const snapshot = await getDocs(q);
 
   const entries: LeaderboardEntry[] = [];
-  let rank = 1;
 
   for (const docSnap of snapshot.docs) {
     const data = docSnap.data();
@@ -64,12 +82,18 @@ export async function getLeaderboard(period: LeaderboardPeriod): Promise<Leaderb
       username: data.username,
       photoURL: data.photoURL,
       points: data.points || 0,
-      rank: rank++,
       updatedAt: data.updatedAt,
     });
   }
 
-  return entries;
+  const nextCursor = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null;
+  const hasMore = snapshot.size === pageSize;
+
+  return {
+    entries,
+    cursor: nextCursor,
+    hasMore,
+  };
 }
 
 // Get user's current stats (for personal dashboard)
