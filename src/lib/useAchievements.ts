@@ -124,6 +124,7 @@ export function useAchievements(initialAchievements?: Achievements) {
   );
   const [loading, setLoading] = useState(true);
   const [authResolved, setAuthResolved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Debounced save refs
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -343,15 +344,47 @@ export function useAchievements(initialAchievements?: Achievements) {
     }
 
     // Only hydrate from userData when conditions are met
-    if (!user?.uid || !userData?.achievements || lastHydratedUidRef.current === user.uid) {
-      return; // Already hydrated or conditions not met
+    if (!user?.uid) {
+      setLoading(false); // No user - ensure loading resolves
+      return;
     }
 
+    if (!userData?.achievements) {
+      setLoading(false); // No achievements data - ensure loading resolves
+      return;
+    }
+
+    if (lastHydratedUidRef.current === user.uid) {
+      setLoading(false); // Already hydrated - ensure loading resolves
+      return;
+    }
+
+    // Add failsafe timeout (dev-only)
+    const timeoutId =
+      process.env.NODE_ENV === "production"
+        ? null
+        : window.setTimeout(() => {
+            console.warn("[useAchievements] load timeout - forcing loading false");
+            setError((prev) => prev ?? "Load timeout");
+            setLoading(false);
+          }, 6000);
+
     const loadAchievements = async () => {
+      setError(null);
+      setLoading(true);
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[useAchievements] start", { uid: user?.uid });
+      }
       try {
         // At this point we know user exists and conditions are met for hydration
         const currentUser = user!;
         const data = userData;
+
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[useAchievements] received");
+      }
+
         if (data) {
           // Ensure savedAchievements has valid Achievements shape with fallbacks
           const savedAchievements: Achievements = data.achievements && typeof data.achievements === 'object' ? {
@@ -424,15 +457,26 @@ export function useAchievements(initialAchievements?: Achievements) {
           setAchievementsFromRemote(fallbackAchievements, "firestore");
           lastHydratedUidRef.current = currentUser.uid;
         }
-      } catch (error) {
-        console.error("Error loading achievements:", error);
+      } catch (err: unknown) {
+        console.error("[useAchievements] error", err);
+        const message =
+          err instanceof Error ? err.message : typeof err === "string" ? err : "Load error";
+        setError(message);
       } finally {
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[useAchievements] done");
+        }
         setLoading(false);
+        if (timeoutId) clearTimeout(timeoutId);
       }
     };
 
     loadAchievements();
-  }, [user, userData, userDocLoading, initialAchievements]);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [authResolved, user, userData, userDocLoading, initialAchievements]);
 
   // Toggle a single achievement (only for toggle achievements)
   const toggleAchievement = async (category: keyof Achievements, id: string) => {

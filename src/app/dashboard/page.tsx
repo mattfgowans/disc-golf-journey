@@ -8,6 +8,7 @@ import { ACHIEVEMENTS_CATALOG } from "@/data/achievements";
 import { StatsHeader } from "@/components/dashboard/stats-header";
 import { AchievementSection } from "@/components/dashboard/achievement-section";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { auth } from "@/lib/firebase";
 
 
 
@@ -108,7 +109,24 @@ function getInitialActiveTab(): string {
 }
 
 export default function DashboardPage() {
+  return (
+    <RequireAuth title="Sign in to track your achievements" subtitle="Sign in with Google to save your progress and track your disc golf journey.">
+      <DashboardInner />
+    </RequireAuth>
+  );
+}
+
+function DashboardInner() {
   const { achievements, loading: achievementsLoading, toggleAchievement, incrementAchievement } = useAchievements(ACHIEVEMENTS_CATALOG);
+
+  const uid = auth.currentUser?.uid ?? "(no user)";
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      console.log("[Dashboard] uid=", auth.currentUser?.uid, "achievementsLoading=", achievementsLoading);
+    }, 2000);
+    return () => clearInterval(id);
+  }, [achievementsLoading]);
 
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
@@ -177,6 +195,7 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <p>Loading...</p>
+        <p className="text-xs text-muted-foreground mt-2">uid: {uid}</p>
       </div>
     );
   }
@@ -262,7 +281,6 @@ export default function DashboardPage() {
   const currentStreak = getCurrentStreak();
 
   return (
-    <RequireAuth title="Sign in to track your achievements" subtitle="Sign in with Google to save your progress and track your disc golf journey.">
     <div className="container mx-auto py-4" data-gramm="false">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-[100] border-b">
@@ -383,6 +401,5 @@ export default function DashboardPage() {
         </TabsContent>
       </Tabs>
     </div>
-    </RequireAuth>
   );
 }
