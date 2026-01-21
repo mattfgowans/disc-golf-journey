@@ -9,6 +9,7 @@ import { Trophy, Medal, Award } from "lucide-react";
 import { getLeaderboard } from "@/lib/leaderboard";
 import type { LeaderboardEntry, LeaderboardPeriod } from "@/lib/leaderboard";
 import type { DocumentSnapshot } from "firebase/firestore";
+import { getFriends } from "@/lib/friends";
 
 function LeaderboardRow({
   entry,
@@ -19,32 +20,15 @@ function LeaderboardRow({
   rank: number;
   isCurrentUser: boolean;
 }) {
-  const primaryLabel = entry.username ? `@${entry.username}` : "Anonymous";
-
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500" />;
-      case 2:
-        return <Medal className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" />;
-      case 3:
-        return <Award className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />;
-      default:
-        return (
-          <span className="text-sm font-bold text-muted-foreground">
-            #{rank}
-          </span>
-        );
-    }
-  };
+  const primaryLabel = entry.username ? `@${entry.username}` : "Player";
 
   return (
     <div
-      className={`relative min-w-0 flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border ${
+      className={`min-w-0 flex items-center gap-2 sm:gap-3 px-3 py-2 sm:p-4 rounded-lg border ${
         isCurrentUser ? "bg-primary/5 border-primary/20" : "bg-card"
       } hover:bg-accent/50 transition-colors`}
     >
-      <div className="absolute left-3 top-3 text-muted-foreground">
+      <div className="w-6 flex items-center justify-center text-muted-foreground">
         {(() => {
           switch (rank) {
             case 1:
@@ -62,22 +46,26 @@ function LeaderboardRow({
           }
         })()}
       </div>
-      <Avatar className="h-9 w-9 sm:h-10 sm:w-10 ml-5 sm:ml-0">
+      <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
         <AvatarImage src={entry.photoURL} />
         <AvatarFallback className="text-sm">
-          {primaryLabel.charAt(0).toUpperCase()}
+          {entry.username ? entry.username.charAt(0).toUpperCase() : "P"}
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
-        <p
-          className={`text-base sm:text-lg font-semibold truncate ${isCurrentUser ? "text-primary" : ""}`}
-        >
-          {primaryLabel}
-          {isCurrentUser && <span className="ml-2 text-xs">(You)</span>}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm sm:text-base font-semibold truncate">
+            {primaryLabel}
+          </p>
+          {isCurrentUser && (
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 shrink-0">
+              You
+            </Badge>
+          )}
+        </div>
       </div>
       <div className="shrink-0">
-        <Badge variant="secondary" className="text-xs sm:text-sm px-2.5 py-1 sm:px-3 sm:py-1 font-bold whitespace-nowrap">
+        <Badge variant="outline" className="text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 font-bold whitespace-nowrap">
           {entry.points.toLocaleString()} XP
         </Badge>
       </div>
@@ -91,12 +79,16 @@ export function LeaderboardTab({
   pageSize = 10,
   showViewAllLink = true,
   maxHeightClass = "max-h-[420px]",
+  maxRows,
+  friendsOnly = false,
 }: {
   period: LeaderboardPeriod;
   currentUserId: string;
   pageSize?: number;
   showViewAllLink?: boolean;
   maxHeightClass?: string;
+  maxRows?: number;
+  friendsOnly?: boolean;
 }) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,6 +96,7 @@ export function LeaderboardTab({
   const [cursor, setCursor] = useState<DocumentSnapshot | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [friendUids, setFriendUids] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const loadLeaderboard = async () => {
@@ -111,7 +104,27 @@ export function LeaderboardTab({
       setError(null);
       try {
         const page = await getLeaderboard(period, { pageSize, cursor: null });
-        setEntries(page.entries);
+        let filteredEntries = page.entries;
+
+        if (friendsOnly && currentUserId) {
+          // Load friends list
+          try {
+            const friends = await getFriends(currentUserId);
+            const friendUidSet = new Set(friends.map(friend => friend.uid));
+            setFriendUids(friendUidSet);
+
+            // Filter entries to only include current user and friends
+            filteredEntries = page.entries.filter(entry =>
+              entry.uid === currentUserId || friendUidSet.has(entry.uid)
+            );
+          } catch (friendsError) {
+            console.error("Error loading friends:", friendsError);
+            // If friends fail to load, just show current user
+            filteredEntries = page.entries.filter(entry => entry.uid === currentUserId);
+          }
+        }
+
+        setEntries(filteredEntries);
         setCursor(page.cursor);
         setHasMore(page.hasMore);
       } catch (error) {
@@ -123,7 +136,7 @@ export function LeaderboardTab({
     };
 
     loadLeaderboard();
-  }, [period, pageSize]);
+  }, [period, pageSize, friendsOnly, currentUserId]);
 
   const loadMore = async () => {
     if (!hasMore || loadingMore) return;
@@ -131,7 +144,16 @@ export function LeaderboardTab({
     setLoadingMore(true);
     try {
       const page = await getLeaderboard(period, { pageSize, cursor });
-      setEntries(prev => [...prev, ...page.entries]);
+      let filteredEntries = page.entries;
+
+      if (friendsOnly) {
+        // Filter new entries to only include current user and friends
+        filteredEntries = page.entries.filter(entry =>
+          entry.uid === currentUserId || friendUids.has(entry.uid)
+        );
+      }
+
+      setEntries(prev => [...prev, ...filteredEntries]);
       setCursor(page.cursor);
       setHasMore(page.hasMore);
     } catch (error) {
@@ -143,13 +165,28 @@ export function LeaderboardTab({
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-2">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="h-16 bg-muted rounded-lg animate-pulse" />
+          <div key={i} className="h-12 bg-muted rounded-lg animate-pulse" />
         ))}
       </div>
     );
   }
+
+  // Compute rendered entries (filtered for friends if needed)
+  const renderedEntries = friendsOnly
+    ? entries.filter(entry => entry.uid === currentUserId || friendUids.has(entry.uid))
+    : entries;
+
+  // Compute displayed entries and current user position
+  const displayed = maxRows ? renderedEntries.slice(0, maxRows) : renderedEntries;
+  const currentIndex = renderedEntries.findIndex(e => e.uid === currentUserId);
+
+  // Show "Your rank" if user is not in top list but exists in loaded entries
+  const showYourRank = maxRows &&
+    currentIndex >= maxRows &&
+    currentIndex !== -1 &&
+    renderedEntries.length > maxRows;
 
   if (entries.length === 0) {
     return (
@@ -163,6 +200,22 @@ export function LeaderboardTab({
     );
   }
 
+  // Special empty state for friends-only view
+  if (friendsOnly && renderedEntries.length <= 1) {
+    return (
+      <div className="text-center py-12">
+        <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+        <h3 className="text-lg font-semibold mb-2">No friends ranked yet</h3>
+        <p className="text-muted-foreground mb-6">
+          Add friends to see how you stack up each week.
+        </p>
+        <Button asChild>
+          <Link href="/friends">Add friends</Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <>
       {error && (
@@ -172,7 +225,7 @@ export function LeaderboardTab({
         </div>
       )}
       <div className={`${maxHeightClass} overflow-y-auto pr-2 space-y-2`}>
-        {entries.map((entry, index) => (
+        {(maxRows ? renderedEntries.slice(0, maxRows) : renderedEntries).map((entry, index) => (
           <LeaderboardRow
             key={entry.uid}
             entry={entry}
@@ -181,6 +234,18 @@ export function LeaderboardTab({
           />
         ))}
       </div>
+      {showYourRank && (
+        <div className="pt-4 border-t">
+          <div className="text-xs text-muted-foreground mb-2 px-3">Your rank</div>
+          <div className="bg-muted/40 rounded-lg p-2">
+            <LeaderboardRow
+              entry={renderedEntries[currentIndex]}
+              rank={currentIndex + 1}
+              isCurrentUser={true}
+            />
+          </div>
+        </div>
+      )}
       {hasMore && (
         <div className="pt-3 text-center">
           <Button onClick={loadMore} disabled={loadingMore} variant="outline">

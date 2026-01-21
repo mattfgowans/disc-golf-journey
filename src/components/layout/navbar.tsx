@@ -71,6 +71,9 @@ export function Navbar() {
                   <DropdownMenuItem asChild>
                     <Link href="/leaderboard">🏆 Leaderboard</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/friends">👥 Friends</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem>Settings</DropdownMenuItem>
                   <DropdownMenuItem 
                     className="text-red-600"
