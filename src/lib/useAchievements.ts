@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { doc, setDoc, updateDoc, Timestamp, writeBatch } from "firebase/firestore";
+import { doc, updateDoc, Timestamp, writeBatch } from "firebase/firestore";
 import { db } from "./firebase";
 import { useAuth } from "./firebase-auth";
 import { useUserDoc } from "./useUserDoc";
@@ -89,7 +89,7 @@ function mergeAchievementsWithTemplate(saved: Achievements, template: Achievemen
 
       // Base merged achievement from template
       const mergedAchievement: Achievement = {
-        ...templateAchievement,
+          ...templateAchievement,
         completedDate: savedAchievement?.completedDate,
       };
 
@@ -117,12 +117,13 @@ function mergeAchievementsWithTemplate(saved: Achievements, template: Achievemen
 }
 
 export function useAchievements(initialAchievements?: Achievements) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { userData, mergeUserData, loading: userDocLoading } = useUserDoc();
   const [achievements, setAchievements] = useState<Achievements>(
     initialAchievements || defaultAchievements
   );
   const [loading, setLoading] = useState(true);
+  const [authResolved, setAuthResolved] = useState(false);
 
   // Debounced save refs
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -130,12 +131,47 @@ export function useAchievements(initialAchievements?: Achievements) {
   const pendingContextRef = useRef<{ category: string; id: string } | undefined>(undefined);
   const pendingUidRef = useRef<string | null>(null);
 
+  // Track which user we've last hydrated achievements for
+  const lastHydratedUidRef = useRef<string | null>(null);
+
+  // Suppress autosave when setting achievements from firestore or reset
+  const suppressNextSaveRef = useRef(false);
+
+  // Helper to set achievements from remote sources (firestore/reset) with temporary suppression
+  function setAchievementsFromRemote(next: Achievements, reason: "firestore" | "reset") {
+    suppressNextSaveRef.current = true;
+    setAchievements(next);
+
+    // Clear suppression on the next tick so it can't suppress user actions
+    const clearSuppression = () => {
+      suppressNextSaveRef.current = false;
+    };
+
+    // Use queueMicrotask if available, otherwise setTimeout
+    if (typeof queueMicrotask !== "undefined") {
+      queueMicrotask(clearSuppression);
+    } else {
+      setTimeout(clearSuppression, 0);
+    }
+  }
+
+  // Track when auth state is resolved (user is either signed in or signed out)
+  useEffect(() => {
+    setAuthResolved(!authLoading);
+  }, [authLoading]);
+
   // Save achievements to Firestore
   const saveAchievements = async (newAchievements: Achievements, context?: { category: string, id: string }) => {
     if (!user) return;
 
     try {
-      console.log(`Saving achievements${context ? ` for ${context.category}/${context.id}` : ''}...`);
+      if (process.env.NODE_ENV !== "production") {
+        const progressSummary = Object.entries(newAchievements).map(([cat, achievements]) => {
+          const withProgress = achievements.filter(a => a.kind === "counter" ? (a as CounterAchievement).progress > 0 : a.isCompleted).length;
+          return `${cat}: ${withProgress}/${achievements.length}`;
+        }).join(', ');
+        console.log(`[ACH][WRITE] saveAchievements starting - uid: ${user.uid}, doc: users/${user.uid}, context: ${context ? `${context.category}/${context.id}` : 'none'}, progress: ${progressSummary}`);
+      }
 
       // Use writeBatch for atomic updates
       const batch = writeBatch(db);
@@ -143,6 +179,8 @@ export function useAchievements(initialAchievements?: Achievements) {
 
       // Update user achievements
       const userDocRef = doc(db, "users", user.uid);
+
+      // DEV-ONLY: Pre-flight check
       batch.update(userDocRef, {
         achievements: sanitizeAchievementsForFirestore(newAchievements),
         achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION,
@@ -199,16 +237,22 @@ export function useAchievements(initialAchievements?: Achievements) {
         points: pointTotals.allTime,
       }, { merge: true });
 
+
       // Commit all writes atomically
       await batch.commit();
 
-      console.log(`Successfully saved achievements${context ? ` for ${context.category}/${context.id}` : ''}`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[ACH][WRITE] saveAchievements SUCCESS - uid: ${user.uid}, context: ${context ? `${context.category}/${context.id}` : 'none'}`);
+      }
       // Update shared userData state locally
       mergeUserData({
         achievements: sanitizeAchievementsForFirestore(newAchievements),
         achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION
       });
     } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error(`[ACH][WRITE] saveAchievements FAILED - uid: ${user.uid}, context: ${context ? `${context.category}/${context.id}` : 'none'}`, error);
+      }
       console.error(`Failed to save achievements${context ? ` for ${context.category}/${context.id}` : ''}:`, error);
       throw error;
     }
@@ -216,6 +260,12 @@ export function useAchievements(initialAchievements?: Achievements) {
 
   // Debounced save function - combines multiple rapid changes into single write
   const scheduleSave = (newAchievements: Achievements, context?: { category: string, id: string }) => {
+    // Never schedule saves if user is null
+    if (!user) return;
+
+    // Check if this save should be suppressed (state came from firestore/reset)
+    if (suppressNextSaveRef.current) return;
+
     // Store the latest achievements, context, and user UID to save
     pendingAchievementsRef.current = newAchievements;
     pendingContextRef.current = context;
@@ -279,9 +329,11 @@ export function useAchievements(initialAchievements?: Achievements) {
 
   // Load achievements from shared user document
   useEffect(() => {
-    if (!user) {
-      setAchievements(initialAchievements || defaultAchievements);
+    // Only reset to defaults when auth is resolved and user is actually signed out
+    if (authResolved && !user) {
+      setAchievementsFromRemote(initialAchievements || defaultAchievements, "reset");
       setLoading(false);
+      lastHydratedUidRef.current = null;
       return;
     }
 
@@ -290,12 +342,17 @@ export function useAchievements(initialAchievements?: Achievements) {
       return; // Wait for user doc to load
     }
 
+    // Only hydrate from userData when conditions are met
+    if (!user?.uid || !userData?.achievements || lastHydratedUidRef.current === user.uid) {
+      return; // Already hydrated or conditions not met
+    }
+
     const loadAchievements = async () => {
       try {
-        const userDocRef = doc(db, "users", user.uid);
-
-        if (userData) {
-          const data = userData;
+        // At this point we know user exists and conditions are met for hydration
+        const currentUser = user!;
+        const data = userData;
+        if (data) {
           // Ensure savedAchievements has valid Achievements shape with fallbacks
           const savedAchievements: Achievements = data.achievements && typeof data.achievements === 'object' ? {
             skill: Array.isArray(data.achievements.skill) ? data.achievements.skill : [],
@@ -307,45 +364,19 @@ export function useAchievements(initialAchievements?: Achievements) {
           const savedVersion = data.achievementsSchemaVersion ?? 0;
           const needsMigration = savedVersion !== ACHIEVEMENTS_SCHEMA_VERSION;
 
-          // Check if user has any saved achievements in any category
-          const hasAnySaved =
-            savedAchievements &&
-            (savedAchievements.skill?.length > 0 ||
-             savedAchievements.social?.length > 0 ||
-             savedAchievements.collection?.length > 0);
+          // Check if the saved data has duplicate IDs across all categories (our bug from before)
+          const allIds = [
+            ...savedAchievements.skill.map((a: Achievement) => a.id),
+            ...savedAchievements.social.map((a: Achievement) => a.id),
+            ...savedAchievements.collection.map((a: Achievement) => a.id),
+          ];
+          const hasDuplicateIds = allIds.length !== new Set(allIds).size;
 
-          // If user has saved achievements, use them; otherwise initialize with defaults
-          if (hasAnySaved) {
-            // Check if the saved data has duplicate IDs across all categories (our bug from before)
-            const allIds = [
-              ...savedAchievements.skill.map((a: Achievement) => a.id),
-              ...savedAchievements.social.map((a: Achievement) => a.id),
-              ...savedAchievements.collection.map((a: Achievement) => a.id),
-            ];
-            const hasDuplicateIds = allIds.length !== new Set(allIds).size;
-
-            if (hasDuplicateIds || needsMigration) {
-              // Write when: corrupted data OR schema version changed
-              const achievementsToSave = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
-              await updateDoc(userDocRef, {
-                achievements: sanitizeAchievementsForFirestore(achievementsToSave),
-                achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION,
-                updatedAt: new Date().toISOString(),
-              });
-              // Update shared userData locally
-              mergeUserData({
-                achievements: sanitizeAchievementsForFirestore(achievementsToSave),
-                achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION
-              });
-              setAchievements(achievementsToSave);
-            } else {
-              // No write needed - just merge locally for display
-              const updatedAchievements = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
-              setAchievements(updatedAchievements);
-            }
-          } else {
-            // Initialize with default achievements if provided, otherwise empty
-            const achievementsToSave = initialAchievements || defaultAchievements;
+          // Only write to Firestore for true migrations (schema version or corruption)
+          if (hasDuplicateIds || needsMigration) {
+            // Write when: corrupted data OR schema version changed
+            const userDocRef = doc(db, "users", currentUser.uid);
+            const achievementsToSave = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
             await updateDoc(userDocRef, {
               achievements: sanitizeAchievementsForFirestore(achievementsToSave),
               achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION,
@@ -356,22 +387,42 @@ export function useAchievements(initialAchievements?: Achievements) {
               achievements: sanitizeAchievementsForFirestore(achievementsToSave),
               achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION
             });
-            setAchievements(achievementsToSave);
+
+            if (process.env.NODE_ENV !== "production") {
+              const progressSummary = Object.entries(achievementsToSave).map(([cat, achievements]) => {
+                const withProgress = achievements.filter(a => a.kind === "counter" ? (a as CounterAchievement).progress > 0 : a.isCompleted).length;
+                return `${cat}: ${withProgress}/${achievements.length}`;
+              }).join(', ');
+              console.log(`[ACH][READ] hydrated from firestore - uid: ${currentUser.uid}, progress: ${progressSummary}`);
+              }
+
+              setAchievementsFromRemote(achievementsToSave, "firestore");
+              lastHydratedUidRef.current = currentUser.uid;
+          } else {
+            // Normal hydration - merge saved data with template, no Firestore write
+            const mergedAchievements = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
+
+            if (process.env.NODE_ENV !== "production") {
+              const progressSummary = Object.entries(mergedAchievements).map(([cat, achievements]) => {
+                const withProgress = achievements.filter(a => a.kind === "counter" ? (a as CounterAchievement).progress > 0 : a.isCompleted).length;
+                return `${cat}: ${withProgress}/${achievements.length}`;
+              }).join(', ');
+              console.log(`[ACH][READ] hydrated from firestore - uid: ${currentUser.uid}, progress: ${progressSummary}`);
+              }
+
+              setAchievementsFromRemote(mergedAchievements, "firestore");
+              lastHydratedUidRef.current = currentUser.uid;
           }
         } else {
-          // Create user document with default achievements if it doesn't exist
-          const achievementsToSave = initialAchievements || defaultAchievements;
-          await setDoc(userDocRef, {
-            achievements: sanitizeAchievementsForFirestore(achievementsToSave),
-            achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION,
-            createdAt: new Date().toISOString(),
-          });
-          // Update shared userData locally
-          mergeUserData({
-            achievements: sanitizeAchievementsForFirestore(achievementsToSave),
-            achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION
-          });
-          setAchievements(achievementsToSave);
+          // userData exists but achievements is missing - set defaults locally, don't write
+          const fallbackAchievements = initialAchievements || defaultAchievements;
+
+          if (process.env.NODE_ENV !== "production") {
+            console.log(`[ACH][READ] hydrated from firestore - uid: ${currentUser.uid}, progress: (defaults)`);
+          }
+
+          setAchievementsFromRemote(fallbackAchievements, "firestore");
+          lastHydratedUidRef.current = currentUser.uid;
         }
       } catch (error) {
         console.error("Error loading achievements:", error);
@@ -386,6 +437,7 @@ export function useAchievements(initialAchievements?: Achievements) {
   // Toggle a single achievement (only for toggle achievements)
   const toggleAchievement = async (category: keyof Achievements, id: string) => {
     if (!user) return;
+
 
     const updatedAchievements: Achievements = {
       ...achievements,
@@ -407,8 +459,9 @@ export function useAchievements(initialAchievements?: Achievements) {
           isCompleted: nextCompleted,
           completedDate: nextCompletedDate,
         };
-      }),
-    };
+        }),
+      };
+
 
     setAchievements(updatedAchievements);
 
@@ -419,6 +472,7 @@ export function useAchievements(initialAchievements?: Achievements) {
   // Increment counter achievement progress
   const incrementAchievement = async (category: keyof Achievements, id: string, amount: number = 1) => {
     if (!user) return;
+
 
     const updatedAchievements: Achievements = {
       ...achievements,
@@ -443,13 +497,14 @@ export function useAchievements(initialAchievements?: Achievements) {
             : achievement.completedDate;
 
         return {
-          ...achievement,
+              ...achievement,
           progress: nextProgress,
           isCompleted: nextCompleted,
           completedDate: nextCompletedDate,
         };
       }),
     };
+
 
     setAchievements(updatedAchievements);
 

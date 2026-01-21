@@ -1,6 +1,6 @@
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-import { getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
+import { initializeApp, getApps, FirebaseApp, getApp } from "firebase/app";
+import { getAuth, Auth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, Firestore, connectFirestoreEmulator } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "demo-api-key",
@@ -22,6 +22,28 @@ if (getApps().length === 0) {
 // Initialize Firebase services
 export const auth: Auth = getAuth(app);
 export const db: Firestore = getFirestore(app);
+
+// Conditionally connect to emulators in development
+if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true") {
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[FIREBASE] Connecting to emulators...");
+
+    // Connect Firestore emulator
+    connectFirestoreEmulator(db, "localhost", 8080);
+
+    // Connect Auth emulator
+    connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+
+    console.log("[FIREBASE] Connected to emulators");
+  }
+}
+
+// Dev-only startup log
+if (process.env.NODE_ENV !== "production") {
+  const app = getApp();
+  const isUsingEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true";
+  console.log(`[FIREBASE] project=${app.options.projectId} emulator=${isUsingEmulator}`);
+}
 
 export default app;
 

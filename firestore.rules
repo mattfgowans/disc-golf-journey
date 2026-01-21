@@ -27,18 +27,19 @@ service cloud.firestore {
       match /friends/{friendUid} {
         allow read: if request.auth != null && request.auth.uid == userId;
 
-        // Owner can create/update as before
-        allow create, update: if request.auth != null && request.auth.uid == userId;
-
-        // ALSO allow the friend to create the doc whose id == their uid,
-        // but only if there is a matching incoming request doc on the friend's side
-        // (i.e., the friend is accepting a real request)
-        allow create: if request.auth != null
-                      && request.auth.uid == friendUid
-                      && exists(/databases/$(database)/documents/users/$(friendUid)/friendRequestsIn/$(userId));
+        // Allow create/update for owner OR friend accepting request
+        allow create, update: if request.auth != null && (
+          request.auth.uid == userId ||
+          (request.auth.uid == friendUid &&
+           exists(/databases/$(database)/documents/users/$(friendUid)/friendRequestsIn/$(userId)))
+        );
 
         // Keep delete as-is (unfriend)
         allow delete: if request.auth != null && (request.auth.uid == userId || request.auth.uid == friendUid);
+      }
+
+      match /stats/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
       }
     }
 
@@ -53,7 +54,8 @@ service cloud.firestore {
     // Usernames collection - for username uniqueness
     match /usernames/{username} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow create, update: if request.auth != null && request.auth.uid == request.resource.data.uid;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
   }
 }
