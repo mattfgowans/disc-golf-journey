@@ -121,13 +121,6 @@ function DashboardInner() {
 
   const uid = auth.currentUser?.uid ?? "(no user)";
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      console.log("[Dashboard] uid=", auth.currentUser?.uid, "achievementsLoading=", achievementsLoading);
-    }, 2000);
-    return () => clearInterval(id);
-  }, [achievementsLoading]);
-
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
 

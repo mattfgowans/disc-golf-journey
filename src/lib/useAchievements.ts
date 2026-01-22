@@ -165,6 +165,66 @@ export function useAchievements(initialAchievements?: Achievements) {
   const saveAchievements = async (newAchievements: Achievements, context?: { category: string, id: string }) => {
     if (!user) return;
 
+    // Prevent saves during hydration to avoid resetting points to 0
+    if (loading) {
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[ACH][WRITE] saveAchievements skipped - still hydrating, uid: ${user.uid}`);
+      }
+      return;
+    }
+
+    // Safety check: Don't reset points to 0 if we have existing achievement data
+    // This prevents nuking points when achievements haven't been properly merged yet
+    const hasExistingAchievements = userData?.achievements && (
+      (Array.isArray(userData.achievements.skill) && userData.achievements.skill.length > 0) ||
+      (Array.isArray(userData.achievements.social) && userData.achievements.social.length > 0) ||
+      (Array.isArray(userData.achievements.collection) && userData.achievements.collection.length > 0)
+    );
+
+    const allNewAchievements = [
+      ...newAchievements.skill,
+      ...newAchievements.social,
+      ...newAchievements.collection,
+    ];
+    const newPointTotals = computePointTotals(allNewAchievements);
+
+    // If new points would be 0 but we have existing achievements, skip the save
+    const newPointsAreZero = newPointTotals.week === 0 && newPointTotals.month === 0 &&
+                             newPointTotals.year === 0 && newPointTotals.allTime === 0;
+    if (newPointsAreZero && hasExistingAchievements && !context) {
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[ACH][WRITE] saveAchievements skipped - would reset points to 0, uid: ${user.uid}`);
+      }
+      return;
+    }
+
+    // Detect existing points from Firestore
+    const existingPoints = userData?.stats?.points;
+
+    const hasExistingPoints =
+      existingPoints &&
+      (
+        (existingPoints.week ?? 0) > 0 ||
+        (existingPoints.month ?? 0) > 0 ||
+        (existingPoints.year ?? 0) > 0 ||
+        (existingPoints.allTime ?? 0) > 0
+      );
+
+    // If new points would be 0 but we already had points, skip the save
+    if (newPointsAreZero && hasExistingPoints && !context) {
+      if (process.env.NODE_ENV !== "production") {
+        console.log(
+          `[ACH][WRITE] saveAchievements skipped - would reset existing points to 0`,
+          {
+            uid: user.uid,
+            existingPoints,
+            newPointTotals,
+          }
+        );
+      }
+      return;
+    }
+
     try {
       if (process.env.NODE_ENV !== "production") {
         const progressSummary = Object.entries(newAchievements).map(([cat, achievements]) => {

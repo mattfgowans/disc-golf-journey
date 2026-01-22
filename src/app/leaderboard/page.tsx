@@ -25,6 +25,13 @@ export default function LeaderboardPage() {
     localStorage.setItem(SCOPE_STORAGE_KEY, scope);
   }, [scope]);
 
+  // Debug: Log user UID
+  useEffect(() => {
+    if (user?.uid) {
+      console.log("DEBUG UID:", user.uid);
+    }
+  }, [user]);
+
   // Ensure periodTab is always valid
   const safePeriodTab = periodTab && ["weekly", "monthly", "yearly", "allTime"].includes(periodTab)
     ? periodTab
