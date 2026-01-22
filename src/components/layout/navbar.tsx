@@ -60,15 +60,21 @@ export function Navbar() {
           ) : (
             <>
               <Link href="/dashboard">
-                <Button variant="ghost">
+                <Button variant="ghost" className="flex flex-col items-center justify-center sm:flex-row">
                   <LayoutDashboard className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Dashboard</span>
+                  <span className="sm:hidden text-[10px] leading-none text-muted-foreground mt-1">
+                    Dashboard
+                  </span>
                 </Button>
               </Link>
               <Link href="/leaderboard">
-                <Button variant="ghost">
+                <Button variant="ghost" className="flex flex-col items-center justify-center sm:flex-row">
                   <Trophy className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Leaderboard</span>
+                  <span className="sm:hidden text-[10px] leading-none text-muted-foreground mt-1">
+                    Leaderboard
+                  </span>
                 </Button>
               </Link>
               <DropdownMenu>
