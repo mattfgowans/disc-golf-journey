@@ -37,7 +37,7 @@ export function AchievementSection({
 }: AchievementSectionProps) {
   return (
     <Collapsible open={isOpen}>
-      <div className="sticky top-[305px] md:top-[252px] z-0 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm scroll-mt-44">
+      <div className="sticky top-[404px] md:top-[320px] z-40 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm scroll-mt-[430px] md:scroll-mt-[336px]">
         <button
           type="button"
           onClick={onToggle}
