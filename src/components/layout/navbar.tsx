@@ -35,7 +35,7 @@ export function Navbar() {
     return (
       <nav className="sticky top-0 z-50 bg-background border-b">
         <div className="flex items-center px-4 container mx-auto bg-background min-h-16 py-2 sm:h-16 sm:py-0">
-          <Link href="/" className="font-bold text-xl leading-tight">
+          <Link href="/" className="font-bold text-xl leading-tight whitespace-nowrap">
             Disc Golf Journey
           </Link>
         </div>
@@ -46,11 +46,11 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-background border-b">
       <div className="flex items-center px-4 container mx-auto bg-background min-h-16 py-2 sm:h-16 sm:py-0">
-        <Link href="/" className="font-bold text-xl leading-tight">
+        <Link href="/" className="font-bold text-xl leading-tight whitespace-nowrap">
           Disc Golf Journey
         </Link>
         
-        <div className="ml-auto flex items-center gap-2 sm:gap-4 shrink-0">
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-2 sm:gap-4 shrink-0">
           {!user ? (
             <>
               <Button variant="ghost" onClick={signInWithGoogle}>
@@ -61,14 +61,14 @@ export function Navbar() {
             <>
               <Link href="/dashboard">
                 <Button variant="ghost">
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  Dashboard
+                  <LayoutDashboard className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Dashboard</span>
                 </Button>
               </Link>
               <Link href="/leaderboard">
                 <Button variant="ghost">
-                  <Trophy className="h-4 w-4 mr-2" />
-                  Leaderboard
+                  <Trophy className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Leaderboard</span>
                 </Button>
               </Link>
               <DropdownMenu>

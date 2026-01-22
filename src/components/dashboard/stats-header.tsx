@@ -26,7 +26,7 @@ export function StatsHeader({
   const qualifiesForPatch = (percentage: number) => percentage >= 80;
 
   return (
-    <div className="sticky top-[100px] bg-background z-[100] border-b w-full">
+    <div className="bg-background border-b w-full">
       <div className="flex flex-col w-full gap-0.5">
         {/* Rank, Points and Days */}
         <div className="flex flex-col md:flex-row gap-1.5 md:gap-2 p-0.5 items-center justify-center">

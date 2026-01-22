@@ -273,27 +273,32 @@ function DashboardInner() {
 
   const currentStreak = getCurrentStreak();
 
+  const activeCompletion =
+    activeTab === "skill" ? skillCompletion :
+    activeTab === "social" ? socialCompletion :
+    collectionCompletion;
+
   return (
-    <div className="container mx-auto py-4" data-gramm="false">
+    <div className="container mx-auto py-4 -mt-8" data-gramm="false">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="sticky top-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 z-[100] border-b">
+        <div className="sticky top-16 z-50 bg-background border-b">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="skill">Skill</TabsTrigger>
             <TabsTrigger value="social">Social</TabsTrigger>
             <TabsTrigger value="collection">Collection</TabsTrigger>
           </TabsList>
-        </div>
 
-        <TabsContent value="skill">
           <StatsHeader
-            completionPercentage={skillCompletion}
+            completionPercentage={activeCompletion}
             totalPoints={totalPoints}
             currentStreak={currentStreak}
             currentRank={currentRank}
             nextRank={nextRank}
             rankProgress={rankProgress}
           />
+          </div>
 
+        <TabsContent value="skill">
           <div className="mt-4">
             <div className="space-y-4">
               {SECTIONS.skill.map((section) => {
@@ -321,15 +326,6 @@ function DashboardInner() {
           </div>
         </TabsContent>
         <TabsContent value="social">
-          <StatsHeader
-            completionPercentage={socialCompletion}
-            totalPoints={totalPoints}
-            currentStreak={currentStreak}
-            currentRank={currentRank}
-            nextRank={nextRank}
-            rankProgress={rankProgress}
-          />
-
           <div className="mt-4">
             <div className="space-y-4">
               {SECTIONS.social.map((section) => {
@@ -357,15 +353,6 @@ function DashboardInner() {
           </div>
         </TabsContent>
         <TabsContent value="collection">
-          <StatsHeader
-            completionPercentage={collectionCompletion}
-            totalPoints={totalPoints}
-            currentStreak={currentStreak}
-            currentRank={currentRank}
-            nextRank={nextRank}
-            rankProgress={rankProgress}
-          />
-
           <div className="mt-4">
             <div className="space-y-4">
               {SECTIONS.collection.map((section) => {
