@@ -44,21 +44,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInPromiseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
-    // Handle redirect result on app load (before attaching auth state listener)
-    getRedirectResult(auth).catch((error) => {
-      console.warn("Redirect result error (non-critical):", error);
-      // Don't break the app if redirect handling fails
-    });
+    let unsubscribe: (() => void) | null = null;
 
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
+    (async () => {
+      try {
+        await setPersistence(auth, browserLocalPersistence);
+      } catch (e) {
+        console.warn("Auth persistence setup failed:", e);
+        // continue anyway
+      }
 
-      // If auth state changes, clear any stale in-flight lock
-      signInPromiseRef.current = null;
-    });
+      try {
+        await getRedirectResult(auth);
+      } catch (error) {
+        console.warn("Redirect result error (non-critical):", error);
+      }
 
-    return () => unsubscribe();
+      unsubscribe = onAuthStateChanged(auth, (u) => {
+        setUser(u);
+        setLoading(false);
+        signInPromiseRef.current = null;
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[Auth] state", { uid: u?.uid ?? null });
+        }
+      });
+    })();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   const signInWithGoogle = async () => {
