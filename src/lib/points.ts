@@ -1,6 +1,7 @@
 "use client";
 
 import { Achievement } from "./useAchievements";
+import { getWeeklyKey } from "./time";
 
 export interface PointTotals {
   allTime: number;
@@ -15,8 +16,9 @@ export interface PeriodKeys {
   yearlyKey: string;
 }
 
-// Generate period keys for a given date
-export function getWeekKey(date: Date): string {
+// Legacy week key calculation (Sunday-starting weeks)
+// Kept for backward compatibility with existing weekly leaderboard data
+export function getLegacyWeekKey(date: Date): string {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
@@ -24,6 +26,11 @@ export function getWeekKey(date: Date): string {
   const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
   const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
   return `${year}-W${String(weekNumber).padStart(2, '0')}`;
+}
+
+// Generate period keys for a given date
+export function getWeekKey(date: Date): string {
+  return getWeeklyKey(date);
 }
 
 export function getMonthKey(date: Date): string {
@@ -45,7 +52,7 @@ export function getPeriodKeys(date: Date = new Date()): PeriodKeys {
 // Compute point totals from achievements, bucketing by completion date
 export function computePointTotals(achievements: Achievement[]): PointTotals {
   const now = new Date();
-  const currentWeek = getWeekKey(now);
+  const currentWeek = getWeekKey(now); // Now uses ISO weeks (Monday start, Denver timezone)
   const currentMonth = getMonthKey(now);
   const currentYear = getYearKey(now);
 

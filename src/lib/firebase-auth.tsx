@@ -8,6 +8,9 @@ import {
   signInWithRedirect,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
+  setPersistence,
+  browserLocalPersistence,
+  getRedirectResult,
 } from "firebase/auth";
 import { auth } from "./firebase";
 
@@ -41,6 +44,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInPromiseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
+    // Handle redirect result on app load (before attaching auth state listener)
+    getRedirectResult(auth).catch((error) => {
+      console.warn("Redirect result error (non-critical):", error);
+      // Don't break the app if redirect handling fails
+    });
+
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
@@ -60,10 +69,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const attempt = (async () => {
       try {
-        // Try popup first (works on most devices) - increased timeout for mobile
+        // Set auth persistence to browser local storage
+        await setPersistence(auth, browserLocalPersistence);
+
+        // Try popup first (works on most devices)
         await withTimeout(signInWithPopup(auth, provider), 10000, "Sign-in popup timed out");
       } catch (err: any) {
         const code = err?.code as string | undefined;
+
+        // Try redirect fallback for popup failures
+        if (
+          code === "auth/popup-blocked" ||
+          code === "auth/popup-closed-by-user" ||
+          code === "auth/operation-not-supported"
+        ) {
+          try {
+            console.log("Popup failed, trying redirect fallback...");
+            await signInWithRedirect(auth, provider);
+            return;
+          } catch (redirectErr: any) {
+            console.error("Both popup and redirect failed:", { popupError: err, redirectError: redirectErr });
+            throw new Error("Sign-in failed. Please check your browser settings and try again.");
+          }
+        }
+
+        // Handle other error cases
         const msg = (err?.message ?? "").toLowerCase();
         const isMissingInitialState =
           code === "auth/missing-initial-state" ||
@@ -77,35 +107,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Normal user behaviors: don't treat as error
-        if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+        if (code === "auth/cancelled-popup-request") {
           return;
         }
 
-        // Timeout error (from our wrapper) should just allow retry
+        // Timeout error (from our wrapper) - fall back to redirect
         if (err instanceof Error && err.message === "Sign-in popup timed out") {
-          console.warn(err.message);
-          return;
-        }
-
-        // Handle popup-blocked differently for iOS vs other platforms
-        if (code === "auth/popup-blocked") {
-          const isLikelyIOS =
-            typeof navigator !== "undefined" &&
-            /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-          if (isLikelyIOS) {
-            // On iOS, redirect often fails due to sessionStorage issues in in-app browsers
-            throw new Error("Sign-in can fail when opened inside Messages or other apps. Tap Share → Open in Safari, then try again.");
-          } else {
-            // For non-iOS devices, try redirect as fallback
-            try {
-              console.log("Popup blocked, trying redirect fallback...");
-              await signInWithRedirect(auth, provider);
-              return;
-            } catch (redirectErr: any) {
-              console.error("Both popup and redirect failed:", { popupError: err, redirectError: redirectErr });
-              throw new Error("Sign-in failed. Please check your browser settings and try again.");
-            }
+          try {
+            console.log("Popup timed out, trying redirect fallback...");
+            await signInWithRedirect(auth, provider);
+            return;
+          } catch (redirectErr: any) {
+            console.error("Both popup and redirect failed:", { popupError: err, redirectError: redirectErr });
+            throw new Error("Sign-in failed. Please check your browser settings and try again.");
           }
         }
 

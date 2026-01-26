@@ -11,7 +11,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { getPeriodKeys } from "./points";
+import { getPeriodKeys, getLegacyWeekKey } from "./points";
 
 export interface LeaderboardEntry {
   uid: string;
@@ -48,15 +48,12 @@ export function getCurrentPeriodKey(period: LeaderboardPeriod): string {
   }
 }
 
-// Get leaderboard entries for a period with pagination
-export async function getLeaderboard(
-  period: LeaderboardPeriod,
-  opts?: { pageSize?: number; cursor?: DocumentSnapshot | null }
+// Helper function to fetch a leaderboard page from a specific period key
+async function fetchLeaderboardPage(
+  periodKey: string,
+  pageSize: number,
+  cursor: DocumentSnapshot | null
 ): Promise<LeaderboardPage> {
-  const periodKey = getCurrentPeriodKey(period);
-  const pageSize = opts?.pageSize ?? 50;
-  const cursor = opts?.cursor ?? null;
-
   const leaderboardRef = collection(db, "leaderboards", periodKey, "entries");
 
   let q = query(
@@ -94,6 +91,41 @@ export async function getLeaderboard(
     cursor: nextCursor,
     hasMore,
   };
+}
+
+// Weekly leaderboards use ISO weeks (Monday start) in America/Denver.
+// Legacy Sunday-based weekly keys are supported as a read-only fallback
+// to preserve existing user data after the rollover logic change.
+
+// Get leaderboard entries for a period with pagination
+export async function getLeaderboard(
+  period: LeaderboardPeriod,
+  opts?: { pageSize?: number; cursor?: DocumentSnapshot | null }
+): Promise<LeaderboardPage> {
+  const pageSize = opts?.pageSize ?? 50;
+  const cursor = opts?.cursor ?? null;
+
+  // For weekly leaderboards, implement backward compatibility fallback
+  if (period === "weekly") {
+    const primaryKey = getCurrentPeriodKey("weekly"); // New ISO week key
+    const legacyKey = `weekly_${getLegacyWeekKey(new Date())}`; // Old Sunday-starting key
+
+    // Try primary (new) key first
+    const primaryResult = await fetchLeaderboardPage(primaryKey, pageSize, cursor);
+
+    // If primary key has data or we're on a subsequent page, use it
+    if (primaryResult.entries.length > 0 || cursor) {
+      return primaryResult;
+    }
+
+    // If primary key is empty and we're on the first page, try legacy key
+    const legacyResult = await fetchLeaderboardPage(legacyKey, pageSize, null);
+    return legacyResult;
+  }
+
+  // For non-weekly periods, use normal logic
+  const periodKey = getCurrentPeriodKey(period);
+  return fetchLeaderboardPage(periodKey, pageSize, cursor);
 }
 
 // Get user's current stats (for personal dashboard)

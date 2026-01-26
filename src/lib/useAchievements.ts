@@ -242,11 +242,11 @@ export function useAchievements(initialAchievements?: Achievements) {
       const userDocRef = doc(db, "users", user.uid);
 
       // DEV-ONLY: Pre-flight check
-      batch.update(userDocRef, {
+      batch.set(userDocRef, {
         achievements: sanitizeAchievementsForFirestore(newAchievements),
         achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION,
         updatedAt: now,
-      });
+      }, { merge: true });
 
       // Compute point totals and update stats
       const allAchievements = [
