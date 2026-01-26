@@ -1,7 +1,9 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { useAuth } from "@/lib/firebase-auth";
+import { useUserDoc } from "@/lib/useUserDoc";
+import { usePathname, useRouter } from "next/navigation";
 import { SignInPanel } from "@/components/auth/sign-in-panel";
 import { Loader2 } from "lucide-react";
 
@@ -17,8 +19,22 @@ export function RequireAuth({
   subtitle = "Sign in with Google to access your account.",
 }: RequireAuthProps) {
   const { user, loading } = useAuth();
+  const { userData, loading: userDataLoading } = useUserDoc();
+  const pathname = usePathname();
+  const router = useRouter();
 
-  if (loading) {
+  // Check if user has completed username onboarding
+  const hasUsername = Boolean(userData?.profile?.username);
+  const isOnOnboardingPage = pathname === "/onboarding/username";
+
+  // Handle redirect to onboarding in useEffect to avoid side effects in render
+  useEffect(() => {
+    if (user && !userDataLoading && !hasUsername && !isOnOnboardingPage) {
+      router.replace("/onboarding/username");
+    }
+  }, [user, userDataLoading, hasUsername, isOnOnboardingPage, router]);
+
+  if (loading || userDataLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
@@ -31,5 +47,16 @@ export function RequireAuth({
     return <SignInPanel title={title} subtitle={subtitle} />;
   }
 
+  if (!hasUsername && !isOnOnboardingPage) {
+    // Show loading while redirect happens in useEffect
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">Setting up your account...</p>
+      </div>
+    );
+  }
+
+  // Allow access to onboarding page or if user has username
   return <>{children}</>;
 }
