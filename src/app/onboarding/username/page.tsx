@@ -25,17 +25,17 @@ export default function UsernameOnboardingPage() {
   const [loading, setLoading] = useState(false);
 
   const validateUsername = (value: string): string | null => {
-    const trimmed = value.trim().toLowerCase();
+    const normalized = value.trim().toLowerCase().replace(/^@/, "");
 
-    if (trimmed.length < 3) {
+    if (normalized.length < 3) {
       return "Username must be at least 3 characters";
     }
 
-    if (trimmed.length > 20) {
+    if (normalized.length > 20) {
       return "Username must be at most 20 characters";
     }
 
-    if (!/^[a-z0-9._]+$/.test(trimmed)) {
+    if (!/^[a-z0-9._]+$/.test(normalized)) {
       return "Username can only contain letters, numbers, dots, and underscores";
     }
 
@@ -50,8 +50,9 @@ export default function UsernameOnboardingPage() {
       return;
     }
 
-    const trimmedUsername = username.trim().toLowerCase();
-    const validationError = validateUsername(trimmedUsername);
+    // Normalize username: trim, lowercase, remove leading '@'
+    const normalizedUsername = username.trim().toLowerCase().replace(/^@/, "");
+    const validationError = validateUsername(username); // Validate original input
 
     if (validationError) {
       setError(validationError);
@@ -62,8 +63,8 @@ export default function UsernameOnboardingPage() {
     setError("");
 
     try {
-      // Check if username is available
-      const usernameRef = doc(db, "usernames", trimmedUsername);
+      // Check if username is available (use normalized)
+      const usernameRef = doc(db, "usernames", normalizedUsername);
       const usernameSnap = await getDoc(usernameRef);
 
       if (usernameSnap.exists()) {
@@ -75,12 +76,15 @@ export default function UsernameOnboardingPage() {
         }
       }
 
-      // Reserve the username
+      // Reserve the username (use normalized)
       await setDoc(usernameRef, { uid: user.uid }, { merge: true });
 
-      // Update user document
+      // Update user document (use normalized)
       const userRef = doc(db, "users", user.uid);
-      await setDoc(userRef, { profile: { username: trimmedUsername } }, { merge: true });
+      await setDoc(userRef, {
+        username: normalizedUsername,
+        profile: { username: normalizedUsername }
+      }, { merge: true });
 
       // Redirect to dashboard
       router.replace("/dashboard");

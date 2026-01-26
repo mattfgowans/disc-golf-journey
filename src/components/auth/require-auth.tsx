@@ -23,10 +23,12 @@ export function RequireAuth({
   const pathname = usePathname();
   const router = useRouter();
 
+  const userDocReady = userData !== null;
+
   // Check if user has completed username onboarding
   const hasUsername =
-    Boolean(userData?.profile?.username) ||
-    Boolean((userData as any)?.username);
+    Boolean((userData as any)?.username) ||
+    Boolean(userData?.profile?.username);
 
   const hasAnyProgress =
     (userData?.stats?.points?.allTime ?? 0) > 0 ||
@@ -43,13 +45,14 @@ export function RequireAuth({
     if (
       user &&
       !userDataLoading &&
+      userDocReady &&
       !hasUsername &&
       !hasAnyProgress &&
       !isOnOnboardingPage
     ) {
       router.replace("/onboarding/username");
     }
-  }, [user, userDataLoading, hasUsername, hasAnyProgress, isOnOnboardingPage, router]);
+  }, [user, userDataLoading, userDocReady, hasUsername, hasAnyProgress, isOnOnboardingPage, router]);
 
   if (loading || userDataLoading) {
     return (
@@ -64,7 +67,7 @@ export function RequireAuth({
     return <SignInPanel title={title} subtitle={subtitle} />;
   }
 
-  if (!hasUsername && !hasAnyProgress && !isOnOnboardingPage) {
+  if (userDocReady && !hasUsername && !hasAnyProgress && !isOnOnboardingPage) {
     // Show loading while redirect happens in useEffect
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">

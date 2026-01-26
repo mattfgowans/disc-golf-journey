@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
 import { useAuth } from "./firebase-auth";
 
@@ -12,8 +12,6 @@ export function useUserDoc() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-
     if (!user) {
       setUserData(null);
       setUserExists(false);
@@ -24,31 +22,43 @@ export function useUserDoc() {
     // Reset loading state when user changes
     setLoading(true);
 
-    const fetchUserDoc = async () => {
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(userDocRef);
-        // Avoid calling exists() twice by storing result
+    let active = true;
+    const userDocRef = doc(db, "users", user.uid);
+    const unsubscribe = onSnapshot(
+      userDocRef,
+      (docSnap) => {
+        if (!active) return;
         const exists = docSnap.exists();
-        if (cancelled) return;
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[useUserDoc] snapshot", {
+            uid: user.uid,
+            exists,
+            data: exists ? docSnap.data() : null,
+          });
+        }
         setUserExists(exists);
         setUserData(exists ? (docSnap.data() as any) : null);
-      } catch (error) {
-        console.error("Error fetching user document:", error);
-        if (cancelled) return;
+        setLoading(false);
+      },
+      (error) => {
+        if (!active) return;
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[useUserDoc] snapshot ERROR", {
+            uid: user.uid,
+            message: error?.message,
+            code: (error as any)?.code,
+          });
+        }
+        console.error("Error listening to user document:", error);
         setUserExists(false);
         setUserData(null);
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
-    };
-
-    fetchUserDoc();
+    );
 
     return () => {
-      cancelled = true;
+      active = false;
+      unsubscribe();
     };
   }, [user]);
 
