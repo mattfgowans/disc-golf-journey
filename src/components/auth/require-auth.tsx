@@ -1,82 +1,46 @@
 "use client";
-
-import { ReactNode, useEffect } from "react";
-import { useAuth } from "@/lib/firebase-auth";
-import { useUserDoc } from "@/lib/useUserDoc";
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { SignInPanel } from "@/components/auth/sign-in-panel";
-import { Loader2 } from "lucide-react";
+import { useAuth } from "@/lib/firebase-auth";
+import { useUserProfile } from "@/lib/useUserProfile";
 
-interface RequireAuthProps {
-  children: ReactNode;
-  title?: string;
-  subtitle?: string;
-}
+const ONBOARDING_PATH = "/onboarding/username";
+const LOGIN_PATH = "/login";
+const DEFAULT_APP_PATH = "/dashboard"; // justified by src/app/dashboard/page.tsx
 
-export function RequireAuth({
-  children,
-  title = "Sign in to continue",
-  subtitle = "Sign in with Google to access your account.",
-}: RequireAuthProps) {
-  const { user, loading } = useAuth();
-  const { userData, loading: userDataLoading } = useUserDoc();
-  const pathname = usePathname();
+export function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useUserProfile(user?.uid);
+
   const router = useRouter();
+  const pathname = usePathname();
 
-  const userDocReady = userData !== null;
-
-  // Check if user has completed username onboarding
-  const hasUsername =
-    Boolean((userData as any)?.username) ||
-    Boolean(userData?.profile?.username);
-
-  const hasAnyProgress =
-    (userData?.stats?.points?.allTime ?? 0) > 0 ||
-    (userData?.stats?.points?.week ?? 0) > 0 ||
-    (userData?.stats?.points?.month ?? 0) > 0 ||
-    (userData?.stats?.points?.year ?? 0) > 0 ||
-    (userData?.stats?.points?.weekly ?? 0) > 0 ||
-    (userData?.stats?.points?.monthly ?? 0) > 0 ||
-    (userData?.stats?.points?.yearly ?? 0) > 0;
-  const isOnOnboardingPage = pathname === "/onboarding/username";
-
-  // Handle redirect to onboarding in useEffect to avoid side effects in render
   useEffect(() => {
-    if (
-      user &&
-      !userDataLoading &&
-      userDocReady &&
-      !hasUsername &&
-      !hasAnyProgress &&
-      !isOnOnboardingPage
-    ) {
-      router.replace("/onboarding/username");
+    if (authLoading) return;
+
+    if (!user) {
+      if (pathname !== LOGIN_PATH) router.replace(LOGIN_PATH);
+      return;
     }
-  }, [user, userDataLoading, userDocReady, hasUsername, hasAnyProgress, isOnOnboardingPage, router]);
 
-  if (loading || userDataLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    );
-  }
+    if (profileLoading) return;
 
-  if (!user) {
-    return <SignInPanel title={title} subtitle={subtitle} />;
-  }
+    const hasUsername = !!profile?.username;
 
-  if (userDocReady && !hasUsername && !hasAnyProgress && !isOnOnboardingPage) {
-    // Show loading while redirect happens in useEffect
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-        <p className="text-gray-600">Setting up your account...</p>
-      </div>
-    );
-  }
+    if (!hasUsername && pathname !== ONBOARDING_PATH) {
+      router.replace(ONBOARDING_PATH);
+      return;
+    }
 
-  // Allow access if on onboarding page, or if user has a username, or if user already has progress
+    if (hasUsername && pathname === ONBOARDING_PATH) {
+      router.replace(DEFAULT_APP_PATH);
+    }
+  }, [authLoading, user, profileLoading, profile, pathname, router]);
+
+  if (authLoading) return null;
+  if (!user) return null;
+  if (profileLoading) return null;
+  if (!profile?.username && pathname !== ONBOARDING_PATH) return null;
+
   return <>{children}</>;
 }

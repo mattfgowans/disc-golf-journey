@@ -110,7 +110,7 @@ function getInitialActiveTab(): string {
 
 export default function DashboardPage() {
   return (
-    <RequireAuth title="Sign in to track your achievements" subtitle="Sign in with Google to save your progress and track your disc golf journey.">
+    <RequireAuth>
       <DashboardInner />
     </RequireAuth>
   );

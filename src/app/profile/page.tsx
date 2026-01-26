@@ -5,15 +5,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUserProfile, type UserProfile } from "@/lib/useUserProfile";
+import { useUserDoc } from "@/lib/useUserDoc";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Loader2, Edit2, Save, X } from "lucide-react";
 import Link from "next/link";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/lib/firebase-auth";
 
 export default function ProfilePage() {
-  const { profile, loading: profileLoading, updateProfile } = useUserProfile();
+  const { user } = useAuth();
+  const { userData: profile, loading: profileLoading } = useUserDoc();
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<UserProfile>>({});
+  const [editForm, setEditForm] = useState<Record<string, any>>({});
+
+  const updateProfile = async (updates: Record<string, any>) => {
+    if (!user) throw new Error("Not authenticated");
+
+    const userRef = doc(db, "users", user.uid);
+
+    // If username is being updated, check availability
+    if (updates.username && updates.username !== profile?.username) {
+      const normalizedUsername = updates.username.trim().toLowerCase().replace(/^@/, "");
+      const usernameRef = doc(db, "usernames", normalizedUsername);
+      const usernameSnap = await getDoc(usernameRef);
+
+      if (usernameSnap.exists() && usernameSnap.data().uid !== user.uid) {
+        throw new Error("Username already taken");
+      }
+
+      // Reserve the username
+      await setDoc(usernameRef, { uid: user.uid }, { merge: true });
+
+      // Update with normalized username
+      updates.username = normalizedUsername;
+      updates.profile = { ...updates.profile, username: normalizedUsername };
+    }
+
+    await setDoc(userRef, updates, { merge: true });
+  };
 
   // Initialize edit form when profile loads
   useEffect(() => {
@@ -26,7 +56,7 @@ export default function ProfilePage() {
   }, [profile]);
 
   return (
-    <RequireAuth title="Sign in to view your profile" subtitle="Sign in with Google to manage your profile information.">
+    <RequireAuth>
       {/* Handle profile loading and error states inside RequireAuth */}
       {profileLoading ? (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -61,12 +91,12 @@ function ProfileContent({
   setEditForm,
   updateProfile,
 }: {
-  profile: UserProfile;
+  profile: Record<string, any>;
   isEditing: boolean;
   setIsEditing: (editing: boolean) => void;
-  editForm: Partial<UserProfile>;
-  setEditForm: (form: Partial<UserProfile> | ((prev: Partial<UserProfile>) => Partial<UserProfile>)) => void;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  editForm: Record<string, any>;
+  setEditForm: (form: Record<string, any> | ((prev: Record<string, any>) => Record<string, any>)) => void;
+  updateProfile: (updates: Record<string, any>) => Promise<void>;
 }) {
   const handleSave = async () => {
     try {
@@ -98,7 +128,7 @@ function ProfileContent({
       .split(" ")
       .filter(Boolean)
       .slice(0, 2)
-      .map((n) => n[0])
+      .map((n: string) => n[0])
       .join("")
       .toUpperCase();
 
@@ -203,7 +233,7 @@ function ProfileContent({
                   id="handedness"
                   value={editForm.handedness || "RHBH"}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                    setEditForm(prev => ({ ...prev, handedness: e.target.value as UserProfile['handedness'] }))
+                    setEditForm(prev => ({ ...prev, handedness: e.target.value as string }))
                   }
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >

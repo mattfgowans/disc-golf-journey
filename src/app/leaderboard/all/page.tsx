@@ -26,10 +26,7 @@ export default function FullLeaderboardPage() {
   }, [scope]);
 
   return (
-    <RequireAuth
-      title="Sign in to view leaderboards"
-      subtitle="Sign in with Google to see how you rank against other players."
-    >
+    <RequireAuth>
       <div className="container mx-auto py-8 max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">🏆 Full Leaderboard</h1>

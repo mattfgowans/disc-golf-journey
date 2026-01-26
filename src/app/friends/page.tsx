@@ -403,10 +403,7 @@ export default function FriendsPage() {
   const { user } = useAuth();
 
   return (
-    <RequireAuth
-      title="Sign in to manage friends"
-      subtitle="Sign in with Google to connect with other players."
-    >
+    <RequireAuth>
       <div className="container mx-auto py-8 max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">👥 Friends</h1>

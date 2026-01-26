@@ -1,3 +1,5 @@
+// Redirect preferred on iOS/in-app. Popup falls back to redirect. getRedirectResult guarded to prevent loops.
+
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
@@ -11,8 +13,19 @@ import {
   setPersistence,
   browserLocalPersistence,
   getRedirectResult,
+  AuthError,
 } from "firebase/auth";
 import { auth } from "./firebase";
+import { shouldPreferRedirect } from "./authEnv";
+
+function isPopupFallbackError(e: unknown) {
+  const code = (e as AuthError | undefined)?.code;
+  return (
+    code === "auth/popup-blocked" ||
+    code === "auth/popup-closed-by-user" ||
+    code === "auth/operation-not-supported-in-this-environment"
+  );
+}
 
 interface AuthContextType {
   user: User | null;
@@ -42,70 +55,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Store the actual in-flight PROMISE (not a boolean)
   const signInPromiseRef = useRef<Promise<void> | null>(null);
+  const redirectHandledRef = useRef(false);
 
+  // Handle redirect result once on app load
   useEffect(() => {
-    let unsubscribe: (() => void) | null = null;
+    if (redirectHandledRef.current) return;
+    redirectHandledRef.current = true;
 
     (async () => {
       try {
-        await setPersistence(auth, browserLocalPersistence);
-      } catch (e) {
-        console.warn("Auth persistence setup failed:", e);
-        // continue anyway
-      }
-
-      try {
         await getRedirectResult(auth);
-      } catch (error) {
-        console.warn("Redirect result error (non-critical):", error);
+      } catch {
+        // swallow / optional log
       }
-
-      unsubscribe = onAuthStateChanged(auth, (u) => {
-        setUser(u);
-        setLoading(false);
-        signInPromiseRef.current = null;
-        if (process.env.NODE_ENV !== "production") {
-          console.log("[Auth] state", { uid: u?.uid ?? null });
-        }
-      });
     })();
+  }, []);
 
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+  // Register auth state listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoading(false);
+      signInPromiseRef.current = null;
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[Auth] state", { uid: u?.uid ?? null });
+      }
+    });
+
+    return unsubscribe;
   }, []);
 
   const signInWithGoogle = async () => {
     // If a sign-in attempt is already running, return the same promise.
     if (signInPromiseRef.current) return signInPromiseRef.current;
 
-    const provider = new GoogleAuthProvider();
-
     const attempt = (async () => {
       try {
-        // Set auth persistence to browser local storage
         await setPersistence(auth, browserLocalPersistence);
 
-        // Try popup first (works on most devices)
-        await withTimeout(signInWithPopup(auth, provider), 10000, "Sign-in popup timed out");
-      } catch (err: any) {
-        const code = err?.code as string | undefined;
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
 
-        // Try redirect fallback for popup failures
-        if (
-          code === "auth/popup-blocked" ||
-          code === "auth/popup-closed-by-user" ||
-          code === "auth/operation-not-supported"
-        ) {
-          try {
-            console.log("Popup failed, trying redirect fallback...");
+        if (shouldPreferRedirect()) {
+          await signInWithRedirect(auth, provider);
+          return;
+        }
+
+        try {
+          await withTimeout(signInWithPopup(auth, provider), 15000, "Sign-in popup timed out");
+        } catch (e: any) {
+          if (isPopupFallbackError(e)) {
             await signInWithRedirect(auth, provider);
             return;
-          } catch (redirectErr: any) {
-            console.error("Both popup and redirect failed:", { popupError: err, redirectError: redirectErr });
-            throw new Error("Sign-in failed. Please check your browser settings and try again.");
           }
+          throw e;
         }
+      } catch (err: any) {
+        const code = err?.code as string | undefined;
 
         // Handle other error cases
         const msg = (err?.message ?? "").toLowerCase();
@@ -123,18 +129,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Normal user behaviors: don't treat as error
         if (code === "auth/cancelled-popup-request") {
           return;
-        }
-
-        // Timeout error (from our wrapper) - fall back to redirect
-        if (err instanceof Error && err.message === "Sign-in popup timed out") {
-          try {
-            console.log("Popup timed out, trying redirect fallback...");
-            await signInWithRedirect(auth, provider);
-            return;
-          } catch (redirectErr: any) {
-            console.error("Both popup and redirect failed:", { popupError: err, redirectError: redirectErr });
-            throw new Error("Sign-in failed. Please check your browser settings and try again.");
-          }
         }
 
         console.error("Google sign-in failed:", err);
