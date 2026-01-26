@@ -24,15 +24,32 @@ export function RequireAuth({
   const router = useRouter();
 
   // Check if user has completed username onboarding
-  const hasUsername = Boolean(userData?.profile?.username);
+  const hasUsername =
+    Boolean(userData?.profile?.username) ||
+    Boolean((userData as any)?.username);
+
+  const hasAnyProgress =
+    (userData?.stats?.points?.allTime ?? 0) > 0 ||
+    (userData?.stats?.points?.week ?? 0) > 0 ||
+    (userData?.stats?.points?.month ?? 0) > 0 ||
+    (userData?.stats?.points?.year ?? 0) > 0 ||
+    (userData?.stats?.points?.weekly ?? 0) > 0 ||
+    (userData?.stats?.points?.monthly ?? 0) > 0 ||
+    (userData?.stats?.points?.yearly ?? 0) > 0;
   const isOnOnboardingPage = pathname === "/onboarding/username";
 
   // Handle redirect to onboarding in useEffect to avoid side effects in render
   useEffect(() => {
-    if (user && !userDataLoading && !hasUsername && !isOnOnboardingPage) {
+    if (
+      user &&
+      !userDataLoading &&
+      !hasUsername &&
+      !hasAnyProgress &&
+      !isOnOnboardingPage
+    ) {
       router.replace("/onboarding/username");
     }
-  }, [user, userDataLoading, hasUsername, isOnOnboardingPage, router]);
+  }, [user, userDataLoading, hasUsername, hasAnyProgress, isOnOnboardingPage, router]);
 
   if (loading || userDataLoading) {
     return (
@@ -47,7 +64,7 @@ export function RequireAuth({
     return <SignInPanel title={title} subtitle={subtitle} />;
   }
 
-  if (!hasUsername && !isOnOnboardingPage) {
+  if (!hasUsername && !hasAnyProgress && !isOnOnboardingPage) {
     // Show loading while redirect happens in useEffect
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
@@ -57,6 +74,6 @@ export function RequireAuth({
     );
   }
 
-  // Allow access to onboarding page or if user has username
+  // Allow access if on onboarding page, or if user has a username, or if user already has progress
   return <>{children}</>;
 }
