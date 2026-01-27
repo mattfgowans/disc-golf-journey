@@ -25,19 +25,25 @@ export default function LoginPage() {
 
   // Redirect to dashboard if already signed in
   useEffect(() => {
-    if (!loading && !settling && user) {
+    if (!loading && user) {
       router.replace("/dashboard");
     }
-  }, [user, loading, settling, router]);
+  }, [user, loading, router]);
 
   const handleSignIn = async () => {
+    setSettling(true);
     try {
       await signInWithGoogle();
       // Redirect will happen automatically via useEffect
     } catch (error) {
       console.error("Error signing in:", error);
+      setSettling(false);
     }
   };
+
+  if (user) {
+    return null; // Will redirect via useEffect
+  }
 
   if (loading || settling) {
     return (
@@ -45,10 +51,6 @@ export default function LoginPage() {
         <p className="text-gray-600">Loading...</p>
       </div>
     );
-  }
-
-  if (user) {
-    return null; // Will redirect via useEffect
   }
 
   return (
