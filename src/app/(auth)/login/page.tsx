@@ -10,18 +10,25 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/lib/firebase-auth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const { user, loading, signInWithGoogle, redirectError } = useAuth();
   const router = useRouter();
+  const [settling, setSettling] = useState(true);
+
+  // Auth settling delay to prevent login UI flash after mobile auth redirect
+  useEffect(() => {
+    const timer = setTimeout(() => setSettling(false), 700);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Redirect to dashboard if already signed in
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && !settling && user) {
       router.replace("/dashboard");
     }
-  }, [user, loading, router]);
+  }, [user, loading, settling, router]);
 
   const handleSignIn = async () => {
     try {
@@ -32,7 +39,7 @@ export default function LoginPage() {
     }
   };
 
-  if (loading) {
+  if (loading || settling) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <p className="text-gray-600">Loading...</p>
