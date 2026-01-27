@@ -125,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (isPopupFallbackError(e)) {
             // If in-app browser OR iOS Safari, do NOT redirect (prevents loops)
             if (isInAppBrowser() || isIOS()) {
-              setRedirectError("Google sign-in is being blocked by your browser settings. On iPhone, turn off Private Browsing and try again. If you opened this from an app, tap Share → Open in Safari.");
+              setRedirectError("Google sign-in was blocked by this browser. Try again. If it keeps happening, disable content blockers or Private Browsing, or open in full Safari.");
               return;
             }
             await signInWithRedirect(auth, provider);

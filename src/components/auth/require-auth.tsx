@@ -10,7 +10,7 @@ const DEFAULT_APP_PATH = "/dashboard"; // justified by src/app/dashboard/page.ts
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading } = useUserProfile(user?.uid);
+  const { profile, loading: profileLoading, error: profileError } = useUserProfile(user?.uid);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -24,8 +24,10 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     }
 
     if (profileLoading) return;
+    if (profileError) return;
 
-    const hasUsername = !!profile?.username;
+    const username = profile?.username ?? profile?.profile?.username;
+    const hasUsername = !!username;
 
     if (!hasUsername && pathname !== ONBOARDING_PATH) {
       router.replace(ONBOARDING_PATH);
@@ -40,7 +42,13 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   if (authLoading) return null;
   if (!user) return null;
   if (profileLoading) return null;
-  if (!profile?.username && pathname !== ONBOARDING_PATH) return null;
+  if (profileError) return (
+    <div className="flex items-center justify-center min-h-[200px]">
+      <p className="text-gray-600">Loading profile...</p>
+    </div>
+  );
+  const username = profile?.username ?? profile?.profile?.username;
+  if (!username && pathname !== ONBOARDING_PATH) return null;
 
   return <>{children}</>;
 }
