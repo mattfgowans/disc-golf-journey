@@ -16,7 +16,7 @@ import {
   AuthError,
 } from "firebase/auth";
 import { auth } from "./firebase";
-import { shouldPreferRedirect } from "./authEnv";
+import { shouldPreferRedirect, isIOS, isInAppBrowser } from "./authEnv";
 
 function isPopupFallbackError(e: unknown) {
   const code = (e as AuthError | undefined)?.code;
@@ -123,6 +123,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await withTimeout(signInWithPopup(auth, provider), 15000, "Sign-in popup timed out");
         } catch (e: any) {
           if (isPopupFallbackError(e)) {
+            // If in-app browser OR iOS Safari, do NOT redirect (prevents loops)
+            if (isInAppBrowser() || isIOS()) {
+              setRedirectError("Google sign-in is being blocked by your browser settings. On iPhone, turn off Private Browsing and try again. If you opened this from an app, tap Share → Open in Safari.");
+              return;
+            }
             await signInWithRedirect(auth, provider);
             return;
           }
