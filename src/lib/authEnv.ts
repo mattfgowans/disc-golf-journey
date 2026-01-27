@@ -18,5 +18,5 @@ export function isInAppBrowser(): boolean {
 }
 
 export function shouldPreferRedirect(): boolean {
-  return isIOS() || isInAppBrowser();
+  return isInAppBrowser();
 }

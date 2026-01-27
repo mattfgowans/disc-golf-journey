@@ -13,13 +13,13 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function LoginPage() {
-  const { user, loading, signInWithGoogle } = useAuth();
+  const { user, loading, signInWithGoogle, redirectError } = useAuth();
   const router = useRouter();
 
   // Redirect to dashboard if already signed in
   useEffect(() => {
     if (!loading && user) {
-      router.push("/dashboard");
+      router.replace("/dashboard");
     }
   }, [user, loading, router]);
 
@@ -54,6 +54,11 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {redirectError && (
+            <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+              {redirectError}
+            </div>
+          )}
           <Button onClick={handleSignIn} className="w-full" size="lg">
             Sign in with Google
           </Button>

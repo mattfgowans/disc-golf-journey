@@ -1,4 +1,4 @@
-// Redirect preferred on iOS/in-app. Popup falls back to redirect. getRedirectResult guarded to prevent loops.
+// Redirect preferred in in-app browsers (not iOS). Popup falls back to redirect. getRedirectResult guarded to prevent loops.
 
 "use client";
 
@@ -32,6 +32,7 @@ interface AuthContextType {
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  redirectError: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,6 +53,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message = "Sign-in time
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [redirectError, setRedirectError] = useState<string | null>(null);
 
   // Store the actual in-flight PROMISE (not a boolean)
   const signInPromiseRef = useRef<Promise<void> | null>(null);
@@ -65,8 +67,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         await getRedirectResult(auth);
-      } catch {
-        // swallow / optional log
+      } catch (error: any) {
+        const code = error?.code as string | undefined;
+        const msg = (error?.message ?? "").toLowerCase();
+        const isMissingInitialState =
+          code === "auth/missing-initial-state" ||
+          msg.includes("missing initial state") ||
+          msg.includes("sessionstorage") ||
+          msg.includes("storage-partition");
+
+        console.error("Redirect result error:", error);
+
+        if (isMissingInitialState) {
+          setRedirectError("Sign-in failed due to browser storage restrictions. If you're on iPhone, open this link in Safari (not inside Messages) and try again.");
+        } else {
+          setRedirectError("Sign-in failed. Please try again.");
+        }
       }
     })();
   }, []);
@@ -75,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
+      if (u) setRedirectError(null);
       setLoading(false);
       signInPromiseRef.current = null;
       if (process.env.NODE_ENV !== "production") {
@@ -91,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const attempt = (async () => {
       try {
+        setRedirectError(null);
         await setPersistence(auth, browserLocalPersistence);
 
         const provider = new GoogleAuthProvider();
@@ -148,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, redirectError }}>
       {children}
     </AuthContext.Provider>
   );

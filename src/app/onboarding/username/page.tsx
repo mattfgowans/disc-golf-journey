@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/lib/firebase-auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, runTransaction } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
 
@@ -52,7 +52,7 @@ export default function UsernameOnboardingPage() {
 
     // Normalize username: trim, lowercase, remove leading '@'
     const normalizedUsername = username.trim().toLowerCase().replace(/^@/, "");
-    const validationError = validateUsername(username); // Validate original input
+    const validationError = validateUsername(normalizedUsername); // Validate normalized value
 
     if (validationError) {
       setError(validationError);
@@ -63,34 +63,37 @@ export default function UsernameOnboardingPage() {
     setError("");
 
     try {
-      // Check if username is available (use normalized)
       const usernameRef = doc(db, "usernames", normalizedUsername);
-      const usernameSnap = await getDoc(usernameRef);
-
-      if (usernameSnap.exists()) {
-        const data = usernameSnap.data();
-        if (data.uid !== user.uid) {
-          setError("This username is already taken");
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Reserve the username (use normalized)
-      await setDoc(usernameRef, { uid: user.uid }, { merge: true });
-
-      // Update user document (use normalized)
       const userRef = doc(db, "users", user.uid);
-      await setDoc(userRef, {
-        username: normalizedUsername,
-        profile: { username: normalizedUsername }
-      }, { merge: true });
+
+      await runTransaction(db, async (tx) => {
+        const usernameSnap = await tx.get(usernameRef);
+
+        if (usernameSnap.exists()) {
+          const data = usernameSnap.data() as { uid?: string };
+          if (data?.uid && data.uid !== user.uid) {
+            throw new Error("USERNAME_TAKEN");
+          }
+        }
+
+        tx.set(usernameRef, { uid: user.uid }, { merge: true });
+
+        tx.set(
+          userRef,
+          { username: normalizedUsername },
+          { merge: true }
+        );
+      });
 
       // Redirect to dashboard
       router.replace("/dashboard");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error setting username:", err);
-      setError("Failed to set username. Please try again.");
+      if (err.message === "USERNAME_TAKEN") {
+        setError("This username is already taken");
+      } else {
+        setError("Failed to set username. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
