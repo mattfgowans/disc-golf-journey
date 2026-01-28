@@ -116,6 +116,48 @@ export default function DashboardPage() {
   );
 }
 
+// Helper function to get progress color based on percentage
+function getProgressColorClass(percent: number, isActive: boolean = false): string {
+  if (percent === 100) return isActive ? "bg-blue-500/30" : "bg-blue-500/20";
+  if (percent >= 61) return isActive ? "bg-green-500/30" : "bg-green-500/20";
+  if (percent >= 26) return isActive ? "bg-yellow-500/30" : "bg-yellow-500/20";
+  return isActive ? "bg-red-500/30" : "bg-red-500/20";
+}
+
+// Helper function to get conditional rounding for small fills
+function getFillRounding(percent: number): string {
+  if (percent < 15) {
+    return "rounded-l-md"; // Only left side rounded for tiny fills
+  }
+  return "rounded-md"; // Full rounding for larger fills
+}
+
+// Helper component for tab triggers with background fill
+function TabTriggerWithFill({ value, label, percent, isActive }: { value: string; label: string; percent: number; isActive: boolean }) {
+  const colorClass = getProgressColorClass(percent, isActive);
+  const clampedPercent = Math.min(100, Math.max(0, percent));
+  const fillRounding = getFillRounding(clampedPercent);
+
+  return (
+    <TabsTrigger
+      value={value}
+      className="relative overflow-hidden border border-muted-foreground/20 bg-muted/30 data-[state=active]:border-foreground/30 data-[state=active]:ring-2 data-[state=active]:ring-foreground/10"
+    >
+      {/* Background track (always visible) */}
+      <div className="absolute inset-0 rounded-md bg-muted/20 z-0" />
+
+      {/* Progress fill layer */}
+      <div
+        className={`absolute inset-y-0 left-0 ${fillRounding} ${colorClass} z-10`}
+        style={{ width: `${clampedPercent}%` }}
+      />
+
+      {/* Text layer on top */}
+      <span className="relative z-20">{label}</span>
+    </TabsTrigger>
+  );
+}
+
 function DashboardInner() {
   const { achievements, loading: achievementsLoading, toggleAchievement, incrementAchievement } = useAchievements(ACHIEVEMENTS_CATALOG);
 
@@ -283,20 +325,20 @@ function DashboardInner() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="sticky top-16 z-50 bg-background border-b">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="skill">Skill</TabsTrigger>
-            <TabsTrigger value="social">Social</TabsTrigger>
-            <TabsTrigger value="collection">Collection</TabsTrigger>
+            <TabTriggerWithFill value="skill" label="Skill" percent={skillCompletion} isActive={activeTab === "skill"} />
+            <TabTriggerWithFill value="social" label="Social" percent={socialCompletion} isActive={activeTab === "social"} />
+            <TabTriggerWithFill value="collection" label="Collection" percent={collectionCompletion} isActive={activeTab === "collection"} />
           </TabsList>
+        </div>
 
-          <StatsHeader
-            completionPercentage={activeCompletion}
-            totalPoints={totalPoints}
-            currentStreak={currentStreak}
-            currentRank={currentRank}
-            nextRank={nextRank}
-            rankProgress={rankProgress}
-          />
-          </div>
+        <StatsHeader
+          completionPercentage={activeCompletion}
+          totalPoints={totalPoints}
+          currentStreak={currentStreak}
+          currentRank={currentRank}
+          nextRank={nextRank}
+          rankProgress={rankProgress}
+        />
 
         <TabsContent value="skill">
           <div className="mt-4">

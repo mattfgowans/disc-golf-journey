@@ -10,7 +10,7 @@ const DEFAULT_APP_PATH = "/dashboard"; // justified by src/app/dashboard/page.ts
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading, error: profileError } = useUserProfile(user?.uid);
+  const { profile, exists, loading: profileLoading, error: profileError } = useUserProfile(user?.uid);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -24,31 +24,36 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     }
 
     if (profileLoading) return;
+    if (exists === null) return;
     if (profileError) return;
 
     const username = profile?.username ?? profile?.profile?.username;
     const hasUsername = !!username;
+    const needsUsername = (exists === false) || (exists === true && !hasUsername);
 
-    if (!hasUsername && pathname !== ONBOARDING_PATH) {
+    if (needsUsername && pathname !== ONBOARDING_PATH) {
       router.replace(ONBOARDING_PATH);
       return;
     }
 
-    if (hasUsername && pathname === ONBOARDING_PATH) {
+    if (!needsUsername && pathname === ONBOARDING_PATH) {
       router.replace(DEFAULT_APP_PATH);
     }
-  }, [authLoading, user, profileLoading, profile, pathname, router]);
+  }, [authLoading, user, profileLoading, exists, profileError, profile, pathname, router]);
 
   if (authLoading) return null;
   if (!user) return null;
   if (profileLoading) return null;
+  if (exists === null) return null;
   if (profileError) return (
     <div className="flex items-center justify-center min-h-[200px]">
-      <p className="text-gray-600">Loading profile...</p>
+      <p className="text-gray-600">Error loading profile. Refresh to try again.</p>
     </div>
   );
   const username = profile?.username ?? profile?.profile?.username;
-  if (!username && pathname !== ONBOARDING_PATH) return null;
+  const hasUsername = !!username;
+  const needsUsername = (exists === false) || (exists === true && !hasUsername);
+  if (needsUsername && pathname !== ONBOARDING_PATH) return null;
 
   return <>{children}</>;
 }

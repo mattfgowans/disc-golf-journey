@@ -58,7 +58,9 @@ service cloud.firestore {
     // Usernames collection - for username uniqueness
     match /usernames/{username} {
       allow read: if request.auth != null;
-      allow create, update: if request.auth != null && request.auth.uid == request.resource.data.uid;
+      allow create, update: if request.auth != null &&
+        request.auth.uid == request.resource.data.uid &&
+        request.resource.data.keys().hasOnly(['uid']);
       allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
     }
   }
