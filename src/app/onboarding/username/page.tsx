@@ -16,8 +16,9 @@ import { useAuth } from "@/lib/firebase-auth";
 import { doc, runTransaction } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
+import { RequireAuth } from "@/components/auth/require-auth";
 
-export default function UsernameOnboardingPage() {
+function UsernameOnboardingInner() {
   const { user } = useAuth();
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -152,5 +153,13 @@ export default function UsernameOnboardingPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function UsernameOnboardingPage() {
+  return (
+    <RequireAuth>
+      <UsernameOnboardingInner />
+    </RequireAuth>
   );
 }
