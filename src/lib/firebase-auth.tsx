@@ -33,6 +33,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   redirectError: string | null;
+  redirectSettling: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [redirectError, setRedirectError] = useState<string | null>(null);
+  const [redirectSettling, setRedirectSettling] = useState(true);
 
   // Store the actual in-flight PROMISE (not a boolean)
   const signInPromiseRef = useRef<Promise<void> | null>(null);
@@ -63,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (redirectHandledRef.current) return;
     redirectHandledRef.current = true;
+    setRedirectSettling(true);
 
     (async () => {
       try {
@@ -83,6 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setRedirectError("Sign-in failed. Please try again.");
         }
+      } finally {
+        setRedirectSettling(false);
       }
     })();
   }, []);
@@ -115,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         provider.setCustomParameters({ prompt: "select_account" });
 
         if (shouldPreferRedirect()) {
+          setRedirectSettling(true);
           await signInWithRedirect(auth, provider);
           return;
         }
@@ -128,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setRedirectError("Google sign-in was blocked by this browser. Try again. If it keeps happening, disable content blockers or Private Browsing, or open in full Safari.");
               return;
             }
+            setRedirectSettling(true);
             await signInWithRedirect(auth, provider);
             return;
           }
@@ -171,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, redirectError }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, redirectError, redirectSettling }}>
       {children}
     </AuthContext.Provider>
   );

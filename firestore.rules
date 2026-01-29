@@ -1,10 +1,31 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+  function isAuthed() {
+    return request.auth != null;
+  }
+
+  function isOwner(uid) {
+    return isAuthed() && request.auth.uid == uid;
+  }
+
+  function isValidUsername(username) {
+    return username is string && username.matches('^[a-z0-9._]{3,20}$');
+  }
     // Users collection
     match /users/{userId} {
       // Allow users to read and manage their own user document
-      allow read, create, update, delete: if request.auth != null && request.auth.uid == userId;
+      allow read, create: if isAuthed() && isOwner(userId);
+      allow update: if isOwner(userId) &&
+        // Username immutability: once set, cannot change or remove
+        (!resource.data.keys().hasAny(['username']) || request.resource.data.username == resource.data.username) &&
+        // When setting username for first time, validate and require usernames doc
+        (!request.resource.data.username ||
+         (isValidUsername(request.resource.data.username) &&
+          existsAfter(/databases/$(database)/documents/usernames/$(request.resource.data.username)) &&
+          getAfter(/databases/$(database)/documents/usernames/$(request.resource.data.username)).data.uid == userId));
+      allow delete: if isAuthed() && isOwner(userId);
 
       match /friendRequestsOut/{toUid} {
         allow read, create, update: if request.auth != null && request.auth.uid == userId;
@@ -57,11 +78,12 @@ service cloud.firestore {
 
     // Usernames collection - for username uniqueness
     match /usernames/{username} {
-      allow read: if request.auth != null;
-      allow create, update: if request.auth != null &&
-        request.auth.uid == request.resource.data.uid &&
-        request.resource.data.keys().hasOnly(['uid']);
-      allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow read: if isAuthed();
+      allow create: if isAuthed() &&
+        isOwner(request.resource.data.uid) &&
+        isValidUsername(username) &&
+        request.resource.data.keys().hasOnly(['uid', 'createdAt']);
+      allow update, delete: if false; // Immutable once created
     }
   }
 }

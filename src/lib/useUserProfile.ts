@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -10,6 +10,9 @@ export function useUserProfile(uid: string | null | undefined) {
   const [exists, setExists] = useState<boolean | null>(null);
   const [loading, setLoading] = useState<boolean>(!!uid);
   const [error, setError] = useState<string | null>(null);
+
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,7 +36,6 @@ export function useUserProfile(uid: string | null | undefined) {
         if (cancelled) return;
 
         if (!snap.exists()) {
-          // User doc truly does not exist
           setExists(false);
           setProfile(null);
           setLoading(false);
@@ -57,7 +59,7 @@ export function useUserProfile(uid: string | null | undefined) {
     return () => {
       cancelled = true;
     };
-  }, [uid]);
+  }, [uid, refreshKey]);
 
-  return { profile, exists, loading, error };
+  return { profile, exists, loading, error, refresh };
 }

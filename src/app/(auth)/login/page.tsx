@@ -13,15 +13,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function LoginPage() {
-  const { user, loading, signInWithGoogle, redirectError } = useAuth();
+  const { user, loading, signInWithGoogle, redirectError, redirectSettling } = useAuth();
   const router = useRouter();
-  const [settling, setSettling] = useState(true);
-
-  // Auth settling delay to prevent login UI flash after mobile auth redirect
-  useEffect(() => {
-    const timer = setTimeout(() => setSettling(false), 700);
-    return () => clearTimeout(timer);
-  }, []);
+  const [signingIn, setSigningIn] = useState(false);
 
   // Redirect to dashboard if already signed in
   useEffect(() => {
@@ -31,13 +25,13 @@ export default function LoginPage() {
   }, [user, loading, router]);
 
   const handleSignIn = async () => {
-    setSettling(true);
+    setSigningIn(true);
     try {
       await signInWithGoogle();
       // Redirect will happen automatically via useEffect
     } catch (error) {
       console.error("Error signing in:", error);
-      setSettling(false);
+      setSigningIn(false);
     }
   };
 
@@ -45,7 +39,7 @@ export default function LoginPage() {
     return null; // Will redirect via useEffect
   }
 
-  if (loading || settling) {
+  if (loading || redirectSettling) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <p className="text-gray-600">Loading...</p>
@@ -68,8 +62,13 @@ export default function LoginPage() {
               {redirectError}
             </div>
           )}
-          <Button onClick={handleSignIn} className="w-full" size="lg">
-            Sign in with Google
+          <Button
+            onClick={handleSignIn}
+            disabled={loading || redirectSettling || signingIn}
+            className="w-full"
+            size="lg"
+          >
+            {loading || redirectSettling || signingIn ? "Signing in..." : "Sign in with Google"}
           </Button>
         </CardContent>
       </Card>

@@ -13,30 +13,30 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/lib/firebase-auth";
-import { doc, runTransaction } from "firebase/firestore";
+import { doc, runTransaction, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { useUserProfile } from "@/lib/useUserProfile";
 
 function UsernameOnboardingInner() {
   const { user } = useAuth();
   const router = useRouter();
+  const { refresh } = useUserProfile(user?.uid);
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const validateUsername = (value: string): string | null => {
-    const normalized = value.trim().toLowerCase().replace(/^@/, "");
-
-    if (normalized.length < 3) {
+    if (value.length < 3) {
       return "Username must be at least 3 characters";
     }
 
-    if (normalized.length > 20) {
+    if (value.length > 20) {
       return "Username must be at most 20 characters";
     }
 
-    if (!/^[a-z0-9._]+$/.test(normalized)) {
+    if (!/^[a-z0-9._]+$/.test(value)) {
       return "Username can only contain letters, numbers, dots, and underscores";
     }
 
@@ -68,23 +68,50 @@ function UsernameOnboardingInner() {
       const userRef = doc(db, "users", user.uid);
 
       await runTransaction(db, async (tx) => {
-        const usernameSnap = await tx.get(usernameRef);
+        // Read both documents to ensure consistency
+        const [usernameSnap, userSnap] = await Promise.all([
+          tx.get(usernameRef),
+          tx.get(userRef)
+        ]);
 
-        if (usernameSnap.exists()) {
-          const data = usernameSnap.data() as { uid?: string };
-          if (data?.uid && data.uid !== user.uid) {
-            throw new Error("USERNAME_TAKEN");
-          }
+        // Check if user already has a username set (prevent double-setting)
+        const userData = userSnap.exists() ? userSnap.data() : null;
+        const existingUsername = (userData as any)?.username as string | undefined;
+        if (existingUsername && existingUsername !== normalizedUsername) {
+          throw new Error("USERNAME_ALREADY_SET");
         }
 
-        tx.set(usernameRef, { uid: user.uid }, { merge: true });
+        // Harden username registry logic
+        if (usernameSnap.exists()) {
+          const data = usernameSnap.data() as { uid?: string };
+          if (!data.uid) {
+            throw new Error("USERNAME_TAKEN"); // defensive: malformed doc
+          }
+          if (data.uid !== user.uid) {
+            throw new Error("USERNAME_TAKEN"); // taken by someone else
+          }
+          // If data.uid === user.uid, allow (idempotent)
+        } else {
+          // Only create username document when it doesn't exist
+          tx.set(usernameRef, {
+            uid: user.uid,
+            createdAt: serverTimestamp()
+          });
+        }
 
+        // Always update user document with username and timestamp
         tx.set(
           userRef,
-          { username: normalizedUsername },
+          {
+            username: normalizedUsername,
+            usernameSetAt: serverTimestamp()
+          },
           { merge: true }
         );
       });
+
+      // Refresh profile data so RequireAuth sees the update immediately
+      refresh?.();
 
       // Redirect to dashboard
       router.replace("/dashboard");
@@ -92,6 +119,8 @@ function UsernameOnboardingInner() {
       console.error("Error setting username:", err);
       if (err.message === "USERNAME_TAKEN") {
         setError("This username is already taken");
+      } else if (err.message === "USERNAME_ALREADY_SET") {
+        setError("You already have a username set");
       } else {
         setError("Failed to set username. Please try again.");
       }
