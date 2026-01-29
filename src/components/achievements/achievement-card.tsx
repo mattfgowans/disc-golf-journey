@@ -72,21 +72,23 @@ export function AchievementCard({
 
   return (
     <>
-      <Card className={`${isCompleted ? 'bg-green-50' : ''} transition-colors`}>
-        <CardHeader className="flex flex-row items-center gap-2 p-3 pb-1.5">
-          <div className={`p-1 rounded-full ${isCompleted ? 'bg-green-100' : 'bg-gray-100'}`}>
+      <Card className={`${isCompleted ? 'bg-green-50' : ''} transition-colors rounded-xl overflow-hidden leading-tight py-1`}>
+        <CardHeader className="flex flex-row items-center gap-1.5 px-3 pt-2 pb-1">
+          <div className={`p-0.5 rounded-full ${isCompleted ? 'bg-green-100' : 'bg-gray-100'}`}>
             <Icon className={`w-4 h-4 ${isCompleted ? 'text-green-600' : 'text-gray-500'}`} />
           </div>
           <div className="flex-1">
-            <CardTitle className="text-sm font-semibold">{title}</CardTitle>
-            <CardDescription className="text-xs">{description}</CardDescription>
-            {points && (
-              <div className="mt-0.5">
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <CardTitle className="text-[13px] font-semibold leading-tight">{title}</CardTitle>
+              </div>
+              {points && (
+                <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 font-medium text-[11px] px-2 py-[1px] shrink-0 whitespace-nowrap">
                   🏆 {points} pts
                 </span>
-              </div>
-            )}
+              )}
+            </div>
+            <CardDescription className="text-[11px] leading-snug line-clamp-1 opacity-90">{description}</CardDescription>
             {/* Rarity badges temporarily disabled - uncomment to re-enable */}
             {/* {rarity && rarity !== "common" && (
               <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
@@ -99,16 +101,16 @@ export function AchievementCard({
             )} */}
           </div>
         </CardHeader>
-        <CardContent className="pt-1.5 pb-3">
+        <CardContent className="pt-1 pb-2">
           <div className="flex flex-col gap-1">
             {kind === "counter" && progress !== undefined && target !== undefined ? (
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-1.5">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => onIncrementAchievement(category, id, -1)}
                   disabled={progress <= 0}
-                  className="px-2"
+                  className="px-2 h-7"
                 >
                   -
                 </Button>
@@ -120,29 +122,31 @@ export function AchievementCard({
                   size="sm"
                   onClick={() => onIncrementAchievement(category, id, 1)}
                   disabled={progress >= target}
-                  className="px-2"
+                  className="px-2 h-7"
                 >
                   +
                 </Button>
               </div>
             ) : (
-              <Button
-                variant={isCompleted ? "outline" : "default"}
-                size="sm"
-                onClick={handleToggle}
-                className={isCompleted ? "text-green-600 border-green-600 hover:bg-green-50 w-full text-xs" : "w-full text-xs"}
-              >
-                {isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
-              </Button>
-            )}
-            {completedDate && (
-              <span className="text-xs text-muted-foreground text-center">
-                Completed {completedDate.toDate().toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={isCompleted ? "outline" : "default"}
+                  size="sm"
+                  onClick={handleToggle}
+                  className={isCompleted ? "text-green-600 border-green-600 hover:bg-green-50 flex-1 text-xs h-7 py-0" : "flex-1 text-xs h-7 py-0"}
+                >
+                  {isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
+                </Button>
+                {completedDate && (
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap leading-none">
+                    Completed {completedDate.toDate().toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </CardContent>
