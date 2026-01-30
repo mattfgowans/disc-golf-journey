@@ -141,10 +141,10 @@ function TabTriggerWithFill({ value, label, percent, isActive }: { value: string
   return (
     <TabsTrigger
       value={value}
-      className="relative overflow-hidden border border-muted-foreground/20 bg-muted/30 py-1 data-[state=active]:border-foreground/40 data-[state=active]:shadow-[0_0_0_2px_rgba(59,130,246,0.55)] focus-visible:ring-2 focus-visible:ring-blue-400/60 focus-visible:ring-offset-2"
+      className="relative min-w-[112px] overflow-hidden border border-muted-foreground/20 bg-muted/30 py-1 data-[state=active]:border-foreground/40 data-[state=active]:shadow-[0_0_0_2px_rgba(59,130,246,0.55)] focus-visible:ring-2 focus-visible:ring-blue-400/60 focus-visible:ring-offset-2"
     >
       {/* Background track (always visible) */}
-      <div className="absolute inset-0 rounded-md bg-muted/30 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] z-0" />
+      <div className="absolute inset-0 rounded-md shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] z-0" />
 
       {/* Progress fill layer */}
       <div
@@ -153,9 +153,9 @@ function TabTriggerWithFill({ value, label, percent, isActive }: { value: string
       />
 
       {/* Text layer on top */}
-      <div className="relative z-10 flex items-center justify-between w-full px-1">
-        <span className="data-[state=active]:font-semibold">{label}</span>
-        <span className="text-[11px] opacity-80 tabular-nums">{Math.round(clampedPercent)}%</span>
+      <div className="relative z-10 flex min-w-0 items-center justify-between w-full px-1">
+        <span className="min-w-0 truncate data-[state=active]:font-semibold">{label}</span>
+        <span className="shrink-0 text-[11px] opacity-80 tabular-nums">{Math.round(clampedPercent)}%</span>
       </div>
     </TabsTrigger>
   );
