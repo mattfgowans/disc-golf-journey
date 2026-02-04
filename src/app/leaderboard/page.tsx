@@ -54,7 +54,7 @@ export default function LeaderboardPage() {
             <CardHeader>
               <CardTitle>Rankings</CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                {scope === "friends" ? "Friends" : "Global"}
+                {scope === "friends" ? "Friends (Top only)" : "Global"}
                 <span className="sm:hidden"> · </span>
                 <span className="hidden sm:inline"> • </span>
                 {(() => {
@@ -86,9 +86,14 @@ export default function LeaderboardPage() {
                     onClick={() => setScope("friends")}
                     className="flex-1"
                   >
-                    Friends
+                    Friends (Top)
                   </Button>
                 </div>
+                {scope === "friends" && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Shows friends who appear in this leaderboard page.
+                  </p>
+                )}
               </div>
 
               <Tabs

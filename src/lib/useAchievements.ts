@@ -263,9 +263,14 @@ export function useAchievements(initialAchievements?: Achievements) {
 
       // Update leaderboard entries for all periods
       const periodKeys = getPeriodKeys();
+      const resolvedUsername =
+        (userData as any)?.profile?.username ??
+        (userData as any)?.username ??
+        (userData as any)?.profile?.profile?.username ??
+        null;
       const userInfo = {
         displayName: userData?.profile?.displayName || user.displayName || "Anonymous",
-        username: userData?.profile?.username || null,
+        username: resolvedUsername,
         photoURL: userData?.profile?.photoURL || user.photoURL || null,
         updatedAt: now,
       };

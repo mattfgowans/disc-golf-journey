@@ -15,8 +15,8 @@ export function PendingRequestsBell({ currentUserId }: { currentUserId: string }
       variant="ghost"
       size="icon"
       className="relative h-10 w-10"
-      onClick={() => router.push("/friends")}
-      aria-label="Friend requests"
+      onClick={() => router.push("/notifications")}
+      aria-label="Notifications"
     >
       <Bell className="h-5 w-5" />
       {count > 0 && (
