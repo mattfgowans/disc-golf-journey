@@ -268,10 +268,25 @@ export function useAchievements(initialAchievements?: Achievements) {
         (userData as any)?.username ??
         (userData as any)?.profile?.profile?.username ??
         null;
+
+      const resolvedDisplayName =
+        (userData as any)?.profile?.displayName ??
+        (userData as any)?.displayName ??
+        (userData as any)?.profile?.profile?.displayName ??
+        user.displayName ??
+        "Anonymous";
+
+      const resolvedPhotoURL =
+        (userData as any)?.profile?.photoURL ??
+        (userData as any)?.photoURL ??
+        (userData as any)?.profile?.profile?.photoURL ??
+        user.photoURL ??
+        null;
+
       const userInfo = {
-        displayName: userData?.profile?.displayName || user.displayName || "Anonymous",
+        displayName: resolvedDisplayName,
         username: resolvedUsername,
-        photoURL: userData?.profile?.photoURL || user.photoURL || null,
+        photoURL: resolvedPhotoURL,
         updatedAt: now,
       };
 
