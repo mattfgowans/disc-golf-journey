@@ -51,9 +51,9 @@ export function Navbar() {
           Disc Golf Journey
         </Link>
         {user ? (
-          <div className="flex flex-1 items-center justify-center gap-2 min-w-0 overflow-hidden">
+          <div className="flex flex-1 items-center justify-center gap-2 min-w-0 flex-wrap sm:flex-nowrap">
             <Link href="/dashboard">
-              <Button variant="ghost" className="flex flex-col items-center justify-center sm:flex-row shrink-0">
+              <Button variant="ghost" className="flex w-16 flex-col items-center justify-center sm:w-auto sm:flex-row">
                 <LayoutDashboard className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Dashboard</span>
                 <span className="sm:hidden text-[10px] leading-none text-muted-foreground mt-1">
@@ -62,7 +62,7 @@ export function Navbar() {
               </Button>
             </Link>
             <Link href="/leaderboard">
-              <Button variant="ghost" className="flex flex-col items-center justify-center sm:flex-row shrink-0">
+              <Button variant="ghost" className="flex w-16 flex-col items-center justify-center sm:w-auto sm:flex-row">
                 <Trophy className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Leaderboard</span>
                 <span className="sm:hidden text-[10px] leading-none text-muted-foreground mt-1">
