@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { ACHIEVEMENTS_CATALOG } from "@/data/achievements";
 import { StatsHeader } from "@/components/dashboard/stats-header";
 import { AchievementSection } from "@/components/dashboard/achievement-section";
+import { QuickLogSheet } from "@/components/dashboard/quick-log-sheet";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { auth } from "@/lib/firebase";
+import { Plus } from "lucide-react";
 
 
 
@@ -126,10 +128,7 @@ function getProgressColorClass(percent: number, isActive: boolean = false): stri
 
 // Helper function to get conditional rounding for small fills
 function getFillRounding(percent: number): string {
-  if (percent < 15) {
-    return "rounded-l-md"; // Only left side rounded for tiny fills
-  }
-  return "rounded-md"; // Full rounding for larger fills
+  return "rounded-full"; // Pill cap for all fills (avoids squared right edge at low %)
 }
 
 // Helper component for tab triggers with background fill
@@ -141,20 +140,17 @@ function TabTriggerWithFill({ value, label, percent, isActive }: { value: string
   return (
     <TabsTrigger
       value={value}
-      className="relative min-w-[112px] overflow-hidden border border-muted-foreground/20 bg-muted/30 py-1 data-[state=active]:border-foreground/40 data-[state=active]:shadow-[0_0_0_2px_rgba(59,130,246,0.55)] focus-visible:ring-2 focus-visible:ring-blue-400/60 focus-visible:ring-offset-2"
+      className="relative min-w-[112px] overflow-hidden rounded-full ring-1 ring-inset ring-muted-foreground/20 bg-muted/40 py-1 data-[state=active]:ring-2 data-[state=active]:ring-inset data-[state=active]:ring-blue-500/50 focus-visible:ring-2 focus-visible:ring-blue-400/60 focus-visible:ring-offset-2"
     >
-      {/* Background track (always visible) */}
-      <div className="absolute inset-0 rounded-md shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] z-0" />
-
       {/* Progress fill layer */}
       <div
         className={`absolute inset-y-0 left-0 ${fillRounding} ${colorClass} z-0 pointer-events-none transition-[width] duration-300 ease-out`}
-        style={{ width: `${clampedPercent}%` }}
+        style={{ width: `calc(${clampedPercent}% + 1px)` }}
       />
 
       {/* Text layer on top */}
       <div className="relative z-10 flex min-w-0 items-center justify-between w-full px-1">
-        <span className="min-w-0 truncate data-[state=active]:font-semibold">{label}</span>
+        <span className="whitespace-nowrap data-[state=active]:font-semibold">{label}</span>
         <span className="shrink-0 text-[11px] opacity-80 tabular-nums">{Math.round(clampedPercent)}%</span>
       </div>
     </TabsTrigger>
@@ -168,6 +164,7 @@ function DashboardInner() {
 
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
+  const [quickLogOpen, setQuickLogOpen] = useState(false);
 
   // Save openSections to localStorage whenever it changes
   useEffect(() => {
@@ -324,10 +321,10 @@ function DashboardInner() {
     collectionCompletion;
 
   return (
-    <div className="container mx-auto py-4 -mt-8" data-gramm="false">
+    <div className="container mx-auto py-4 -mt-8 pb-24" data-gramm="false">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="sticky top-16 z-50 bg-background border-b">
-          <TabsList className="grid w-full grid-cols-3 gap-2 p-0.5">
+          <TabsList className="grid w-full grid-cols-3 gap-2 rounded-full bg-muted/30 p-0.5">
             <TabTriggerWithFill value="skill" label="Skill" percent={skillCompletion} isActive={activeTab === "skill"} />
             <TabTriggerWithFill value="social" label="Social" percent={socialCompletion} isActive={activeTab === "social"} />
             <TabTriggerWithFill value="collection" label="Collection" percent={collectionCompletion} isActive={activeTab === "collection"} />
@@ -425,6 +422,22 @@ function DashboardInner() {
           </div>
         </TabsContent>
       </Tabs>
+      <QuickLogSheet
+        open={quickLogOpen}
+        onOpenChange={setQuickLogOpen}
+        achievements={currentAchievements}
+        onToggle={toggleAchievement}
+        onIncrement={incrementAchievement}
+        defaultCategory={activeTab as keyof Achievements}
+      />
+      <Button
+        size="icon"
+        className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg z-50"
+        onClick={() => setQuickLogOpen(true)}
+        aria-label="Quick log"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
     </div>
   );
 }
