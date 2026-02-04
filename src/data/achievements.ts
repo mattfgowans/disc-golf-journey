@@ -88,7 +88,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-8",
       title: "Spin Doctor",
-      description: "Make a putt outside 15 feet, using the turbo putt technique",
+      description: "Make a turbo putt outside 15 feet",
       category: "skill",
       subcategory: "puttingMastery",
       isCompleted: false,
@@ -98,7 +98,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-9",
       title: "Three-Point Shot",
-      description: "Make a putt outside 15 feet, using the Vinnie basketball technique",
+      description: "Make a Vinnie basketball putt outside 15 feet",
       category: "skill",
       subcategory: "puttingMastery",
       isCompleted: false,
@@ -108,7 +108,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-11",
       title: "Scooby Snack",
-      description: "Make a putt outside 15 feet, using the scoober technique",
+      description: "Make a scoober putt outside 15 feet",
       category: "skill",
       subcategory: "puttingMastery",
       isCompleted: false,
@@ -118,7 +118,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-10",
       title: "Money Shot",
-      description: "Make your first throw in from 66+ ft (not off the tee shot)",
+      description: "Make your first throw in from 66+ feet",
       category: "skill",
       subcategory: "puttingMastery",
       isCompleted: false,
@@ -179,7 +179,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     },
     {
       id: "skill-17",
-      title: "Precision Landing",
+      title: "Park Job",
       description: "Park your first hole off a drive (landing within 11 ft)",
       category: "skill",
       subcategory: "distanceControl",
@@ -200,7 +200,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-19",
       title: "Distance Control",
-      description: "Land within 20 feet of target on 3 consecutive holes",
+      description: "Land within C1 on 3 consecutive holes",
       category: "skill",
       subcategory: "distanceControl",
       isCompleted: false,
@@ -220,7 +220,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-21",
       title: "Hyzer Flip Hero",
-      description: "Execute a hyzer flip that lands withing 11 ft of the pin",
+      description: "Birdie with a hyzer flip off tee",
       category: "skill",
       subcategory: "specialtyShots",
       isCompleted: false,
@@ -232,7 +232,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-22",
       title: "Thumbs Up",
-      description: "Birdie a hole while throwing a thumber off tee",
+      description: "Birdie with a thumber off tee",
       category: "skill",
       subcategory: "specialtyShots",
       isCompleted: false,
@@ -242,7 +242,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-23",
       title: "Grenade Launcher",
-      description: "Birdie while throwing a grenade off tee",
+      description: "Birdie with a grenade off tee",
       category: "skill",
       subcategory: "specialtyShots",
       isCompleted: false,
@@ -272,7 +272,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-26",
       title: "Water Walker",
-      description: "Birdie while skipping a disc off the water off the tee",
+      description: "Birdie by skipping a disc off of water",
       category: "skill",
       subcategory: "specialtyShots",
       isCompleted: false,
@@ -282,7 +282,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-27",
       title: "Roller Derby",
-      description: "Execute a roller shot that stays inbounds.",
+      description: "Throw a roller that stays inbounds.",
       category: "skill",
       subcategory: "specialtyShots",
       isCompleted: false,
@@ -292,7 +292,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-28",
       title: "Scramble Master",
-      description: "Save par from 3 different lies off the fairway in one round",
+      description: "Save par 3 different times off the fairway in one round",
       category: "skill",
       subcategory: "specialtyShots",
       isCompleted: false,
@@ -302,7 +302,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-29",
       title: "Thumber",
-      description: "Execute a successful thumber shot that stays inbounds.",
+      description: "Throw a thumber that stays inbounds.",
       category: "skill",
       subcategory: "specialtyShots",
       isCompleted: false,
@@ -312,7 +312,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-30",
       title: "Forehand Finesse",
-      description: "Execute a successful forehand shot that stays inbounds.",
+      description: "Throw a forehand that stays inbounds.",
       category: "skill",
       subcategory: "specialtyShots",
       isCompleted: false,
@@ -322,7 +322,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "skill-31",
       title: "Flex Master",
-      description: "Execute a successful flex shot that stays inbounds.",
+      description: "Throw a flex that stays inbounds.",
       category: "skill",
       subcategory: "specialtyShots",
       isCompleted: false,
@@ -644,7 +644,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "social-4",
       title: "Tree Guardian",
-      description: "Help plant trees, or maintain landscaping at a course",
+      description: "Plant trees, or maintain landscaping at a course",
       category: "social",
       subcategory: "communityEngagement",
       isCompleted: false,
@@ -664,7 +664,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "social-5",
       title: "PDGA Official",
-      description: "Purchase a PDGA membership and receive your player number",
+      description: "Purchase a PDGA membership",
       category: "social",
       subcategory: "communityEngagement",
       isCompleted: false,
@@ -694,7 +694,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "social-8",
       title: "Disc Trader",
-      description: "Participate in your first disc swap event in person or online",
+      description: "Participate in your first disc swap event",
       category: "social",
       subcategory: "communityEngagement",
       isCompleted: false,
@@ -960,7 +960,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "social-34",
       title: "Pro Tour Fan",
-      description: "Start watching day-later content of the pro tour on JomezPro or another channel",
+      description: "Start watching pro tour content",
       category: "social",
       subcategory: "mediaContent",
       isCompleted: false,
@@ -970,7 +970,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "social-35",
       title: "Live Coverage Enthusiast",
-      description: "Purchase a DGN subscription to watch live pro tour coverage",
+      description: "Purchase a DGN subscription",
       category: "social",
       subcategory: "mediaContent",
       isCompleted: false,
@@ -1197,7 +1197,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     },
     {
       id: "collection-lost-but-remembered",
-      title: "Lost but Remembered",
+      title: "Lost & Not Found",
       description: "Lose a disc and never get it back",
       category: "collection",
       subcategory: "discMilestones",
