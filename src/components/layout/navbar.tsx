@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, LayoutDashboard, Trophy, Users, LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/firebase-auth";
+import { PendingRequestsBell } from "@/components/notifications/pending-requests-bell";
 
 export function Navbar() {
   const { user, loading, signInWithGoogle, signOut } = useAuth();
@@ -45,41 +46,43 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-background border-b">
-      <div className="flex items-center px-4 container mx-auto bg-background min-h-16 py-2 sm:h-16 sm:py-0">
-        <Link href="/" className="font-bold text-xl leading-tight whitespace-nowrap">
+      <div className="flex items-center px-4 container mx-auto bg-background min-h-16 py-2 sm:h-16 sm:py-0 min-w-0">
+        <Link href="/" className="font-bold text-xl leading-tight whitespace-nowrap min-w-0 shrink-0 truncate">
           Disc Golf Journey
         </Link>
-        
-        <div className="ml-auto flex flex-wrap items-center justify-end gap-2 sm:gap-4 shrink-0">
-          {!user ? (
-            <>
-              <Button variant="ghost" onClick={signInWithGoogle}>
-                Sign in with Google
+        {user ? (
+          <div className="flex flex-1 items-center justify-center gap-2 min-w-0 overflow-hidden">
+            <Link href="/dashboard">
+              <Button variant="ghost" className="flex flex-col items-center justify-center sm:flex-row shrink-0">
+                <LayoutDashboard className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Dashboard</span>
+                <span className="sm:hidden text-[10px] leading-none text-muted-foreground mt-1">
+                  Dashboard
+                </span>
               </Button>
-            </>
+            </Link>
+            <Link href="/leaderboard">
+              <Button variant="ghost" className="flex flex-col items-center justify-center sm:flex-row shrink-0">
+                <Trophy className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Leaderboard</span>
+                <span className="sm:hidden text-[10px] leading-none text-muted-foreground mt-1">
+                  Leaderboard
+                </span>
+              </Button>
+            </Link>
+          </div>
+        ) : null}
+        <div className="flex items-center gap-2 shrink-0">
+          {!user ? (
+            <Button variant="ghost" onClick={signInWithGoogle}>
+              Sign in with Google
+            </Button>
           ) : (
             <>
-              <Link href="/dashboard">
-                <Button variant="ghost" className="flex flex-col items-center justify-center sm:flex-row">
-                  <LayoutDashboard className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Dashboard</span>
-                  <span className="sm:hidden text-[10px] leading-none text-muted-foreground mt-1">
-                    Dashboard
-                  </span>
-                </Button>
-              </Link>
-              <Link href="/leaderboard">
-                <Button variant="ghost" className="flex flex-col items-center justify-center sm:flex-row">
-                  <Trophy className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Leaderboard</span>
-                  <span className="sm:hidden text-[10px] leading-none text-muted-foreground mt-1">
-                    Leaderboard
-                  </span>
-                </Button>
-              </Link>
+              <PendingRequestsBell currentUserId={user.uid} />
               <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <Avatar>
+                <DropdownMenuTrigger className="shrink-0">
+                  <Avatar className="shrink-0">
                     <AvatarImage src={user.photoURL || undefined} />
                     <AvatarFallback>
                       {user.displayName?.charAt(0).toUpperCase() || "DG"}
