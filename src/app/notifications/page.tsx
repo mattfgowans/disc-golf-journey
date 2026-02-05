@@ -132,9 +132,18 @@ export default function NotificationsPage() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {primaryLabel}
-                          </p>
+                          {request.fromUsername ? (
+                            <Link
+                              href={`/u/${request.fromUsername}`}
+                              className="text-sm font-medium truncate text-primary hover:underline"
+                            >
+                              {primaryLabel}
+                            </Link>
+                          ) : (
+                            <p className="text-sm font-medium truncate">
+                              {primaryLabel}
+                            </p>
+                          )}
                           {request.fromDisplayName && (
                             <p className="text-xs text-muted-foreground truncate">
                               {request.fromDisplayName}

@@ -32,31 +32,36 @@ export function normalizeUsername(input: string): string {
 
 /**
  * Resolves a username to a user ID by looking up the username in Firestore.
- * Returns the UID if found, null if not found or invalid.
+ * Returns the UID if found, null if doc does not exist. Throws on permission-denied (do not swallow).
  */
 export async function resolveUsernameToUid(usernameInput: string): Promise<string | null> {
   const normalizedUsername = normalizeUsername(usernameInput);
 
-  // Return null if username is empty/invalid after normalization
   if (!normalizedUsername) {
     return null;
   }
 
+  const path = `usernames/${normalizedUsername}`;
+  if (process.env.NODE_ENV !== "production") {
+    console.info("[resolveUsernameToUid] normalized:", normalizedUsername, "path:", path);
+  }
+
   try {
-    // Read the document at usernames/{normalizedUsername}
     const usernameDocRef = doc(db, "usernames", normalizedUsername);
     const usernameDoc = await getDoc(usernameDocRef);
 
     if (usernameDoc.exists()) {
-      // Return the uid field from the document
       const data = usernameDoc.data();
       return data?.uid || null;
     }
 
-    // Username not found
     return null;
-  } catch (error) {
-    console.error("Error resolving username to UID:", error);
-    return null;
+  } catch (error: unknown) {
+    const code = (error as { code?: string })?.code;
+    if (code === "permission-denied") {
+      console.error("[resolveUsernameToUid] permission-denied reading", path, error);
+      throw error;
+    }
+    throw error;
   }
 }

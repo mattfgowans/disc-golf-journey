@@ -57,9 +57,18 @@ function LeaderboardRow({
       </Avatar>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="text-sm sm:text-base font-semibold truncate">
-            {primaryLabel}
-          </p>
+          {entry.username ? (
+            <Link
+              href={`/u/${entry.username}`}
+              className="text-sm sm:text-base font-semibold truncate text-primary hover:underline"
+            >
+              {primaryLabel}
+            </Link>
+          ) : (
+            <p className="text-sm sm:text-base font-semibold truncate">
+              {primaryLabel}
+            </p>
+          )}
           {isCurrentUser && (
             <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 shrink-0">
               You

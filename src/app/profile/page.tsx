@@ -9,7 +9,7 @@ import { useUserDoc } from "@/lib/useUserDoc";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Loader2, Edit2, Save, X } from "lucide-react";
 import Link from "next/link";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/firebase-auth";
 
@@ -24,9 +24,10 @@ export default function ProfilePage() {
 
     const userRef = doc(db, "users", user.uid);
 
-    // If username is being updated, check availability
-    if (updates.username && updates.username !== profile?.username) {
+    // If username is being updated, check availability and sync usernames + publicProfiles
+    if (updates.username && updates.username !== (profile?.username ?? profile?.profile?.username)) {
       const normalizedUsername = updates.username.trim().toLowerCase().replace(/^@/, "");
+      const oldUsername = (profile?.username ?? profile?.profile?.username ?? "").toString().trim().toLowerCase().replace(/^@/, "");
       const usernameRef = doc(db, "usernames", normalizedUsername);
       const usernameSnap = await getDoc(usernameRef);
 
@@ -34,15 +35,39 @@ export default function ProfilePage() {
         throw new Error("Username already taken");
       }
 
-      // Reserve the username
-      await setDoc(usernameRef, { uid: user.uid }, { merge: true });
+      // Remove old usernames doc (rules allow delete only when resource.data.uid == request.auth.uid)
+      if (oldUsername && oldUsername !== normalizedUsername) {
+        const oldUsernameRef = doc(db, "usernames", oldUsername);
+        try {
+          await deleteDoc(oldUsernameRef);
+        } catch {
+          // Ignore if doc missing or permission denied
+        }
+      }
 
-      // Update with normalized username
+      await setDoc(usernameRef, {
+        uid: user.uid,
+        username: normalizedUsername,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
       updates.username = normalizedUsername;
       updates.profile = { ...updates.profile, username: normalizedUsername };
     }
 
     await setDoc(userRef, updates, { merge: true });
+
+    // Keep publicProfiles in sync (username and photoURL)
+    const currentUsername = (updates.username ?? profile?.username ?? profile?.profile?.username ?? "").toString().trim().toLowerCase().replace(/^@/, "");
+    const photoURL = updates.profile?.photoURL ?? profile?.profile?.photoURL ?? profile?.photoURL ?? null;
+    if (currentUsername) {
+      await setDoc(doc(db, "publicProfiles", user.uid), {
+        uid: user.uid,
+        username: currentUsername,
+        photoURL,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
   };
 
   // Initialize edit form when profile loads

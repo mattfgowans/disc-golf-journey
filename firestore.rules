@@ -76,14 +76,20 @@ service cloud.firestore {
       }
     }
 
-    // Usernames collection - for username uniqueness
+    // Usernames mapping - lookup by any authenticated user; writes owner-only
     match /usernames/{username} {
-      allow read: if isAuthed();
-      allow create: if isAuthed() &&
-        isOwner(request.resource.data.uid) &&
-        isValidUsername(username) &&
-        request.resource.data.keys().hasOnly(['uid', 'createdAt']);
-      allow update, delete: if false; // Immutable once created
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+      allow delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+    }
+
+    // Public profiles (collection: publicProfiles) - any authed user can read; owner-only write.
+    // When using emulator: restart it after rule changes so it reloads this file.
+    match /publicProfiles/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }

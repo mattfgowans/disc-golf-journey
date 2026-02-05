@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -337,7 +338,16 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <span className="text-sm font-medium">{displayName}</span>
+                        {username ? (
+                          <Link
+                            href={`/u/${username}`}
+                            className="text-sm font-medium text-primary hover:underline"
+                          >
+                            {displayName}
+                          </Link>
+                        ) : (
+                          <span className="text-sm font-medium">{displayName}</span>
+                        )}
                         {username && (
                           <span className="text-xs text-muted-foreground ml-1">@{username}</span>
                         )}
@@ -380,9 +390,18 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {friend.displayName}
-                      </p>
+                      {friend.username ? (
+                        <Link
+                          href={`/u/${friend.username}`}
+                          className="text-sm font-medium truncate text-primary hover:underline"
+                        >
+                          {friend.displayName}
+                        </Link>
+                      ) : (
+                        <p className="text-sm font-medium truncate">
+                          {friend.displayName}
+                        </p>
+                      )}
                       {friend.username && (
                         <p className="text-xs text-muted-foreground">
                           @{friend.username}

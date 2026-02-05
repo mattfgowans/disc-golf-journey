@@ -63,64 +63,77 @@ function UsernameOnboardingInner() {
     setLoading(true);
     setError("");
 
-    try {
-      const usernameRef = doc(db, "usernames", normalizedUsername);
-      const userRef = doc(db, "users", user.uid);
+    const usernameRef = doc(db, "usernames", normalizedUsername);
+    const userRef = doc(db, "users", user.uid);
+    if (process.env.NODE_ENV !== "production") {
+      console.info("[onboarding] saving username path: usernames/" + normalizedUsername);
+    }
 
+    try {
       await runTransaction(db, async (tx) => {
-        // Read both documents to ensure consistency
         const [usernameSnap, userSnap] = await Promise.all([
           tx.get(usernameRef),
           tx.get(userRef)
         ]);
 
-        // Check if user already has a username set (prevent double-setting)
         const userData = userSnap.exists() ? userSnap.data() : null;
         const existingUsername = (userData as any)?.username as string | undefined;
         if (existingUsername && existingUsername !== normalizedUsername) {
           throw new Error("USERNAME_ALREADY_SET");
         }
 
-        // Harden username registry logic
         if (usernameSnap.exists()) {
           const data = usernameSnap.data() as { uid?: string };
           if (!data.uid) {
-            throw new Error("USERNAME_TAKEN"); // defensive: malformed doc
+            throw new Error("USERNAME_TAKEN");
           }
           if (data.uid !== user.uid) {
-            throw new Error("USERNAME_TAKEN"); // taken by someone else
+            throw new Error("USERNAME_TAKEN");
           }
-          // If data.uid === user.uid, allow (idempotent)
-        } else {
-          // Only create username document when it doesn't exist
           tx.set(usernameRef, {
             uid: user.uid,
-            createdAt: serverTimestamp()
+            username: normalizedUsername,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } else {
+          tx.set(usernameRef, {
+            uid: user.uid,
+            username: normalizedUsername,
+            updatedAt: serverTimestamp()
           });
         }
 
-        // Always update user document with username and timestamp
+        const existingProfile = (userData as any)?.profile && typeof (userData as any).profile === "object" ? (userData as any).profile : {};
         tx.set(
           userRef,
           {
             username: normalizedUsername,
-            usernameSetAt: serverTimestamp()
+            usernameSetAt: serverTimestamp(),
+            profile: { ...existingProfile, username: normalizedUsername }
           },
           { merge: true }
         );
+
+        const publicProfileRef = doc(db, "publicProfiles", user.uid);
+        tx.set(publicProfileRef, {
+          uid: user.uid,
+          username: normalizedUsername,
+          photoURL: user.photoURL ?? null,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
       });
 
-      // Refresh profile data so RequireAuth sees the update immediately
       refresh?.();
-
-      // Redirect to dashboard
       router.replace("/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const e = err as { message?: string; code?: string };
       console.error("Error setting username:", err);
-      if (err.message === "USERNAME_TAKEN") {
+      if (e.message === "USERNAME_TAKEN") {
         setError("This username is already taken");
-      } else if (err.message === "USERNAME_ALREADY_SET") {
+      } else if (e.message === "USERNAME_ALREADY_SET") {
         setError("You already have a username set");
+      } else if (e.code === "permission-denied") {
+        setError("Permission denied. Could not save username. Try signing out and back in.");
       } else {
         setError("Failed to set username. Please try again.");
       }
