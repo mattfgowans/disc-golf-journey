@@ -16,6 +16,11 @@ function isMissing(value: unknown): boolean {
   return value === undefined || value === null || (typeof value === "string" && value.trim() === "");
 }
 
+function isGenericDisplayName(value: unknown): boolean {
+  const s = (value ?? "").toString().trim();
+  return !s || s === "Player" || s === "Anonymous" || s === "Unknown User";
+}
+
 async function main() {
   const projectId = process.env.FIREBASE_PROJECT_ID;
   if (projectId) {
@@ -49,35 +54,39 @@ async function main() {
       const displayName = data.displayName;
       const photoURL = data.photoURL;
 
-      const needsPatch = isMissing(username) || isMissing(displayName);
+      const needsPatch = isMissing(username);
       if (!needsPatch) {
         skipped++;
         continue;
       }
 
-      let profile: { username?: string; displayName?: string; photoURL?: string } = {};
+      let resolvedUsername: string | undefined;
+      let resolvedDisplayName: string | undefined;
+      let resolvedPhotoURL: string | undefined;
       try {
         const userDoc = await db.doc(`users/${uid}`).get();
         if (userDoc.exists) {
-          const raw = userDoc.data();
-          profile = (raw?.profile ?? {}) as typeof profile;
+          const raw = userDoc.data() ?? {};
+          const profile = (raw.profile ?? {}) as any;
+          resolvedUsername = (profile.username ?? raw.username ?? "").toString().trim() || undefined;
+          resolvedDisplayName = (profile.displayName ?? raw.displayName ?? "").toString().trim() || undefined;
+          resolvedPhotoURL = (profile.photoURL ?? raw.photoURL ?? "").toString().trim() || undefined;
         }
       } catch {
-        // leave profile empty
+        // leave resolved* empty
       }
 
       const patch: Record<string, any> = {
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       };
-      if (isMissing(username) && profile.username != null && profile.username !== "") {
-        patch.username = profile.username;
+      if (isMissing(username) && resolvedUsername) {
+        patch.username = resolvedUsername;
       }
-      if (isMissing(displayName)) {
-        patch.displayName =
-          profile.displayName ?? (profile as { displayName?: string }).displayName ?? "Anonymous";
+      if ((isMissing(displayName) || isGenericDisplayName(displayName)) && resolvedUsername) {
+        patch.displayName = `@${resolvedUsername}`;
       }
-      if (isMissing(photoURL) && profile.photoURL != null && profile.photoURL !== "") {
-        patch.photoURL = profile.photoURL;
+      if (isMissing(photoURL) && resolvedPhotoURL) {
+        patch.photoURL = resolvedPhotoURL;
       }
 
       if (Object.keys(patch).length > 1) {
