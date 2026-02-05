@@ -1,4 +1,4 @@
-// Redirect preferred in in-app browsers (not iOS). Popup falls back to redirect. getRedirectResult guarded to prevent loops.
+// Redirect preferred for iOS and in-app browsers; desktop uses popup. getRedirectResult runs once on load.
 
 "use client";
 
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [redirectError, setRedirectError] = useState<string | null>(null);
-  const [redirectSettling, setRedirectSettling] = useState(true);
+  const [redirectSettling, setRedirectSettling] = useState(false);
 
   // Store the actual in-flight PROMISE (not a boolean)
   const signInPromiseRef = useRef<Promise<void> | null>(null);
@@ -129,8 +129,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await withTimeout(signInWithPopup(auth, provider), 15000, "Sign-in popup timed out");
         } catch (e: any) {
           if (isPopupFallbackError(e)) {
-            // If in-app browser OR iOS Safari, do NOT redirect (prevents loops)
-            if (isInAppBrowser() || isIOS()) {
+            // iOS/in-app already use redirect above; here we're desktop with blocked popup → fallback to redirect
+            if (isInAppBrowser()) {
               setRedirectError("Google sign-in was blocked by this browser. Try again. If it keeps happening, disable content blockers or Private Browsing, or open in full Safari.");
               return;
             }

@@ -17,6 +17,7 @@ export function isInAppBrowser(): boolean {
   );
 }
 
+/** Use redirect instead of popup (iOS Safari/Chrome block popups; in-app browsers need redirect). */
 export function shouldPreferRedirect(): boolean {
-  return isInAppBrowser();
+  return isInAppBrowser() || isIOS();
 }
