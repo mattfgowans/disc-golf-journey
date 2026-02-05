@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -20,12 +20,12 @@ import {
 import { normalizeUsername } from "@/lib/usernames";
 import { UserPlus, Loader2 } from "lucide-react";
 
-export default function PublicProfilePage() {
-  const params = useParams();
-  const { user } = useAuth();
-  const usernameParam = (params?.username as string) ?? "";
+function PublicProfileContent() {
+  const searchParams = useSearchParams();
+  const usernameParam = searchParams.get("username") ?? "";
   const normalized = normalizeUsername(usernameParam);
 
+  const { user } = useAuth();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [friendUids, setFriendUids] = useState<Set<string>>(new Set());
@@ -121,7 +121,12 @@ export default function PublicProfilePage() {
     return (
       <RequireAuth>
         <div className="container max-w-md mx-auto py-8 px-4">
-          <p className="text-muted-foreground text-center">Invalid username.</p>
+          <p className="text-muted-foreground text-center">Missing or invalid username.</p>
+          <div className="mt-4 text-center">
+            <Link href="/leaderboard" className="text-sm text-primary hover:underline">
+              Back to leaderboard
+            </Link>
+          </div>
         </div>
       </RequireAuth>
     );
@@ -231,5 +236,19 @@ export default function PublicProfilePage() {
         </div>
       </div>
     </RequireAuth>
+  );
+}
+
+export default function PublicProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container max-w-md mx-auto py-8 px-4 flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      }
+    >
+      <PublicProfileContent />
+    </Suspense>
   );
 }

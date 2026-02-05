@@ -340,7 +340,7 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
                       <div>
                         {username ? (
                           <Link
-                            href={`/u/${username}`}
+                            href={`/u?username=${encodeURIComponent(username)}`}
                             className="text-sm font-medium text-primary hover:underline"
                           >
                             {displayName}
@@ -392,7 +392,7 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
                     <div className="flex-1 min-w-0">
                       {friend.username ? (
                         <Link
-                          href={`/u/${friend.username}`}
+                          href={`/u?username=${encodeURIComponent(friend.username)}`}
                           className="text-sm font-medium truncate text-primary hover:underline"
                         >
                           {friend.displayName}

@@ -59,7 +59,7 @@ function LeaderboardRow({
         <div className="flex items-center gap-2">
           {entry.username ? (
             <Link
-              href={`/u/${entry.username}`}
+              href={`/u?username=${encodeURIComponent(entry.username)}`}
               className="text-sm sm:text-base font-semibold truncate text-primary hover:underline"
             >
               {primaryLabel}

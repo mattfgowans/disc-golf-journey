@@ -134,7 +134,7 @@ export default function NotificationsPage() {
                         <div className="min-w-0">
                           {request.fromUsername ? (
                             <Link
-                              href={`/u/${request.fromUsername}`}
+                              href={`/u?username=${encodeURIComponent(request.fromUsername)}`}
                               className="text-sm font-medium truncate text-primary hover:underline"
                             >
                               {primaryLabel}
