@@ -20,7 +20,10 @@ function LeaderboardRow({
   rank: number;
   isCurrentUser: boolean;
 }) {
-  const primaryLabel = entry.username ? `@${entry.username}` : "Player";
+  const name = entry.displayName ?? "Anonymous";
+  const handle = entry.username ? `@${entry.username}` : null;
+  const primaryLabel = handle ?? name;
+  const avatarLetter = (name || "A").charAt(0).toUpperCase();
 
   return (
     <div
@@ -47,9 +50,9 @@ function LeaderboardRow({
         })()}
       </div>
       <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
-        <AvatarImage src={entry.photoURL} />
+        {entry.photoURL ? <AvatarImage src={entry.photoURL} /> : null}
         <AvatarFallback className="text-sm">
-          {entry.username ? entry.username.charAt(0).toUpperCase() : "P"}
+          {avatarLetter}
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">

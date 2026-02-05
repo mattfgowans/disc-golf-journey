@@ -110,29 +110,40 @@ export async function sendFriendRequest(currentUid: string, targetUid: string, t
   await batch.commit();
 }
 
-// Accept an incoming friend request
+// Accept an incoming friend request (idempotent: already friends => success)
 export async function acceptFriendRequest(currentUid: string, fromUid: string): Promise<void> {
   try {
-    const batch = writeBatch(db);
-
-    // Read current user's user doc (allowed)
+    // Read current user's user doc
     const currentUserDoc = await getDoc(doc(db, "users", currentUid));
     const currentUserData = currentUserDoc.data();
 
-    // Read the incoming request doc (allowed - it's in current user's subcollection)
+    // Read the incoming request doc and existing friend doc
     const reqDoc = await getDoc(doc(db, "users", currentUid, "friendRequestsIn", fromUid));
-    if (!reqDoc.exists()) throw new Error("Friend request no longer exists.");
-    const req = reqDoc.data();
+    const friendDoc = await getDoc(doc(db, "users", currentUid, "friends", fromUid));
 
-    // Normalize current user's username
+    // Idempotent: if request is gone but we're already friends, treat as success
+    if (!reqDoc.exists()) {
+      if (friendDoc.exists()) return;
+      throw new Error("Friend request no longer exists.");
+    }
+
+    const req = reqDoc.data();
     const currentUsername = normalizeUsername(currentUserData?.profile?.username);
 
-    // 1. Create friend document for current user (using data from friend request)
+    const batch = writeBatch(db);
+
+    // 1. Create friend document for current user (using request data: displayName, photoURL, username)
+    const friendDisplayName =
+      req.fromDisplayName != null && req.fromDisplayName !== ""
+        ? req.fromDisplayName
+        : req.fromUsername
+          ? `@${req.fromUsername}`
+          : "Friend";
     batch.set(doc(db, "users", currentUid, "friends", fromUid), cleanFirestoreData({
       uid: fromUid,
-      displayName: req.fromUsername ? `@${req.fromUsername}` : "Friend",
-      username: req.fromUsername,
-      photoURL: undefined, // Friend request doesn't include photoURL
+      displayName: friendDisplayName,
+      username: normalizeUsername(req.fromUsername),
+      photoURL: req.fromPhotoURL ?? undefined,
       createdAt: serverTimestamp(),
     }));
 
@@ -151,39 +162,25 @@ export async function acceptFriendRequest(currentUid: string, fromUid: string): 
     // 4. Delete outgoing request from the other user
     batch.delete(doc(db, "users", fromUid, "friendRequestsOut", currentUid));
 
-    // Debug logging before commit
-    console.log("acceptFriendRequest batch operations:");
-    console.log(`  SET /users/${currentUid}/friends/${fromUid}`);
-    console.log(`  SET /users/${fromUid}/friends/${currentUid}`);
-    console.log(`  DELETE /users/${currentUid}/friendRequestsIn/${fromUid}`);
-    console.log(`  DELETE /users/${fromUid}/friendRequestsOut/${currentUid}`);
-
-    // Commit the batch
     await batch.commit();
-
-    console.log("acceptFriendRequest completed successfully");
   } catch (error) {
     console.error("acceptFriendRequest failed", error);
     throw error;
   }
 }
 
-// Remove a friend (unilateral)
+// Remove a friend (unilateral, atomic)
 export async function removeFriend(currentUid: string, friendUid: string): Promise<void> {
+  const batch = writeBatch(db);
 
-  // Remove from both users' friends collections
-  await deleteDoc(doc(db, "users", currentUid, "friends", friendUid));
-  await deleteDoc(doc(db, "users", friendUid, "friends", currentUid));
+  batch.delete(doc(db, "users", currentUid, "friends", friendUid));
+  batch.delete(doc(db, "users", friendUid, "friends", currentUid));
+  batch.delete(doc(db, "users", currentUid, "friendRequestsIn", friendUid));
+  batch.delete(doc(db, "users", currentUid, "friendRequestsOut", friendUid));
+  batch.delete(doc(db, "users", friendUid, "friendRequestsIn", currentUid));
+  batch.delete(doc(db, "users", friendUid, "friendRequestsOut", currentUid));
 
-  // Clean up any pending requests between them
-  try {
-    await deleteDoc(doc(db, "users", currentUid, "friendRequestsIn", friendUid));
-    await deleteDoc(doc(db, "users", currentUid, "friendRequestsOut", friendUid));
-    await deleteDoc(doc(db, "users", friendUid, "friendRequestsIn", currentUid));
-    await deleteDoc(doc(db, "users", friendUid, "friendRequestsOut", currentUid));
-  } catch (error) {
-    // Ignore cleanup errors - friendship is already removed
-  }
+  await batch.commit();
 }
 
 // Get user's friends list

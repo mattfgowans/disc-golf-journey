@@ -132,12 +132,19 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
   };
 
   const handleAcceptRequest = async (fromUid: string) => {
+    setBusyRequestId(`incoming:${fromUid}`);
+    setErrorMessage("");
+    setSuccessMessage("");
+
     try {
       await acceptFriendRequest(currentUserId, fromUid);
-      await loadFriendsData(); // Refresh the data
+      await loadFriendsData();
+      setSuccessMessage("Friend request accepted.");
     } catch (error) {
       console.error("Error accepting friend request:", error);
-      alert("Failed to accept friend request.");
+      setErrorMessage("Failed to accept friend request.");
+    } finally {
+      setBusyRequestId(null);
     }
   };
 
@@ -258,7 +265,7 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
             <Label>Incoming Requests</Label>
             <div className="space-y-2">
               {incomingRequests.map((request) => {
-                const displayName = request.fromDisplayName ?? (request.fromUsername ? `@${request.fromUsername}` : request.fromUid);
+                const displayName = request.fromDisplayName ?? request.fromUsername ?? request.fromUid;
 
                 return (
                   <div
@@ -274,7 +281,7 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
                       </Avatar>
                       <div>
                         <span className="text-sm font-medium">{displayName}</span>
-                        {request.fromUsername && (
+                        {request.fromUsername != null && request.fromUsername !== "" && (
                           <span className="text-xs text-muted-foreground ml-1">@{request.fromUsername}</span>
                         )}
                       </div>
