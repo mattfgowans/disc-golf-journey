@@ -18,7 +18,7 @@ import {
   acceptFriendRequest,
 } from "@/lib/friends";
 import { normalizeUsername } from "@/lib/usernames";
-import { UserPlus, Loader2 } from "lucide-react";
+import { UserPlus, Loader2, Check, Clock } from "lucide-react";
 
 function PublicProfileContent() {
   const searchParams = useSearchParams();
@@ -49,7 +49,7 @@ function PublicProfileContent() {
       setLoading(true);
       try {
         const [pub, friends, outgoing, incoming] = await Promise.all([
-          getPublicProfileByUsername(normalized),
+          getPublicProfileByUsername(normalized, { currentUid: user?.uid ?? null }),
           user?.uid ? getFriends(user.uid) : Promise.resolve([]),
           user?.uid ? getOutgoingFriendRequests(user.uid) : Promise.resolve([]),
           user?.uid ? getIncomingFriendRequests(user.uid) : Promise.resolve([]),
@@ -199,9 +199,23 @@ function PublicProfileContent() {
                 </Button>
               </div>
             ) : isFriend ? (
-              <p className="text-sm text-muted-foreground text-center">Friends</p>
+              <Button
+                className="w-full bg-muted/60 text-muted-foreground"
+                disabled
+                aria-disabled
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Friends
+              </Button>
             ) : isPending ? (
-              <p className="text-sm text-muted-foreground text-center">Pending</p>
+              <Button
+                className="w-full bg-muted/60 text-muted-foreground"
+                disabled
+                aria-disabled
+              >
+                <Clock className="h-4 w-4 mr-2" />
+                Request sent
+              </Button>
             ) : isIncoming ? (
               <Button
                 className="w-full"
