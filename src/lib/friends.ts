@@ -62,6 +62,12 @@ export async function sendFriendRequest(currentUid: string, targetUid: string, t
     throw new Error("You already sent a friend request to this user.");
   }
 
+  // Check if target already sent current user a request (crossed request)
+  const existingInReq = await getDoc(doc(db, "users", currentUid, "friendRequestsIn", targetUid));
+  if (existingInReq.exists()) {
+    throw new Error("This user already sent you a friend request. Go accept it in Notifications.");
+  }
+
   // Extract display fields from current user's profile
   const fromDisplayName = currentUserData?.profile?.displayName ?? null;
   const fromPhotoURL = currentUserData?.profile?.photoURL ?? null;

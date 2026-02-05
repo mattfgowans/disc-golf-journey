@@ -119,6 +119,8 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
         setErrorMessage("You're already friends with this user.");
       } else if (errorMessage === "You already sent a friend request to this user.") {
         setErrorMessage("You already sent a friend request to this user.");
+      } else if (errorMessage.includes("already sent you a friend request")) {
+        setErrorMessage("They already sent you a request — check Notifications to accept it.");
       } else if (errorMessage.toLowerCase().includes("permission")) {
         setErrorMessage("Permissions error. Please try again after refresh.");
       } else if (errorMessage) {
