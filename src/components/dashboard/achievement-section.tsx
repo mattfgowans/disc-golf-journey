@@ -1,9 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { AchievementCard } from "@/components/achievements/achievement-card";
 import { cn } from "@/lib/utils";
+import { isUnlocked } from "@/lib/achievementProgress";
 import type { Achievement, Achievements } from "@/lib/useAchievements";
 
 type SectionKey = string;
@@ -14,6 +16,16 @@ interface AchievementSectionProps {
   title: string;
   sectionKey: SectionKey;
   achievements: Achievement[];
+  /** Optional global map for isUnlocked (cross-category); falls back to section-only map when omitted. */
+  effectiveById?: Record<string, Achievement>;
+  /** Optional flat list of all achievements (all categories) for parent→child index; used for secret hints. */
+  allAchievements?: Achievement[];
+  /** Optional set of achievement ids that were just revealed this session (for one-time highlight). */
+  newlyRevealedIds?: Set<string>;
+  /** Optional set of parent achievement ids to briefly pulse the ✨ icon (echo reveal). */
+  revealPulseParentIds?: Set<string>;
+  /** Optional id of parent achievement currently in celebration bobble (pre-modal). */
+  celebratingParentId?: string | null;
   completion: number;
   isOpen: boolean;
   onToggle: () => void;
@@ -28,6 +40,11 @@ export function AchievementSection({
   title,
   sectionKey,
   achievements,
+  effectiveById: effectiveByIdProp,
+  allAchievements,
+  newlyRevealedIds,
+  revealPulseParentIds,
+  celebratingParentId,
   completion,
   isOpen,
   onToggle,
@@ -35,6 +52,27 @@ export function AchievementSection({
   onIncrementAchievement,
   getCompletionColor,
 }: AchievementSectionProps) {
+  const localById = useMemo(() => {
+    const map: Record<string, Achievement> = {};
+    for (const a of achievements) map[a.id] = a;
+    return map;
+  }, [achievements]);
+
+  const effectiveById = effectiveByIdProp ?? localById;
+
+  const childrenByParentId = useMemo(() => {
+    const map = new Map<string, Achievement[]>();
+    const list = allAchievements ?? [];
+    for (const a of list) {
+      if (a.requiresId) {
+        const arr = map.get(a.requiresId) ?? [];
+        arr.push(a);
+        map.set(a.requiresId, arr);
+      }
+    }
+    return map;
+  }, [allAchievements]);
+
   return (
     <Collapsible open={isOpen}>
       <div className="sticky top-24 md:top-20 z-40 bg-gradient-to-r from-emerald-400 to-teal-500 border-b shadow-sm">
@@ -65,15 +103,32 @@ export function AchievementSection({
       </div>
       <CollapsibleContent>
         <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-          {achievements.map((achievement) => (
-            <AchievementCard
-              key={achievement.id}
-              {...achievement}
-              category={category}
-              onToggle={() => onToggleAchievement(achievement.id)}
-              onIncrementAchievement={onIncrementAchievement}
-            />
-          ))}
+          {achievements.map((achievement) => {
+            const unlocked = isUnlocked(achievement, effectiveById);
+            if (achievement.requiresId && !unlocked) return null;
+
+            const children = childrenByParentId.get(achievement.id) ?? [];
+            const totalChildrenCount = children.length;
+            const lockedChildCount = children.filter((c) => !isUnlocked(c, effectiveById)).length;
+            const hasSecrets = totalChildrenCount > 0;
+
+            return (
+              <AchievementCard
+                key={achievement.id}
+                {...achievement}
+                category={category}
+                locked={!unlocked}
+                hasSecrets={hasSecrets}
+                lockedChildCount={hasSecrets ? lockedChildCount : undefined}
+                totalChildrenCount={hasSecrets ? totalChildrenCount : undefined}
+                isNewlyRevealed={newlyRevealedIds?.has(achievement.id) ?? false}
+                revealPulse={revealPulseParentIds?.has(achievement.id) ?? false}
+                celebrateParent={celebratingParentId === achievement.id}
+                onToggle={() => onToggleAchievement(achievement.id)}
+                onIncrementAchievement={onIncrementAchievement}
+              />
+            );
+          })}
         </div>
       </CollapsibleContent>
     </Collapsible>

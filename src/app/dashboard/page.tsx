@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAchievements, type Achievement, type Achievements } from "@/lib/useAchievements";
 import { Button } from "@/components/ui/button";
 import { ACHIEVEMENTS_CATALOG } from "@/data/achievements";
+import { isUnlocked } from "@/lib/achievementProgress";
 import { StatsHeader } from "@/components/dashboard/stats-header";
 import { AchievementSection } from "@/components/dashboard/achievement-section";
 import { QuickLogSheet } from "@/components/dashboard/quick-log-sheet";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { auth } from "@/lib/firebase";
 import { Plus } from "lucide-react";
+import confetti from "canvas-confetti";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 
 
@@ -158,13 +161,49 @@ function TabTriggerWithFill({ value, label, percent, isActive }: { value: string
 }
 
 function DashboardInner() {
-  const { achievements, loading: achievementsLoading, toggleAchievement, incrementAchievement } = useAchievements(ACHIEVEMENTS_CATALOG);
+  const { achievements, loading: achievementsLoading, toggleAchievement, incrementAchievement, newUnlocks, clearNewUnlocks } = useAchievements(ACHIEVEMENTS_CATALOG);
 
   const uid = auth.currentUser?.uid ?? "(no user)";
 
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
   const [quickLogOpen, setQuickLogOpen] = useState(false);
+  const [recentlyRevealedIds, setRecentlyRevealedIds] = useState<Set<string>>(new Set());
+  const [revealPulseParentIds, setRevealPulseParentIds] = useState<Set<string>>(new Set());
+  const [secretModalOpen, setSecretModalOpen] = useState(false);
+  const [celebratingParentId, setCelebratingParentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (newUnlocks.length === 0) {
+      setSecretModalOpen(false);
+      return;
+    }
+
+    const parentIds = Array.from(new Set(newUnlocks.map((a) => a.requiresId).filter(Boolean))) as string[];
+    if (parentIds.length > 0) {
+      setRevealPulseParentIds(new Set(parentIds));
+      window.setTimeout(() => setRevealPulseParentIds(new Set()), 1500);
+    }
+
+    const t = window.setTimeout(() => setSecretModalOpen(true), 700);
+    return () => window.clearTimeout(t);
+  }, [newUnlocks]);
+
+  const startRevealGlow = (ids: string[]) => {
+    if (ids.length === 0) return;
+    setRecentlyRevealedIds(new Set(ids));
+    window.setTimeout(() => setRecentlyRevealedIds(new Set()), 2500);
+  };
+
+  const handleCloseSecretModal = () => {
+    const parentIds = Array.from(new Set(newUnlocks.map((a) => a.requiresId).filter(Boolean))) as string[];
+    if (parentIds.length > 0) {
+      setRevealPulseParentIds(new Set(parentIds));
+      window.setTimeout(() => setRevealPulseParentIds(new Set()), 2500);
+    }
+    startRevealGlow(newUnlocks.map((a) => a.id));
+    clearNewUnlocks();
+  };
 
   // Save openSections to localStorage whenever it changes
   useEffect(() => {
@@ -183,6 +222,71 @@ function DashboardInner() {
   // Use achievements from Firebase, or fallback to catalog if not loaded yet
   // Only fallback if achievements is null/undefined, not if arrays are empty
   const currentAchievements: Achievements = achievements ?? ACHIEVEMENTS_CATALOG;
+
+  const effectiveById = useMemo(() => {
+    const map: Record<string, Achievement> = {};
+    for (const cat of ["skill", "social", "collection"] as const) {
+      for (const a of currentAchievements[cat]) map[a.id] = a;
+    }
+    return map;
+  }, [currentAchievements]);
+
+  const allAchievements = useMemo(
+    () => [
+      ...currentAchievements.skill,
+      ...currentAchievements.social,
+      ...currentAchievements.collection,
+    ],
+    [currentAchievements]
+  );
+
+  const newlyRevealedIds = useMemo(() => {
+    const s = new Set<string>([...recentlyRevealedIds]);
+    for (const a of newUnlocks) s.add(a.id);
+    return s;
+  }, [recentlyRevealedIds, newUnlocks]);
+
+  const secretsDiscoveredCount = useMemo(
+    () => allAchievements.filter((a) => a.requiresId && isUnlocked(a, effectiveById)).length,
+    [allAchievements, effectiveById]
+  );
+
+  const childrenByParentId = useMemo(() => {
+    const map = new Map<string, Achievement[]>();
+    for (const a of allAchievements) {
+      if (a.requiresId) {
+        const arr = map.get(a.requiresId) ?? [];
+        arr.push(a);
+        map.set(a.requiresId, arr);
+      }
+    }
+    return map;
+  }, [allAchievements]);
+
+  const toggleAchievementWithCelebration = (category: keyof Achievements, id: string) => {
+    const ach = currentAchievements[category].find((a) => a.id === id);
+    if (!ach) return;
+
+    const willComplete = ach.kind !== "counter" && !ach.isCompleted;
+    const hasSecrets = (childrenByParentId.get(id)?.length ?? 0) > 0;
+
+    if (willComplete && hasSecrets) {
+      setCelebratingParentId(id);
+
+      window.setTimeout(() => {
+        confetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } });
+      }, 1900);
+
+      window.setTimeout(() => {
+        setCelebratingParentId(null);
+        toggleAchievement(category, id);
+      }, 2100);
+
+      return;
+    }
+
+    toggleAchievement(category, id);
+  };
 
   // Helper functions (defined early so they can be used by AchievementSection)
 
@@ -322,6 +426,33 @@ function DashboardInner() {
 
   return (
     <div className="container mx-auto py-4 -mt-8 pb-24" data-gramm="false">
+      <Dialog
+        open={secretModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSecretModalOpen(false);
+            handleCloseSecretModal();
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Secret achievement unlocked!</DialogTitle>
+            <DialogDescription>
+              Completing an achievement has revealed new goals you can now work toward.
+            </DialogDescription>
+          </DialogHeader>
+          <ul className="list-disc list-inside text-sm space-y-1 my-2">
+            {newUnlocks.map((a) => (
+              <li key={a.id}>{a.title}</li>
+            ))}
+          </ul>
+          <DialogFooter>
+            <Button onClick={() => { setSecretModalOpen(false); handleCloseSecretModal(); }} size="sm">Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="sticky top-16 z-50 bg-background border-b">
           <TabsList className="grid w-full grid-cols-3 gap-2 rounded-full bg-muted/30 p-0.5">
@@ -338,6 +469,7 @@ function DashboardInner() {
           currentRank={currentRank}
           nextRank={nextRank}
           rankProgress={rankProgress}
+          secretsDiscoveredCount={secretsDiscoveredCount}
         />
 
         <TabsContent value="skill">
@@ -355,10 +487,15 @@ function DashboardInner() {
                     title={section.title}
                     sectionKey={sectionKey}
                     achievements={achievements}
+                    effectiveById={effectiveById}
+                    allAchievements={allAchievements}
+                    newlyRevealedIds={newlyRevealedIds}
+                    revealPulseParentIds={revealPulseParentIds}
+                    celebratingParentId={celebratingParentId}
                     completion={completion}
                     isOpen={openSections[sectionKey]}
                     onToggle={() => toggleSection(sectionKey)}
-                    onToggleAchievement={(id) => toggleAchievement("skill", id)}
+                    onToggleAchievement={(id) => toggleAchievementWithCelebration("skill", id)}
                     onIncrementAchievement={incrementAchievement}
                     getCompletionColor={getCompletionColor}
                   />
@@ -382,10 +519,15 @@ function DashboardInner() {
                     title={section.title}
                     sectionKey={sectionKey}
                     achievements={achievements}
+                    effectiveById={effectiveById}
+                    allAchievements={allAchievements}
+                    newlyRevealedIds={newlyRevealedIds}
+                    revealPulseParentIds={revealPulseParentIds}
+                    celebratingParentId={celebratingParentId}
                     completion={completion}
                     isOpen={openSections[sectionKey]}
                     onToggle={() => toggleSection(sectionKey)}
-                    onToggleAchievement={(id) => toggleAchievement("social", id)}
+                    onToggleAchievement={(id) => toggleAchievementWithCelebration("social", id)}
                     onIncrementAchievement={incrementAchievement}
                     getCompletionColor={getCompletionColor}
                   />
@@ -409,10 +551,15 @@ function DashboardInner() {
                     title={section.title}
                     sectionKey={sectionKey}
                     achievements={achievements}
+                    effectiveById={effectiveById}
+                    allAchievements={allAchievements}
+                    newlyRevealedIds={newlyRevealedIds}
+                    revealPulseParentIds={revealPulseParentIds}
+                    celebratingParentId={celebratingParentId}
                     completion={completion}
                     isOpen={openSections[sectionKey]}
                     onToggle={() => toggleSection(sectionKey)}
-                    onToggleAchievement={(id) => toggleAchievement("collection", id)}
+                    onToggleAchievement={(id) => toggleAchievementWithCelebration("collection", id)}
                     onIncrementAchievement={incrementAchievement}
                     getCompletionColor={getCompletionColor}
                   />

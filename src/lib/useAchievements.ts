@@ -6,6 +6,7 @@ import { db } from "./firebase";
 import { useAuth } from "./firebase-auth";
 import { useUserDoc } from "./useUserDoc";
 import { computePointTotals, getPeriodKeys } from "./points";
+import { getCurrentYear, getEffectiveProgress, getResetPolicy, isUnlocked } from "./achievementProgress";
 
 // Schema version for achievements - increment when template structure changes
 const ACHIEVEMENTS_SCHEMA_VERSION = 1;
@@ -20,6 +21,12 @@ export type AchievementBase = {
   completedDate?: Timestamp;
   points?: number;
   rarity?: "common" | "rare" | "epic" | "legendary";
+  /** Default "yearly" when missing. */
+  resetPolicy?: "never" | "yearly";
+  /** Locked until this parent achievement is completed. */
+  requiresId?: string;
+  /** Set when writing yearly achievements; used to reset when year changes. */
+  year?: number;
 };
 
 export type ToggleAchievement = AchievementBase & {
@@ -76,37 +83,38 @@ const defaultAchievements: Achievements = {
 
 // Helper function to merge saved achievements with template data
 // Keeps template as source of truth for titles/points/order
-// Keeps saved data as source of truth for completion + completedDate
-// Automatically includes new achievements from the template
+// Applies effective progress (yearly reset when stored.year !== currentYear)
 function mergeAchievementsWithTemplate(saved: Achievements, template: Achievements): Achievements {
   const categories: (keyof Achievements)[] = ["skill", "social", "collection"];
+  const currentYear = getCurrentYear();
 
   const merged: Achievements = { skill: [], social: [], collection: [] };
 
   for (const category of categories) {
     merged[category] = template[category].map((templateAchievement) => {
       const savedAchievement = saved[category]?.find((a) => a.id === templateAchievement.id);
+      const stored = savedAchievement
+        ? {
+            isCompleted: savedAchievement.isCompleted,
+            completedDate: savedAchievement.completedDate,
+            progress:
+              templateAchievement.kind === "counter" && typeof (savedAchievement as any).progress === "number"
+                ? (savedAchievement as any).progress
+                : 0,
+            year: (savedAchievement as any).year,
+          }
+        : null;
 
-      // Base merged achievement from template
+      const effective = getEffectiveProgress(templateAchievement, stored, currentYear);
+
       const mergedAchievement: Achievement = {
-          ...templateAchievement,
-        completedDate: savedAchievement?.completedDate,
+        ...templateAchievement,
+        isCompleted: effective.isCompleted,
+        completedDate: effective.completedDate,
       };
 
-      // For counter achievements, preserve progress and recompute isCompleted from progress/target
       if (templateAchievement.kind === "counter") {
-        const savedProgress =
-          savedAchievement && typeof (savedAchievement as any).progress === "number"
-            ? (savedAchievement as any).progress
-            : (templateAchievement as any).progress;
-
-        (mergedAchievement as CounterAchievement).progress = savedProgress;
-
-        mergedAchievement.isCompleted =
-          savedProgress >= (templateAchievement as CounterAchievement).target;
-      } else {
-        // For toggle achievements, preserve isCompleted from saved data
-        mergedAchievement.isCompleted = savedAchievement?.isCompleted ?? false;
+        (mergedAchievement as CounterAchievement).progress = effective.progress;
       }
 
       return mergedAchievement;
@@ -125,6 +133,10 @@ export function useAchievements(initialAchievements?: Achievements) {
   const [loading, setLoading] = useState(true);
   const [authResolved, setAuthResolved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [newUnlocks, setNewUnlocks] = useState<Achievement[]>([]);
+
+  const prevUnlockedIdsRef = useRef<Set<string>>(new Set());
+  const firstRunRef = useRef(true);
 
   // Debounced save refs
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -558,10 +570,57 @@ export function useAchievements(initialAchievements?: Achievements) {
     };
   }, [authResolved, user, userData, userDocLoading, initialAchievements]);
 
+  const effectiveById = (achs: Achievements): Record<string, Achievement> => {
+    const map: Record<string, Achievement> = {};
+    for (const cat of ["skill", "social", "collection"] as const) {
+      for (const a of achs[cat]) map[a.id] = a;
+    }
+    return map;
+  };
+
+  // Detect newly unlocked secret achievements (requiresId) for one-time modal
+  useEffect(() => {
+    const catalog = initialAchievements ?? defaultAchievements;
+    const allDefs: Achievement[] = [
+      ...(catalog.skill ?? []),
+      ...(catalog.social ?? []),
+      ...(catalog.collection ?? []),
+    ];
+    const byId = effectiveById(achievements);
+    const unlockedNow = new Set<string>();
+    for (const def of allDefs) {
+      if (isUnlocked(def, byId)) unlockedNow.add(def.id);
+    }
+
+    if (firstRunRef.current) {
+      firstRunRef.current = false;
+      prevUnlockedIdsRef.current = unlockedNow;
+      return;
+    }
+
+    const newlyUnlocked = allDefs.filter(
+      (def) =>
+        def.requiresId &&
+        unlockedNow.has(def.id) &&
+        !prevUnlockedIdsRef.current.has(def.id)
+    );
+    if (newlyUnlocked.length > 0) {
+      setNewUnlocks((prev) => {
+        const ids = new Set(prev.map((a) => a.id));
+        const deduped = newlyUnlocked.filter((d) => !ids.has(d.id));
+        return deduped.length > 0 ? [...prev, ...deduped] : prev;
+      });
+    }
+    prevUnlockedIdsRef.current = unlockedNow;
+  }, [achievements, initialAchievements]);
+
+  const clearNewUnlocks = () => setNewUnlocks([]);
+
   // Toggle a single achievement (only for toggle achievements)
   const toggleAchievement = async (category: keyof Achievements, id: string) => {
     if (!user) return;
-
+    const ach = achievements[category]?.find((a) => a.id === id);
+    if (ach && !isUnlocked(ach, effectiveById(achievements))) return;
 
     const updatedAchievements: Achievements = {
       ...achievements,
@@ -578,11 +637,15 @@ export function useAchievements(initialAchievements?: Achievements) {
             ? (achievement.completedDate ?? Timestamp.now())
             : undefined;
 
-        return {
+        const next: Achievement = {
           ...achievement,
           isCompleted: nextCompleted,
           completedDate: nextCompletedDate,
         };
+        if (getResetPolicy(achievement) === "yearly") {
+          (next as any).year = getCurrentYear();
+        }
+        return next;
         }),
       };
 
@@ -596,7 +659,8 @@ export function useAchievements(initialAchievements?: Achievements) {
   // Increment counter achievement progress
   const incrementAchievement = async (category: keyof Achievements, id: string, amount: number = 1) => {
     if (!user) return;
-
+    const ach = achievements[category]?.find((a) => a.id === id);
+    if (ach && !isUnlocked(ach, effectiveById(achievements))) return;
 
     const updatedAchievements: Achievements = {
       ...achievements,
@@ -610,22 +674,22 @@ export function useAchievements(initialAchievements?: Achievements) {
         const target = (achievement as CounterAchievement).target;
         const nextProgress = Math.min(target, Math.max(0, currentProgress + amount));
 
-        // Once completed, stay completed forever (progress can fluctuate but completion is permanent)
-        const wasAlreadyCompleted = achievement.isCompleted;
-        const nextCompleted = wasAlreadyCompleted || nextProgress >= target;
+        const nextCompleted = nextProgress >= target;
 
-        // Set completedDate only the FIRST time it becomes completed
-        const nextCompletedDate =
-          nextCompleted && !achievement.completedDate
-            ? Timestamp.now()
-            : achievement.completedDate;
+        const nextCompletedDate = nextCompleted
+          ? (achievement.completedDate ?? Timestamp.now())
+          : undefined;
 
-        return {
-              ...achievement,
+        const next: Achievement = {
+          ...achievement,
           progress: nextProgress,
           isCompleted: nextCompleted,
           completedDate: nextCompletedDate,
         };
+        if (getResetPolicy(achievement) === "yearly") {
+          (next as any).year = getCurrentYear();
+        }
+        return next;
       }),
     };
 
@@ -642,6 +706,8 @@ export function useAchievements(initialAchievements?: Achievements) {
     toggleAchievement,
     incrementAchievement,
     saveAchievements,
+    newUnlocks,
+    clearNewUnlocks,
   };
 }
 

@@ -423,6 +423,19 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       rarity: "rare",
     },
     {
+      id: "skill-35-2026",
+      title: "First Ace of 2026",
+      description: "Hit an ace this year (unlocked after your first-ever ace)",
+      category: "skill",
+      subcategory: "scoringAchievements",
+      isCompleted: false,
+      points: 250,
+      kind: "toggle",
+      resetPolicy: "yearly",
+      requiresId: "skill-35", // Ace Race (first-ever ace)
+      rarity: "rare",
+    },    
+    {
       id: "skill-36",
       title: "Albatross Alert",
       description: "Card your first albatross",
@@ -1220,7 +1233,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
     {
       id: "collection-51",
       title: "Grip Enhancement",
-      description: "Get your first whale sack or other equivalent chalk bag",
+      description: "Purchase a whale sack or other equivalent chalk bag",
       category: "collection",
       subcategory: "equipmentAccessories",
       isCompleted: false,

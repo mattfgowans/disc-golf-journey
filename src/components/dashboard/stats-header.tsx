@@ -12,6 +12,7 @@ interface StatsHeaderProps {
   currentRank: RankTier;
   nextRank: RankTier | null;
   rankProgress: number;
+  secretsDiscoveredCount?: number;
 }
 
 export function StatsHeader({
@@ -21,6 +22,7 @@ export function StatsHeader({
   currentRank,
   nextRank,
   rankProgress,
+  secretsDiscoveredCount = 0,
 }: StatsHeaderProps) {
   const qualifiesForPatch = (percentage: number) => percentage >= 80;
 
@@ -60,6 +62,11 @@ export function StatsHeader({
             <div className="text-[11px] font-semibold uppercase tracking-wide/relaxed opacity-90">Total Points</div>
             <div className="text-lg font-semibold leading-none">{totalPoints.toLocaleString()}</div>
           </div>
+        </div>
+        {/* Secrets discovered */}
+        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+          <span className="font-medium">Secrets discovered</span>
+          <span className="tabular-nums">{secretsDiscoveredCount}</span>
         </div>
       </div>
     </div>
