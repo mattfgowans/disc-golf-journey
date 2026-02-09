@@ -514,9 +514,7 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       subcategory: "scoringAchievements",
       isCompleted: false,
       points: 25,
-      kind: "counter",
-      target: 10,
-      progress: 0,
+      kind: "toggle",
     },
 
     // ROUND RATINGS
@@ -1545,18 +1543,6 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       isCompleted: false,
       points: 500,
       kind: "toggle",
-    },
-    {
-      id: "rounds_25",
-      title: "Play 25 Rounds",
-      description: "Complete 25 rounds of disc golf.",
-      category: "collection",
-      subcategory: "roundMilestones",
-      isCompleted: false,
-      points: 50,
-      kind: "counter",
-      target: 25,
-      progress: 0,
     }
   ]
 };

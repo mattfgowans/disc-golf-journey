@@ -161,7 +161,7 @@ function TabTriggerWithFill({ value, label, percent, isActive }: { value: string
 }
 
 function DashboardInner() {
-  const { achievements, loading: achievementsLoading, toggleAchievement, incrementAchievement, newUnlocks, clearNewUnlocks } = useAchievements(ACHIEVEMENTS_CATALOG);
+  const { achievements, loading: achievementsLoading, toggleAchievement, newUnlocks, clearNewUnlocks } = useAchievements(ACHIEVEMENTS_CATALOG);
 
   const uid = auth.currentUser?.uid ?? "(no user)";
 
@@ -496,7 +496,6 @@ function DashboardInner() {
                     isOpen={openSections[sectionKey]}
                     onToggle={() => toggleSection(sectionKey)}
                     onToggleAchievement={(id) => toggleAchievementWithCelebration("skill", id)}
-                    onIncrementAchievement={incrementAchievement}
                     getCompletionColor={getCompletionColor}
                   />
                 );
@@ -528,7 +527,6 @@ function DashboardInner() {
                     isOpen={openSections[sectionKey]}
                     onToggle={() => toggleSection(sectionKey)}
                     onToggleAchievement={(id) => toggleAchievementWithCelebration("social", id)}
-                    onIncrementAchievement={incrementAchievement}
                     getCompletionColor={getCompletionColor}
                   />
                 );
@@ -560,7 +558,6 @@ function DashboardInner() {
                     isOpen={openSections[sectionKey]}
                     onToggle={() => toggleSection(sectionKey)}
                     onToggleAchievement={(id) => toggleAchievementWithCelebration("collection", id)}
-                    onIncrementAchievement={incrementAchievement}
                     getCompletionColor={getCompletionColor}
                   />
                 );
@@ -574,7 +571,6 @@ function DashboardInner() {
         onOpenChange={setQuickLogOpen}
         achievements={currentAchievements}
         onToggle={toggleAchievement}
-        onIncrement={incrementAchievement}
         defaultCategory={activeTab as keyof Achievements}
       />
       <Button

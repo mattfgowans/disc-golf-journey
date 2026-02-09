@@ -93,31 +93,23 @@ function mergeAchievementsWithTemplate(saved: Achievements, template: Achievemen
   for (const category of categories) {
     merged[category] = template[category].map((templateAchievement) => {
       const savedAchievement = saved[category]?.find((a) => a.id === templateAchievement.id);
+      // Old saved counter fields (progress/target/kind) are ignored; template is source of truth.
       const stored = savedAchievement
         ? {
             isCompleted: savedAchievement.isCompleted,
             completedDate: savedAchievement.completedDate,
-            progress:
-              templateAchievement.kind === "counter" && typeof (savedAchievement as any).progress === "number"
-                ? (savedAchievement as any).progress
-                : 0,
+            progress: 0,
             year: (savedAchievement as any).year,
           }
         : null;
 
       const effective = getEffectiveProgress(templateAchievement, stored, currentYear);
 
-      const mergedAchievement: Achievement = {
+      return {
         ...templateAchievement,
         isCompleted: effective.isCompleted,
         completedDate: effective.completedDate,
       };
-
-      if (templateAchievement.kind === "counter") {
-        (mergedAchievement as CounterAchievement).progress = effective.progress;
-      }
-
-      return mergedAchievement;
     });
   }
 
@@ -240,7 +232,7 @@ export function useAchievements(initialAchievements?: Achievements) {
     try {
       if (process.env.NODE_ENV !== "production") {
         const progressSummary = Object.entries(newAchievements).map(([cat, achievements]) => {
-          const withProgress = achievements.filter(a => a.kind === "counter" ? (a as CounterAchievement).progress > 0 : a.isCompleted).length;
+          const withProgress = achievements.filter(a => a.isCompleted).length;
           return `${cat}: ${withProgress}/${achievements.length}`;
         }).join(', ');
         console.log(`[ACH][WRITE] saveAchievements starting - uid: ${user.uid}, doc: users/${user.uid}, context: ${context ? `${context.category}/${context.id}` : 'none'}, progress: ${progressSummary}`);
@@ -425,6 +417,9 @@ export function useAchievements(initialAchievements?: Achievements) {
     // Only reset to defaults when auth is resolved and user is actually signed out
     if (authResolved && !user) {
       setAchievementsFromRemote(initialAchievements || defaultAchievements, "reset");
+      setNewUnlocks([]);
+      prevUnlockedIdsRef.current = new Set();
+      firstRunRef.current = true;
       setLoading(false);
       lastHydratedUidRef.current = null;
       return;
@@ -515,7 +510,7 @@ export function useAchievements(initialAchievements?: Achievements) {
 
             if (process.env.NODE_ENV !== "production") {
               const progressSummary = Object.entries(achievementsToSave).map(([cat, achievements]) => {
-                const withProgress = achievements.filter(a => a.kind === "counter" ? (a as CounterAchievement).progress > 0 : a.isCompleted).length;
+                const withProgress = achievements.filter(a => a.isCompleted).length;
                 return `${cat}: ${withProgress}/${achievements.length}`;
               }).join(', ');
               console.log(`[ACH][READ] hydrated from firestore - uid: ${currentUser.uid}, progress: ${progressSummary}`);
@@ -529,7 +524,7 @@ export function useAchievements(initialAchievements?: Achievements) {
 
             if (process.env.NODE_ENV !== "production") {
               const progressSummary = Object.entries(mergedAchievements).map(([cat, achievements]) => {
-                const withProgress = achievements.filter(a => a.kind === "counter" ? (a as CounterAchievement).progress > 0 : a.isCompleted).length;
+                const withProgress = achievements.filter(a => a.isCompleted).length;
                 return `${cat}: ${withProgress}/${achievements.length}`;
               }).join(', ');
               console.log(`[ACH][READ] hydrated from firestore - uid: ${currentUser.uid}, progress: ${progressSummary}`);
@@ -592,6 +587,11 @@ export function useAchievements(initialAchievements?: Achievements) {
       if (isUnlocked(def, byId)) unlockedNow.add(def.id);
     }
 
+    if (loading) {
+      prevUnlockedIdsRef.current = unlockedNow;
+      return;
+    }
+
     if (firstRunRef.current) {
       firstRunRef.current = false;
       prevUnlockedIdsRef.current = unlockedNow;
@@ -612,7 +612,7 @@ export function useAchievements(initialAchievements?: Achievements) {
       });
     }
     prevUnlockedIdsRef.current = unlockedNow;
-  }, [achievements, initialAchievements]);
+  }, [achievements, initialAchievements, loading]);
 
   const clearNewUnlocks = () => setNewUnlocks([]);
 
@@ -626,9 +626,6 @@ export function useAchievements(initialAchievements?: Achievements) {
       ...achievements,
       [category]: achievements[category].map((achievement) => {
         if (achievement.id !== id) return achievement;
-
-        // Skip counter achievements - use incrementAchievement instead
-        if (achievement.kind === "counter") return achievement;
 
         const nextCompleted = !achievement.isCompleted;
 
@@ -656,55 +653,10 @@ export function useAchievements(initialAchievements?: Achievements) {
     scheduleSave(updatedAchievements, { category, id });
   };
 
-  // Increment counter achievement progress
-  const incrementAchievement = async (category: keyof Achievements, id: string, amount: number = 1) => {
-    if (!user) return;
-    const ach = achievements[category]?.find((a) => a.id === id);
-    if (ach && !isUnlocked(ach, effectiveById(achievements))) return;
-
-    const updatedAchievements: Achievements = {
-      ...achievements,
-      [category]: achievements[category].map((achievement) => {
-        if (achievement.id !== id) return achievement;
-
-        // Only increment counter achievements
-        if (achievement.kind !== "counter") return achievement;
-
-        const currentProgress = (achievement as CounterAchievement).progress;
-        const target = (achievement as CounterAchievement).target;
-        const nextProgress = Math.min(target, Math.max(0, currentProgress + amount));
-
-        const nextCompleted = nextProgress >= target;
-
-        const nextCompletedDate = nextCompleted
-          ? (achievement.completedDate ?? Timestamp.now())
-          : undefined;
-
-        const next: Achievement = {
-          ...achievement,
-          progress: nextProgress,
-          isCompleted: nextCompleted,
-          completedDate: nextCompletedDate,
-        };
-        if (getResetPolicy(achievement) === "yearly") {
-          (next as any).year = getCurrentYear();
-        }
-        return next;
-      }),
-    };
-
-
-    setAchievements(updatedAchievements);
-
-    // Schedule debounced save (UI updates immediately, save happens later)
-    scheduleSave(updatedAchievements, { category, id });
-  };
-
   return {
     achievements,
     loading,
     toggleAchievement,
-    incrementAchievement,
     saveAchievements,
     newUnlocks,
     clearNewUnlocks,

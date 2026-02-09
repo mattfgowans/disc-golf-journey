@@ -21,8 +21,6 @@ interface AchievementCardProps {
   points?: number;
   rarity?: "common" | "rare" | "epic" | "legendary";
   kind?: "toggle" | "counter";
-  target?: number;
-  progress?: number;
   locked?: boolean;
   hasSecrets?: boolean;
   lockedChildCount?: number;
@@ -32,7 +30,6 @@ interface AchievementCardProps {
   celebrateParent?: boolean;
   requiresId?: string;
   onToggle: () => void;
-  onIncrementAchievement: (category: AchievementCategory, id: string, amount: number) => void;
 }
 
 const categoryIcons = {
@@ -50,9 +47,6 @@ export function AchievementCard({
   completedDate,
   points,
   rarity = "common",
-  kind,
-  target,
-  progress,
   locked = false,
   hasSecrets = false,
   lockedChildCount,
@@ -62,7 +56,6 @@ export function AchievementCard({
   celebrateParent = false,
   requiresId,
   onToggle,
-  onIncrementAchievement,
 }: AchievementCardProps) {
   const Icon = categoryIcons[category];
   const isSecretChild = !!requiresId;
@@ -135,31 +128,7 @@ export function AchievementCard({
         </CardHeader>
         <CardContent className="pt-1 pb-2">
           <div className="flex flex-col gap-1">
-            {!locked && (kind === "counter" && progress !== undefined && target !== undefined ? (
-              <div className="flex items-center justify-center gap-1.5">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onIncrementAchievement(category, id, -1)}
-                  disabled={progress <= 0}
-                  className="px-2 h-7"
-                >
-                  -
-                </Button>
-                <span className="text-xs font-medium">
-                  {progress} / {target}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onIncrementAchievement(category, id, 1)}
-                  disabled={progress >= target}
-                  className="px-2 h-7"
-                >
-                  +
-                </Button>
-              </div>
-            ) : (
+            {!locked && (
               <div className="flex items-center gap-2">
                 <Button
                   variant={isCompleted ? "outline" : "default"}
@@ -179,7 +148,7 @@ export function AchievementCard({
                   </span>
                 )}
               </div>
-            ))}
+            )}
             {hasSecrets && lockedChildCount != null && lockedChildCount > 0 && (
               <p className="text-[11px] text-muted-foreground pt-1">
                 {totalChildrenCount != null && lockedChildCount === totalChildrenCount

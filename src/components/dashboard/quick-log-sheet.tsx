@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Minus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import type { Achievement, Achievements } from "@/lib/useAchievements";
 
 const RECENT_KEY = "dgj_recent_achievements";
@@ -54,27 +54,17 @@ function pushRecent(category: CategoryKey, id: string) {
   }
 }
 
-function isToggle(a: Achievement): a is Achievement & { kind?: "toggle" } {
-  return a.kind !== "counter";
-}
-
-function isCounter(a: Achievement): a is Achievement & { kind: "counter"; progress: number; target: number } {
-  return a.kind === "counter";
-}
-
 export function QuickLogSheet({
   open,
   onOpenChange,
   achievements,
   onToggle,
-  onIncrement,
   defaultCategory,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   achievements: Achievements;
   onToggle: (category: CategoryKey, id: string) => void;
-  onIncrement: (category: CategoryKey, id: string, amount?: number) => void;
   defaultCategory: CategoryKey;
 }) {
   const [search, setSearch] = useState("");
@@ -157,19 +147,6 @@ export function QuickLogSheet({
     [onToggle, byKey, showToast]
   );
 
-  const handleIncrement = useCallback(
-    (category: CategoryKey, id: string, delta: number) => {
-      const a = byKey.get(`${category}:${id}`);
-      if (a && isCounter(a)) {
-        const next = Math.min(a.target, Math.max(0, a.progress + delta));
-        showToast(`${category}:${id}`, `Progress: ${a.title} (${next}/${a.target})`);
-      }
-      onIncrement(category, id, delta);
-      pushRecent(category, id);
-    },
-    [onIncrement, byKey, showToast]
-  );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -212,43 +189,14 @@ export function QuickLogSheet({
                       )}
                     </div>
                     <div className="shrink-0 flex items-center gap-1">
-                      {isToggle(a) && (
-                        <Button
-                          size="sm"
-                          variant={a.isCompleted ? "outline" : "default"}
-                          className="h-8 text-xs"
-                          onClick={() => handleToggle(a.category, a.id)}
-                        >
-                          {a.isCompleted ? "Undo" : "Log"}
-                        </Button>
-                      )}
-                      {isCounter(a) && (
-                        <>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 shrink-0"
-                            disabled={a.progress <= 0}
-                            onClick={() => handleIncrement(a.category, a.id, -1)}
-                            aria-label="Decrease"
-                          >
-                            <Minus className="h-3.5 w-3.5" />
-                          </Button>
-                          <span className="text-xs tabular-nums min-w-[3rem] text-center">
-                            {a.progress}/{a.target}
-                          </span>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 shrink-0"
-                            disabled={a.progress >= a.target}
-                            onClick={() => handleIncrement(a.category, a.id, 1)}
-                            aria-label="Increase"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                          </Button>
-                        </>
-                      )}
+                      <Button
+                        size="sm"
+                        variant={a.isCompleted ? "outline" : "default"}
+                        className="h-8 text-xs"
+                        onClick={() => handleToggle(a.category, a.id)}
+                      >
+                        {a.isCompleted ? "Undo" : "Log"}
+                      </Button>
                     </div>
                   </li>
                 ))}
@@ -278,43 +226,14 @@ export function QuickLogSheet({
                     )}
                   </div>
                   <div className="shrink-0 flex items-center gap-1">
-                    {isToggle(a) && (
-                      <Button
-                        size="sm"
-                        variant={a.isCompleted ? "outline" : "default"}
-                        className="h-8 text-xs"
-                        onClick={() => handleToggle(a.category, a.id)}
-                      >
-                        {a.isCompleted ? "Undo" : "Log"}
-                      </Button>
-                    )}
-                    {isCounter(a) && (
-                      <>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 shrink-0"
-                          disabled={a.progress <= 0}
-                          onClick={() => handleIncrement(a.category, a.id, -1)}
-                          aria-label="Decrease"
-                        >
-                          <Minus className="h-3.5 w-3.5" />
-                        </Button>
-                        <span className="text-xs tabular-nums min-w-[3rem] text-center">
-                          {a.progress}/{a.target}
-                        </span>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 shrink-0"
-                          disabled={a.progress >= a.target}
-                          onClick={() => handleIncrement(a.category, a.id, 1)}
-                          aria-label="Increase"
-                        >
-                          <Plus className="h-3.5 w-3.5" />
-                        </Button>
-                      </>
-                    )}
+                    <Button
+                      size="sm"
+                      variant={a.isCompleted ? "outline" : "default"}
+                      className="h-8 text-xs"
+                      onClick={() => handleToggle(a.category, a.id)}
+                    >
+                      {a.isCompleted ? "Undo" : "Log"}
+                    </Button>
                   </div>
                 </li>
               ))}

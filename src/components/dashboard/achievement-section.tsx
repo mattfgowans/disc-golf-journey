@@ -30,7 +30,6 @@ interface AchievementSectionProps {
   isOpen: boolean;
   onToggle: () => void;
   onToggleAchievement: (id: string) => void;
-  onIncrementAchievement: (category: keyof Achievements, id: string, amount: number) => void;
   getCompletionColor: (value: number) => string;
 }
 
@@ -49,7 +48,6 @@ export function AchievementSection({
   isOpen,
   onToggle,
   onToggleAchievement,
-  onIncrementAchievement,
   getCompletionColor,
 }: AchievementSectionProps) {
   const localById = useMemo(() => {
@@ -125,7 +123,6 @@ export function AchievementSection({
                 revealPulse={revealPulseParentIds?.has(achievement.id) ?? false}
                 celebrateParent={celebratingParentId === achievement.id}
                 onToggle={() => onToggleAchievement(achievement.id)}
-                onIncrementAchievement={onIncrementAchievement}
               />
             );
           })}
