@@ -1,65 +1,52 @@
 "use client";
 
 import { Suspense, useEffect } from "react";
-import {
-  getRedirectResult,
-  signInWithRedirect,
-  GoogleAuthProvider,
-  setPersistence,
-  browserLocalPersistence,
-  browserSessionPersistence,
-} from "firebase/auth";
+import { getRedirectResult, GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
-
-async function ensurePersistence() {
-  try {
-    await setPersistence(auth, browserLocalPersistence);
-  } catch (e) {
-    await setPersistence(auth, browserSessionPersistence);
-  }
-}
 
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const startRedirect = searchParams.get("start") === "1";
+  const start = searchParams.get("start");
 
   useEffect(() => {
     (async () => {
-      if (startRedirect) {
-        await ensurePersistence();
+      if (start === "1") {
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: "select_account" });
+        console.error("AUTH CALLBACK: starting redirect sign-in");
         await signInWithRedirect(auth, provider);
         return;
       }
 
       const result = await getRedirectResult(auth);
       if (result?.user) {
-        const u = result.user;
-        console.error("AUTH CALLBACK: redirect result -> user", { uid: u.uid, email: u.email ?? null });
+        const { uid, email } = result.user;
+        console.error("AUTH CALLBACK: redirect result -> user", { uid, email: email ?? null });
       } else {
         console.error("AUTH CALLBACK: redirect result -> null");
       }
-      router.replace("/");
+      router.replace("/dashboard");
     })();
-  }, [router, startRedirect]);
+  }, [router, start]);
 
   return (
     <div className="flex min-h-[200px] items-center justify-center">
-      <p className="text-muted-foreground">Signing you in...</p>
+      <p className="text-muted-foreground">Signing you in…</p>
     </div>
   );
 }
 
 export default function AuthCallbackPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-[200px] items-center justify-center">
-        <p className="text-muted-foreground">Signing you in...</p>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex min-h-[200px] items-center justify-center">
+          <p className="text-muted-foreground">Signing you in…</p>
+        </div>
+      }
+    >
       <AuthCallbackContent />
     </Suspense>
   );
