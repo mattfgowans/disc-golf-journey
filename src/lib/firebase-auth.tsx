@@ -3,6 +3,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import {
   User,
   onAuthStateChanged,
@@ -69,6 +70,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message = "Sign-in time
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -92,9 +94,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInPromiseRef = useRef<Promise<void> | null>(null);
   const redirectHandledRef = useRef(false);
 
-  // Handle redirect result once on app load
+  // Handle redirect result once on app load (skip when callback page handles it)
   useEffect(() => {
     if (redirectHandledRef.current) return;
+    if (pathname === "/auth/callback") {
+      redirectHandledRef.current = true;
+      return;
+    }
     redirectHandledRef.current = true;
     setRedirectSettling(true);
 
@@ -130,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRedirectSettling(false);
       }
     })();
-  }, []);
+  }, [pathname]);
 
   // Register auth state listener
   useEffect(() => {

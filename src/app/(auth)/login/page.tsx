@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { shouldPreferRedirect } from "@/lib/authEnv";
 import { useAuth } from "@/lib/firebase-auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -27,6 +28,10 @@ export default function LoginPage() {
   const handleSignIn = async () => {
     setSigningIn(true);
     try {
+      if (shouldPreferRedirect()) {
+        router.push("/auth/callback?start=1");
+        return;
+      }
       await signInWithGoogle();
       // Redirect will happen automatically via useEffect
     } catch (error) {

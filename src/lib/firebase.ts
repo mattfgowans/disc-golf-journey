@@ -11,13 +11,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abcdef123456",
 };
 
-// Initialize Firebase
-let app: FirebaseApp;
-if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0];
-}
+// Initialize Firebase (singleton: reuse existing app if already initialized)
+const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 // Initialize Firebase services
 export const auth: Auth = getAuth(app);
@@ -40,7 +35,6 @@ if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true") {
 
 // Dev-only startup log
 if (process.env.NODE_ENV !== "production") {
-  const app = getApp();
   const isUsingEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true";
   console.log(`[FIREBASE] project=${app.options.projectId} emulator=${isUsingEmulator}`);
 }
