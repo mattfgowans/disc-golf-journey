@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/firebase-auth";
 import { useUserProfile } from "@/lib/useUserProfile";
 
+const DEBUG_AUTH = true;
+
 const ONBOARDING_PATH = "/onboarding/username";
 const LOGIN_PATH = "/login";
 const DEFAULT_APP_PATH = "/dashboard"; // justified by src/app/dashboard/page.tsx
@@ -95,8 +97,11 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!desiredPath) return;
+    if (DEBUG_AUTH && desiredPath === LOGIN_PATH) {
+      console.error("GUARD: redirect to /login", { pathname, hasUser: !!user, loading: authLoading });
+    }
     router.replace(desiredPath);
-  }, [desiredPath, router]);
+  }, [desiredPath, router, pathname, user, authLoading]);
 
   /**
    * Rendering rules (prevents flashes):
@@ -110,6 +115,9 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     !user ||
     usernameStatus === "loading";
 
+  if (DEBUG_AUTH && authLoading && !desiredPath) {
+    console.error("GUARD: loading, no redirect");
+  }
   if (shouldBlockRender) return null;
 
   if (usernameStatus === "error") {

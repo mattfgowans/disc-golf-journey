@@ -18,6 +18,8 @@ import {
 import { auth } from "./firebase";
 import { shouldPreferRedirect, isIOS, isInAppBrowser } from "./authEnv";
 
+const DEBUG_AUTH = true;
+
 function isPopupFallbackError(e: unknown) {
   const code = (e as AuthError | undefined)?.code;
   return (
@@ -54,6 +56,20 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message = "Sign-in time
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (DEBUG_AUTH) console.error("AUTH: init");
+    if (DEBUG_AUTH) {
+      const lsOk = typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+      try {
+        if (lsOk) window.localStorage.setItem("__auth_check", "1");
+        console.error("AUTH: persistence check", { localStorageAvailable: lsOk });
+        if (lsOk) window.localStorage.removeItem("__auth_check");
+      } catch (e) {
+        console.log("AUTH: persistence check", { localStorageAvailable: false, error: String(e) });
+      }
+    }
+  }, []);
   const [redirectError, setRedirectError] = useState<string | null>(null);
   const [redirectSettling, setRedirectSettling] = useState(false);
 
@@ -95,11 +111,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Register auth state listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
+      if (DEBUG_AUTH) {
+        if (u) {
+          console.error("AUTH: state -> user", { uid: u.uid, email: u.email ?? null });
+        } else {
+          console.error("AUTH: state -> null");
+        }
+      }
       setUser(u);
       if (u) setRedirectError(null);
       setLoading(false);
       signInPromiseRef.current = null;
-      if (process.env.NODE_ENV !== "production") {
+      if (process.env.NODE_ENV !== "production" && !DEBUG_AUTH) {
         console.log("[Auth] state", { uid: u?.uid ?? null });
       }
     });

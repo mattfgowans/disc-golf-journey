@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
+import { AuthDebugHud } from "@/components/AuthDebugHud";
 import { Navbar } from "@/components/layout/navbar";
 import { AuthProvider } from "@/lib/firebase-auth";
 
@@ -21,6 +23,9 @@ export default function RootLayout({
           <main className="container mx-auto px-4 py-8">
             {children}
           </main>
+          <Suspense fallback={null}>
+            <AuthDebugHud />
+          </Suspense>
         </AuthProvider>
       </body>
     </html>
