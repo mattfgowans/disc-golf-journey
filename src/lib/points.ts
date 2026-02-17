@@ -2,6 +2,8 @@
 
 import { Achievement } from "./useAchievements";
 import { getWeeklyKey } from "./time";
+import { isAchievementDisabled } from "./disabledAchievements";
+import { getCatalogPoints } from "@/data/achievements";
 
 export interface PointTotals {
   allTime: number;
@@ -64,8 +66,9 @@ export function computePointTotals(achievements: Achievement[]): PointTotals {
   for (const achievement of achievements) {
     // Only count completed achievements
     if (!achievement.isCompleted) continue;
+    if (isAchievementDisabled(achievement.id)) continue;
 
-    const points = achievement.points ?? 0;
+    const points = getCatalogPoints(achievement.id);
     allTime += points;
 
     // Determine completion date (use completedDate if available, otherwise now)
@@ -96,4 +99,36 @@ export function computePointTotals(achievements: Achievement[]): PointTotals {
   }
 
   return { allTime, week, month, year };
+}
+
+export interface TabPointTotals {
+  skillAllTime: number;
+  socialAllTime: number;
+  collectionAllTime: number;
+}
+
+// Compute per-tab allTime point totals. Counters count only when fully completed.
+export function computeTabPointTotals(achievementsByTab: {
+  skill: Achievement[];
+  social: Achievement[];
+  collection: Achievement[];
+}): TabPointTotals {
+  const sum = (arr: Achievement[]) => {
+    let total = 0;
+    for (const a of arr) {
+      if (isAchievementDisabled(a.id)) continue;
+      const isCompleted =
+        a.kind === "counter"
+          ? (a.progress ?? 0) >= (a.target ?? 0)
+          : !!a.isCompleted;
+      if (!isCompleted) continue;
+      total += getCatalogPoints(a.id);
+    }
+    return total;
+  };
+  return {
+    skillAllTime: sum(achievementsByTab.skill),
+    socialAllTime: sum(achievementsByTab.social),
+    collectionAllTime: sum(achievementsByTab.collection),
+  };
 }

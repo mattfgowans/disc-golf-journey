@@ -12,12 +12,15 @@ import Link from "next/link";
 import { doc, setDoc, getDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/firebase-auth";
+import { getUserStats } from "@/lib/leaderboard";
+import { getRankAndPrestige, PRESTIGE_STEP_POINTS } from "@/lib/ranks";
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const { userData: profile, loading: profileLoading } = useUserDoc();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Record<string, any>>({});
+  const [stats, setStats] = useState<{ allTime: number } | null>(null);
 
   const updateProfile = async (updates: Record<string, any>) => {
     if (!user) throw new Error("Not authenticated");
@@ -80,6 +83,27 @@ export default function ProfilePage() {
     }
   }, [profile]);
 
+  // Fetch Firestore stats for rank/prestige display
+  useEffect(() => {
+    const uid = user?.uid;
+    if (!uid) {
+      setStats({ allTime: 0 });
+      return;
+    }
+    let cancelled = false;
+    getUserStats(uid)
+      .then((s) => {
+        if (!cancelled) setStats({ allTime: s.allTime });
+      })
+      .catch(() => {
+        if (!cancelled) setStats({ allTime: 0 });
+      });
+    return () => { cancelled = true; };
+  }, [user?.uid]);
+
+  const allTimePoints = stats?.allTime ?? 0;
+  const rp = getRankAndPrestige(allTimePoints);
+
   return (
     <RequireAuth>
       {/* Handle profile loading and error states inside RequireAuth */}
@@ -102,6 +126,8 @@ export default function ProfilePage() {
           editForm={editForm}
           setEditForm={setEditForm}
           updateProfile={updateProfile}
+          rankPrestige={rp}
+          prestigeStep={PRESTIGE_STEP_POINTS}
         />
       )}
     </RequireAuth>
@@ -115,6 +141,8 @@ function ProfileContent({
   editForm,
   setEditForm,
   updateProfile,
+  rankPrestige,
+  prestigeStep,
 }: {
   profile: Record<string, any>;
   isEditing: boolean;
@@ -122,6 +150,8 @@ function ProfileContent({
   editForm: Record<string, any>;
   setEditForm: (form: Record<string, any> | ((prev: Record<string, any>) => Record<string, any>)) => void;
   updateProfile: (updates: Record<string, any>) => Promise<void>;
+  rankPrestige: ReturnType<typeof getRankAndPrestige>;
+  prestigeStep: number;
 }) {
   const handleSave = async () => {
     try {
@@ -172,6 +202,28 @@ function ProfileContent({
             <AvatarFallback className="text-lg">{initials}</AvatarFallback>
           </Avatar>
           <h1 className="text-3xl font-bold">{profile.displayName}</h1>
+        </div>
+
+        {/* Rank + Prestige */}
+        <div className="rounded-xl border border-border bg-muted/30 p-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-2">Rank & Prestige</h3>
+          <div className="space-y-1 text-sm">
+            <div>
+              <span className="font-medium">Rank:</span> {rankPrestige.rank.name}
+            </div>
+            <div>
+              <span className="font-medium">Prestige:</span> {rankPrestige.prestige}
+            </div>
+            {rankPrestige.progress.nextRank ? (
+              <div className="text-muted-foreground">
+                {rankPrestige.progress.pointsToNext} pts to {rankPrestige.progress.nextRank.name}
+              </div>
+            ) : (
+              <div className="text-muted-foreground">
+                {prestigeStep - rankPrestige.pointsInPrestige} pts to next Prestige
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Profile Information */}

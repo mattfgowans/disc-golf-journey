@@ -4,13 +4,18 @@ import { useState, useEffect, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAchievements, type Achievement, type Achievements } from "@/lib/useAchievements";
 import { Button } from "@/components/ui/button";
-import { ACHIEVEMENTS_CATALOG } from "@/data/achievements";
-import { isUnlocked } from "@/lib/achievementProgress";
+import { ACHIEVEMENTS_CATALOG, getActiveTierAchievements, isTieredCategoryId } from "@/data/achievements";
+import { getCurrentYear, isAchievementCompleted, isGatedVisible } from "@/lib/achievementProgress";
 import { StatsHeader } from "@/components/dashboard/stats-header";
 import { AchievementSection } from "@/components/dashboard/achievement-section";
 import { QuickLogSheet } from "@/components/dashboard/quick-log-sheet";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { auth } from "@/lib/firebase";
+import { getUserStats } from "@/lib/leaderboard";
+import { getRankAndPrestige } from "@/lib/ranks";
+import { computeTabPointTotals } from "@/lib/points";
+import { getTabMastery } from "@/lib/mastery";
+import { isAchievementDisabled } from "@/lib/disabledAchievements";
 import { Plus } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -19,16 +24,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 
 // TODO: Add achievement badges (rarity-based and achievement-specific)
 
-// Rank system - similar to video game ranking
-const RANK_TIERS = [
-  { name: "Beginner", minPoints: 0, color: "from-gray-400 to-gray-600" },
-  { name: "Novice", minPoints: 500, color: "from-green-400 to-green-600" },
-  { name: "Intermediate", minPoints: 1000, color: "from-blue-400 to-blue-600" },
-  { name: "Advanced", minPoints: 2500, color: "from-purple-400 to-purple-600" },
-  { name: "Expert", minPoints: 5000, color: "from-orange-400 to-orange-600" },
-  { name: "Master", minPoints: 10000, color: "from-red-400 to-red-600" },
-  { name: "Legend", minPoints: 15000, color: "from-yellow-300 to-yellow-500" },
-] as const;
+// Achievement IDs used for special handling (gate animation + modal, no bobble)
+const ACE_RACE_ID = "skill-35"; // Ace Race (first-ever ace)
+
+// Rank gradient colors (by rank key)
+const RANK_COLORS: Record<string, string> = {
+  rookie: "from-gray-400 to-gray-600",
+  casual: "from-green-400 to-green-600",
+  regular: "from-blue-400 to-blue-600",
+  dedicated: "from-purple-400 to-purple-600",
+  competitive: "from-orange-400 to-orange-600",
+  advanced: "from-red-400 to-red-600",
+  expert: "from-yellow-300 to-yellow-500",
+  elite: "from-fuchsia-500 to-indigo-500",
+  pro: "from-slate-700 to-black",
+  master: "from-amber-500 to-rose-600",
+  legend: "from-emerald-400 to-cyan-500",
+};
 
 // Section configuration for all achievement categories
 const SECTIONS = {
@@ -37,13 +49,15 @@ const SECTIONS = {
     { key: "distanceControl", title: "Distance Control" },
     { key: "specialtyShots", title: "Specialty Shots" },
     { key: "scoringAchievements", title: "Scoring Achievements" },
+    { key: "aces", title: "Aces" },
     { key: "roundRatings", title: "Round Ratings" },
   ],
   social: [
     { key: "communityEngagement", title: "Community Engagement" },
     { key: "teachingLeadership", title: "Teaching & Leadership" },
-    { key: "competitionEvents", title: "Competition & Events" },
     { key: "mediaContent", title: "Media & Content" },
+    { key: "cardmates", title: "Cardmates" },
+    { key: "competitionEvents", title: "Competition & Events" },
     { key: "goodSamaritan", title: "Good Samaritan" },
   ],
   collection: [
@@ -135,10 +149,23 @@ function getFillRounding(percent: number): string {
 }
 
 // Helper component for tab triggers with background fill
-function TabTriggerWithFill({ value, label, percent, isActive }: { value: string; label: string; percent: number; isActive: boolean }) {
+function TabTriggerWithFill({
+  value,
+  label,
+  percent,
+  isActive,
+  eligibleThreshold = 80,
+}: {
+  value: string;
+  label: string;
+  percent: number;
+  isActive: boolean;
+  eligibleThreshold?: number;
+}) {
   const colorClass = getProgressColorClass(percent, isActive);
   const clampedPercent = Math.min(100, Math.max(0, percent));
   const fillRounding = getFillRounding(clampedPercent);
+  const eligible = clampedPercent >= eligibleThreshold;
 
   return (
     <TabsTrigger
@@ -152,26 +179,54 @@ function TabTriggerWithFill({ value, label, percent, isActive }: { value: string
       />
 
       {/* Text layer on top */}
-      <div className="relative z-10 flex min-w-0 items-center justify-between w-full px-1">
-        <span className="whitespace-nowrap data-[state=active]:font-semibold">{label}</span>
-        <span className="shrink-0 text-[11px] opacity-80 tabular-nums">{Math.round(clampedPercent)}%</span>
+      <div className="relative z-10 flex min-w-0 items-center justify-between w-full px-1 gap-1">
+        <span className="whitespace-nowrap data-[state=active]:font-semibold shrink-0">{label}</span>
+        <div className="flex shrink-0 items-center gap-1 min-w-0">
+          {eligible && (
+            <span
+              className="text-[10px] font-medium opacity-70 text-muted-foreground"
+              title="Eligible when this tab reaches 80% completion."
+            >
+              Eligible
+            </span>
+          )}
+          <span className="text-[11px] opacity-80 tabular-nums">{Math.round(clampedPercent)}%</span>
+        </div>
       </div>
     </TabsTrigger>
   );
 }
 
 function DashboardInner() {
-  const { achievements, loading: achievementsLoading, toggleAchievement, newUnlocks, clearNewUnlocks } = useAchievements(ACHIEVEMENTS_CATALOG);
+  const {
+    achievements,
+    loading: achievementsLoading,
+    toggleAchievement,
+    newUnlocks,
+    clearNewUnlocks,
+    tierUpMessage,
+    clearTierUpMessage,
+    devResetPuttingMasteryTier,
+    devResetAllTieredCategoryTiers,
+    getUserCategoryTierIndex,
+    aceCelebratingId,
+    aceCelebrationPhase,
+  } = useAchievements(ACHIEVEMENTS_CATALOG);
 
   const uid = auth.currentUser?.uid ?? "(no user)";
 
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
   const [quickLogOpen, setQuickLogOpen] = useState(false);
+  const [userStats, setUserStats] = useState<{ allTime: number } | null>(null);
   const [recentlyRevealedIds, setRecentlyRevealedIds] = useState<Set<string>>(new Set());
   const [revealPulseParentIds, setRevealPulseParentIds] = useState<Set<string>>(new Set());
   const [secretModalOpen, setSecretModalOpen] = useState(false);
   const [celebratingParentId, setCelebratingParentId] = useState<string | null>(null);
+
+  const showDevTools =
+    process.env.NODE_ENV !== "production" &&
+    process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
 
   useEffect(() => {
     if (newUnlocks.length === 0) {
@@ -188,6 +243,21 @@ function DashboardInner() {
     const t = window.setTimeout(() => setSecretModalOpen(true), 700);
     return () => window.clearTimeout(t);
   }, [newUnlocks]);
+
+  useEffect(() => {
+    if (!tierUpMessage) return;
+    const t = window.setTimeout(() => clearTierUpMessage(), 2000);
+    return () => window.clearTimeout(t);
+  }, [tierUpMessage, clearTierUpMessage]);
+
+  // Fire confetti exactly on Ace Race "pop" moment.
+  useEffect(() => {
+    const handler = () => {
+      confetti({ particleCount: 160, spread: 85, origin: { y: 0.6 } });
+    };
+    window.addEventListener("ace-pop", handler as EventListener);
+    return () => window.removeEventListener("ace-pop", handler as EventListener);
+  }, []);
 
   const startRevealGlow = (ids: string[]) => {
     if (ids.length === 0) return;
@@ -219,25 +289,49 @@ function DashboardInner() {
     }
   }, [activeTab]);
 
+  // Fetch Firestore stats (allTime) for rank/prestige
+  useEffect(() => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    let cancelled = false;
+    getUserStats(uid)
+      .then((s) => {
+        if (!cancelled) setUserStats({ allTime: s.allTime });
+      })
+      .catch(() => {
+        if (!cancelled) setUserStats({ allTime: 0 });
+      });
+    return () => { cancelled = true; };
+  }, [auth.currentUser?.uid]);
+
   // Use achievements from Firebase, or fallback to catalog if not loaded yet
   // Only fallback if achievements is null/undefined, not if arrays are empty
   const currentAchievements: Achievements = achievements ?? ACHIEVEMENTS_CATALOG;
 
+  const achievementsForUI = useMemo(
+    () => ({
+      skill: currentAchievements.skill.filter((a) => !isAchievementDisabled(a.id)),
+      social: currentAchievements.social.filter((a) => !isAchievementDisabled(a.id)),
+      collection: currentAchievements.collection.filter((a) => !isAchievementDisabled(a.id)),
+    }),
+    [currentAchievements]
+  );
+
   const effectiveById = useMemo(() => {
     const map: Record<string, Achievement> = {};
     for (const cat of ["skill", "social", "collection"] as const) {
-      for (const a of currentAchievements[cat]) map[a.id] = a;
+      for (const a of achievementsForUI[cat]) map[a.id] = a;
     }
     return map;
-  }, [currentAchievements]);
+  }, [achievementsForUI]);
 
   const allAchievements = useMemo(
     () => [
-      ...currentAchievements.skill,
-      ...currentAchievements.social,
-      ...currentAchievements.collection,
+      ...achievementsForUI.skill,
+      ...achievementsForUI.social,
+      ...achievementsForUI.collection,
     ],
-    [currentAchievements]
+    [achievementsForUI]
   );
 
   const newlyRevealedIds = useMemo(() => {
@@ -245,11 +339,6 @@ function DashboardInner() {
     for (const a of newUnlocks) s.add(a.id);
     return s;
   }, [recentlyRevealedIds, newUnlocks]);
-
-  const secretsDiscoveredCount = useMemo(
-    () => allAchievements.filter((a) => a.requiresId && isUnlocked(a, effectiveById)).length,
-    [allAchievements, effectiveById]
-  );
 
   const childrenByParentId = useMemo(() => {
     const map = new Map<string, Achievement[]>();
@@ -269,6 +358,17 @@ function DashboardInner() {
 
     const willComplete = ach.kind !== "counter" && !ach.isCompleted;
     const hasSecrets = (childrenByParentId.get(id)?.length ?? 0) > 0;
+
+    // League Night Rookie (social-0) and Ace Race (skill-35): use gate animation on card, show modal for new unlocks.
+    if (
+      (category === "social" && id === "social-0") ||
+      (category === "skill" && id === ACE_RACE_ID)
+    ) {
+      if (willComplete) {
+        toggleAchievement(category, id);
+        return;
+      }
+    }
 
     if (willComplete && hasSecrets) {
       setCelebratingParentId(id);
@@ -314,11 +414,69 @@ function DashboardInner() {
     return (totalFraction / total) * 100;
   };
 
+  const getTierInfoForSection = (category: keyof Achievements, subcategory: string) => {
+    const inCard = achievementsForUI[category].filter(
+      (achievement) => achievement.subcategory === subcategory
+    );
+    const categoryId = inCard.find((a) => typeof (a as any).categoryId === "string")?.categoryId as
+      | string
+      | undefined;
+    if (!categoryId || !isTieredCategoryId(categoryId)) return null;
+
+    const tierIndex = getUserCategoryTierIndex(categoryId);
+    const tierDefs = getActiveTierAchievements(categoryId, tierIndex);
+    const tierIds = tierDefs.map((d) => d.id);
+    const currentYear = getCurrentYear();
+
+    const visibleTierDefs = tierDefs.filter((def) => isGatedVisible(def as any, effectiveById as any));
+    const completedCount = visibleTierDefs.filter((def) =>
+      isAchievementCompleted(def as any, effectiveById[def.id] as any, currentYear)
+    ).length;
+
+    const label =
+      tierIndex === 0 ? "Beginner" :
+      tierIndex === 1 ? "Intermediate" :
+      tierIndex === 2 ? "Advanced" :
+      tierIndex === 3 ? "Expert" :
+      `Tier ${tierIndex}`;
+
+    return {
+      tierIndex,
+      tierKey:
+        tierIndex === 0 ? "beginner" :
+        tierIndex === 1 ? "intermediate" :
+        tierIndex === 2 ? "advanced" :
+        tierIndex === 3 ? "expert" :
+        `tier-${tierIndex}`,
+      label,
+      progressText: `${completedCount}/${visibleTierDefs.length || 0}`,
+    };
+  };
+
   // Get achievements for a specific category and subcategory
   const getCategoryAchievements = (category: keyof Achievements, subcategory: string) => {
     // Filter by subcategory for all categories
-      const filtered = currentAchievements[category].filter(achievement => achievement.subcategory === subcategory);
-      return filtered;
+    const filtered = currentAchievements[category].filter(
+      (achievement) => achievement.subcategory === subcategory
+    );
+
+    // Tiered category cards: show only achievements in the active tier (preserve tier-defined order).
+    const categoryId = filtered.find((a) => typeof (a as any).categoryId === "string")?.categoryId as
+      | string
+      | undefined;
+    if (categoryId && isTieredCategoryId(categoryId)) {
+      const tierIndex = getUserCategoryTierIndex(categoryId);
+      const tierDefs = getActiveTierAchievements(categoryId, tierIndex);
+      const tierIds = tierDefs.map((d) => d.id);
+      if (tierIds.length > 0) {
+        const byId = new Map(filtered.map((a) => [a.id, a] as const));
+        return tierIds
+          .map((id) => byId.get(id))
+          .filter((a): a is Achievement => a != null);
+      }
+    }
+
+    return filtered;
   };
 
   const getCompletionColor = (value: number) => {
@@ -347,9 +505,9 @@ function DashboardInner() {
   };
 
 
-  // Calculate completion percentages for each category
+  // Calculate completion percentages for each category (excludes disabled)
   const getCompletionPercentage = (category: keyof Achievements) => {
-    const achievements = currentAchievements[category];
+    const achievements = achievementsForUI[category];
     const totalAchievements = achievements.length;
     if (totalAchievements === 0) return 0;
     const totalFraction = achievements.reduce((sum, a) => sum + getAchievementCompletionFraction(a), 0);
@@ -360,47 +518,41 @@ function DashboardInner() {
   const socialCompletion = getCompletionPercentage("social");
   const collectionCompletion = getCompletionPercentage("collection");
 
-  // Calculate total points earned
-  const getTotalPoints = () => {
-    const allAchievements = [...currentAchievements.skill, ...currentAchievements.social, ...currentAchievements.collection];
-    return allAchievements
-      .filter(achievement => isAchievementFullyCompleted(achievement))
-      .reduce((total, achievement) => total + (achievement.points ?? 0), 0);
+  // Tab Mastery + patch eligibility (from achievements, not Firestore)
+  const tabPointTotals = computeTabPointTotals(achievementsForUI);
+  const skillMastery = getTabMastery({
+    tabAllTimePoints: tabPointTotals.skillAllTime,
+    completionPercent: skillCompletion,
+    tab: "skill",
+  });
+  const socialMastery = getTabMastery({
+    tabAllTimePoints: tabPointTotals.socialAllTime,
+    completionPercent: socialCompletion,
+    tab: "social",
+  });
+  const collectionMastery = getTabMastery({
+    tabAllTimePoints: tabPointTotals.collectionAllTime,
+    completionPercent: collectionCompletion,
+    tab: "collection",
+  });
+
+  // Rank + Prestige from Firestore allTime
+  const allTimePoints = userStats?.allTime ?? 0;
+  const rp = getRankAndPrestige(allTimePoints);
+  const currentRankTier = {
+    name: rp.rank.name,
+    minPoints: rp.rank.min,
+    color: RANK_COLORS[rp.rank.key] ?? "from-gray-400 to-gray-600",
   };
+  const next = rp.progress.nextRank;
+  const nextRankTier = next
+    ? { name: next.name, minPoints: next.min, color: RANK_COLORS[next.key] ?? "from-gray-400 to-gray-600" }
+    : null;
+  const rankProgressPct = Math.round(rp.progress.ratio * 100);
 
-  const totalPoints = getTotalPoints();
-
-  // Calculate all rank-related values once
-  const calculateRankInfo = () => {
-    // Find current rank index
-    let currentIndex = 0;
-    for (let i = RANK_TIERS.length - 1; i >= 0; i--) {
-      if (totalPoints >= RANK_TIERS[i].minPoints) {
-        currentIndex = i;
-        break;
-      }
-    }
-
-    const currentRank = RANK_TIERS[currentIndex];
-    const nextRank = currentIndex < RANK_TIERS.length - 1 ? RANK_TIERS[currentIndex + 1] : null;
-    
-    // Calculate progress
-    let rankProgress = 100; // Default to max if at highest rank
-    if (nextRank) {
-    const pointsInCurrentTier = totalPoints - currentRank.minPoints;
-    const pointsNeededForNext = nextRank.minPoints - currentRank.minPoints;
-      rankProgress = (pointsInCurrentTier / pointsNeededForNext) * 100;
-      rankProgress = Math.min(100, Math.max(0, rankProgress));
-    }
-    
-    return { currentRank, nextRank, rankProgress };
-  };
-
-  const { currentRank, nextRank, rankProgress } = calculateRankInfo();
-
-  // Calculate daily streak (simplified - counts unique completion days)
+  // Calculate daily streak (simplified - counts unique completion days; excludes disabled)
   const getCurrentStreak = () => {
-    const completedAchievements = [...currentAchievements.skill, ...currentAchievements.social, ...currentAchievements.collection]
+    const completedAchievements = [...achievementsForUI.skill, ...achievementsForUI.social, ...achievementsForUI.collection]
       .filter(a => isAchievementFullyCompleted(a) && a.completedDate);
 
     if (completedAchievements.length === 0) return 0;
@@ -437,9 +589,9 @@ function DashboardInner() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Secret achievement unlocked!</DialogTitle>
+            <DialogTitle>New achievements unlocked!</DialogTitle>
             <DialogDescription>
-              Completing an achievement has revealed new goals you can now work toward.
+              Completing an achievement revealed new goals you can now work toward.
             </DialogDescription>
           </DialogHeader>
           <ul className="list-disc list-inside text-sm space-y-1 my-2">
@@ -456,112 +608,171 @@ function DashboardInner() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="sticky top-16 z-50 bg-background border-b">
           <TabsList className="grid w-full grid-cols-3 gap-2 rounded-full bg-muted/30 p-0.5">
-            <TabTriggerWithFill value="skill" label="Skill" percent={skillCompletion} isActive={activeTab === "skill"} />
-            <TabTriggerWithFill value="social" label="Social" percent={socialCompletion} isActive={activeTab === "social"} />
-            <TabTriggerWithFill value="collection" label="Collection" percent={collectionCompletion} isActive={activeTab === "collection"} />
+            <TabTriggerWithFill value="skill" label="Skill" percent={skillCompletion} isActive={activeTab === "skill"} eligibleThreshold={80} />
+            <TabTriggerWithFill value="social" label="Social" percent={socialCompletion} isActive={activeTab === "social"} eligibleThreshold={80} />
+            <TabTriggerWithFill value="collection" label="Collection" percent={collectionCompletion} isActive={activeTab === "collection"} eligibleThreshold={80} />
           </TabsList>
         </div>
 
+        {showDevTools && (
+          <div className="mt-3">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => devResetPuttingMasteryTier()}
+              >
+                DEV: Reset Putting Mastery Tier
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => devResetAllTieredCategoryTiers()}
+              >
+                DEV: Reset ALL Tiered Categories
+              </Button>
+            </div>
+          </div>
+        )}
+
         <StatsHeader
           completionPercentage={activeCompletion}
-          totalPoints={totalPoints}
+          totalPoints={allTimePoints}
           currentStreak={currentStreak}
-          currentRank={currentRank}
-          nextRank={nextRank}
-          rankProgress={rankProgress}
-          secretsDiscoveredCount={secretsDiscoveredCount}
+          currentRank={currentRankTier}
+          nextRank={nextRankTier}
+          rankProgress={rankProgressPct}
+          prestige={rp.prestige}
+          pointsToNextRank={rp.progress.pointsToNext}
+          nextRankName={rp.progress.nextRank?.name}
+          pointsInPrestige={rp.pointsInPrestige}
         />
 
         <TabsContent value="skill">
           <div className="mt-4">
             <div className="space-y-4">
-              {SECTIONS.skill.map((section) => {
-                const sectionKey = section.key as SectionKey;
-                const achievements = getCategoryAchievements("skill", section.key);
-                const completion = getCategoryCompletion(achievements);
-                return (
-                  <AchievementSection
-                    key={section.key}
-                    category="skill"
-                    subcategory={section.key}
-                    title={section.title}
-                    sectionKey={sectionKey}
-                    achievements={achievements}
-                    effectiveById={effectiveById}
-                    allAchievements={allAchievements}
-                    newlyRevealedIds={newlyRevealedIds}
-                    revealPulseParentIds={revealPulseParentIds}
-                    celebratingParentId={celebratingParentId}
-                    completion={completion}
-                    isOpen={openSections[sectionKey]}
-                    onToggle={() => toggleSection(sectionKey)}
-                    onToggleAchievement={(id) => toggleAchievementWithCelebration("skill", id)}
-                    getCompletionColor={getCompletionColor}
-                  />
-                );
-              })}
+              {(() => {
+                const withTierInfo = SECTIONS.skill.map((s) => ({
+                  section: s,
+                  tierInfo: getTierInfoForSection("skill", s.key),
+                }));
+                const nonTiered = withTierInfo.filter((x) => !x.tierInfo);
+                const tiered = withTierInfo.filter((x) => !!x.tierInfo);
+                const ordered = [...nonTiered, ...tiered];
+                return ordered.map(({ section, tierInfo }) => {
+                  const sectionKey = section.key as SectionKey;
+                  const achievements = getCategoryAchievements("skill", section.key);
+                  const completion = getCategoryCompletion(achievements);
+                  return (
+                    <AchievementSection
+                      key={section.key}
+                      category="skill"
+                      subcategory={section.key}
+                      title={section.title}
+                      sectionKey={sectionKey}
+                      achievements={achievements}
+                      tierInfo={tierInfo}
+                      headerVariant={section.key === "aces" ? "aces" : undefined}
+                      aceCelebratingId={aceCelebratingId}
+                      aceCelebrationPhase={aceCelebrationPhase}
+                      effectiveById={effectiveById}
+                      allAchievements={allAchievements}
+                      newlyRevealedIds={newlyRevealedIds}
+                      revealPulseParentIds={revealPulseParentIds}
+                      celebratingParentId={celebratingParentId}
+                      completion={completion}
+                      isOpen={openSections[sectionKey]}
+                      onToggle={() => toggleSection(sectionKey)}
+                      onToggleAchievement={(id) => toggleAchievementWithCelebration("skill", id)}
+                      getCompletionColor={getCompletionColor}
+                    />
+                  );
+                });
+              })()}
             </div>
           </div>
         </TabsContent>
         <TabsContent value="social">
           <div className="mt-4">
             <div className="space-y-4">
-              {SECTIONS.social.map((section) => {
-                const sectionKey = section.key as SectionKey;
-                const achievements = getCategoryAchievements("social", section.key);
-                const completion = getCategoryCompletion(achievements);
-                return (
-                  <AchievementSection
-                    key={section.key}
-                    category="social"
-                    subcategory={section.key}
-                    title={section.title}
-                    sectionKey={sectionKey}
-                    achievements={achievements}
-                    effectiveById={effectiveById}
-                    allAchievements={allAchievements}
-                    newlyRevealedIds={newlyRevealedIds}
-                    revealPulseParentIds={revealPulseParentIds}
-                    celebratingParentId={celebratingParentId}
-                    completion={completion}
-                    isOpen={openSections[sectionKey]}
-                    onToggle={() => toggleSection(sectionKey)}
-                    onToggleAchievement={(id) => toggleAchievementWithCelebration("social", id)}
-                    getCompletionColor={getCompletionColor}
-                  />
-                );
-              })}
+              {(() => {
+                const withTierInfo = SECTIONS.social.map((s) => ({
+                  section: s,
+                  tierInfo: getTierInfoForSection("social", s.key),
+                }));
+                const nonTiered = withTierInfo.filter((x) => !x.tierInfo);
+                const tiered = withTierInfo.filter((x) => !!x.tierInfo);
+                const ordered = [...nonTiered, ...tiered];
+                return ordered.map(({ section, tierInfo }) => {
+                  const sectionKey = section.key as SectionKey;
+                  const achievements = getCategoryAchievements("social", section.key);
+                  const completion = getCategoryCompletion(achievements);
+                  return (
+                    <AchievementSection
+                      key={section.key}
+                      category="social"
+                      subcategory={section.key}
+                      title={section.title}
+                      sectionKey={sectionKey}
+                      achievements={achievements}
+                      tierInfo={tierInfo}
+                      aceCelebratingId={aceCelebratingId}
+                      aceCelebrationPhase={aceCelebrationPhase}
+                      effectiveById={effectiveById}
+                      allAchievements={allAchievements}
+                      newlyRevealedIds={newlyRevealedIds}
+                      revealPulseParentIds={revealPulseParentIds}
+                      celebratingParentId={celebratingParentId}
+                      completion={completion}
+                      isOpen={openSections[sectionKey]}
+                      onToggle={() => toggleSection(sectionKey)}
+                      onToggleAchievement={(id) => toggleAchievementWithCelebration("social", id)}
+                      getCompletionColor={getCompletionColor}
+                    />
+                  );
+                });
+              })()}
             </div>
           </div>
         </TabsContent>
         <TabsContent value="collection">
           <div className="mt-4">
             <div className="space-y-4">
-              {SECTIONS.collection.map((section) => {
-                const sectionKey = section.key as SectionKey;
-                const achievements = getCategoryAchievements("collection", section.key);
-                const completion = getCategoryCompletion(achievements);
-                        return (
-                  <AchievementSection
-                    key={section.key}
-                    category="collection"
-                    subcategory={section.key}
-                    title={section.title}
-                    sectionKey={sectionKey}
-                    achievements={achievements}
-                    effectiveById={effectiveById}
-                    allAchievements={allAchievements}
-                    newlyRevealedIds={newlyRevealedIds}
-                    revealPulseParentIds={revealPulseParentIds}
-                    celebratingParentId={celebratingParentId}
-                    completion={completion}
-                    isOpen={openSections[sectionKey]}
-                    onToggle={() => toggleSection(sectionKey)}
-                    onToggleAchievement={(id) => toggleAchievementWithCelebration("collection", id)}
-                    getCompletionColor={getCompletionColor}
-                  />
-                );
-              })}
+              {(() => {
+                const withTierInfo = SECTIONS.collection.map((s) => ({
+                  section: s,
+                  tierInfo: getTierInfoForSection("collection", s.key),
+                }));
+                const nonTiered = withTierInfo.filter((x) => !x.tierInfo);
+                const tiered = withTierInfo.filter((x) => !!x.tierInfo);
+                const ordered = [...nonTiered, ...tiered];
+                return ordered.map(({ section, tierInfo }) => {
+                  const sectionKey = section.key as SectionKey;
+                  const achievements = getCategoryAchievements("collection", section.key);
+                  const completion = getCategoryCompletion(achievements);
+                  return (
+                    <AchievementSection
+                      key={section.key}
+                      category="collection"
+                      subcategory={section.key}
+                      title={section.title}
+                      sectionKey={sectionKey}
+                      achievements={achievements}
+                      tierInfo={tierInfo}
+                      effectiveById={effectiveById}
+                      allAchievements={allAchievements}
+                      newlyRevealedIds={newlyRevealedIds}
+                      revealPulseParentIds={revealPulseParentIds}
+                      celebratingParentId={celebratingParentId}
+                      completion={completion}
+                      isOpen={openSections[sectionKey]}
+                      onToggle={() => toggleSection(sectionKey)}
+                      onToggleAchievement={(id) => toggleAchievementWithCelebration("collection", id)}
+                      getCompletionColor={getCompletionColor}
+                    />
+                  );
+                });
+              })()}
             </div>
           </div>
         </TabsContent>
@@ -569,10 +780,19 @@ function DashboardInner() {
       <QuickLogSheet
         open={quickLogOpen}
         onOpenChange={setQuickLogOpen}
-        achievements={currentAchievements}
+        achievements={achievementsForUI}
         onToggle={toggleAchievement}
         defaultCategory={activeTab as keyof Achievements}
       />
+      {tierUpMessage && (
+        <div
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[120] px-4 py-2 rounded-lg bg-foreground text-background text-sm shadow-lg animate-in fade-in duration-200"
+          role="status"
+          aria-live="polite"
+        >
+          {tierUpMessage}
+        </div>
+      )}
       <Button
         size="icon"
         className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg z-50"

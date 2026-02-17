@@ -28,6 +28,7 @@ interface AchievementCardProps {
   isNewlyRevealed?: boolean;
   revealPulse?: boolean;
   celebrateParent?: boolean;
+  celebratePhase?: "idle" | "shake" | "pop";
   requiresId?: string;
   onToggle: () => void;
 }
@@ -54,12 +55,22 @@ export function AchievementCard({
   isNewlyRevealed = false,
   revealPulse = false,
   celebrateParent = false,
+  celebratePhase = "idle",
   requiresId,
   onToggle,
 }: AchievementCardProps) {
   const Icon = categoryIcons[category];
-  const isSecretChild = !!requiresId;
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const animClass =
+    celebratePhase === "shake"
+      ? "animate-ace-shake"
+      : celebratePhase === "pop"
+        ? "animate-ace-pop"
+        : "";
+  const goldRing =
+    celebratePhase !== "idle"
+      ? "ring-2 ring-amber-300/70 shadow-[0_0_0_10px_rgba(251,191,36,0.12)]"
+      : "";
 
   const handleToggle = () => {
     if (locked) return;
@@ -68,7 +79,10 @@ export function AchievementCard({
       setShowConfirmDialog(true);
     } else {
       // Direct toggle when marking as complete (secret parents: confetti is fired by dashboard after bobble)
-      if (!hasSecrets) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      // skill-35 and social-0: confetti fires on ace-pop event at pop moment
+      if (!hasSecrets && id !== "skill-35" && id !== "social-0") {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      }
       onToggle();
     }
   };
@@ -81,10 +95,24 @@ export function AchievementCard({
 
   return (
     <>
-      <Card className={`${isCompleted ? 'bg-green-50' : ''} ${locked ? 'opacity-75' : ''} ${isNewlyRevealed ? 'ring-2 ring-yellow-400/40 shadow-[0_0_0_6px_rgba(250,204,21,0.12)] animate-pulse' : ''} ${isSecretChild ? 'ring-1 ring-violet-200/50' : ''} ${celebrateParent ? 'relative ring-2 ring-amber-400/50 shadow-[0_0_0_10px_rgba(250,204,21,0.12)] animate-[dgShake_2.1s_ease-in-out_1]' : ''} transition-colors rounded-xl overflow-hidden leading-tight py-1`}>
+      <Card
+        className={cn(
+          isCompleted ? "bg-green-50" : "",
+          locked ? "opacity-75" : "",
+          isNewlyRevealed
+            ? "ring-2 ring-yellow-400/40 shadow-[0_0_0_6px_rgba(250,204,21,0.12)] animate-pulse"
+            : "",
+          celebrateParent
+            ? "relative ring-2 ring-amber-400/50 shadow-[0_0_0_10px_rgba(250,204,21,0.12)] animate-[dgShake_2.1s_ease-in-out_1]"
+            : "",
+          animClass,
+          goldRing,
+          "transform-gpu will-change-transform transition-colors rounded-xl overflow-hidden leading-tight py-1"
+        )}
+      >
         <CardHeader className="flex flex-row items-center gap-1.5 px-3 pt-2 pb-1">
-          <div className={`p-0.5 rounded-full ${locked ? 'bg-gray-200' : isCompleted ? 'bg-green-100' : isSecretChild ? 'bg-violet-100' : 'bg-gray-100'}`}>
-            <Icon className={`w-4 h-4 ${isCompleted ? 'text-green-600' : isSecretChild ? 'text-violet-600' : 'text-gray-500'}`} />
+          <div className={`p-0.5 rounded-full ${locked ? 'bg-gray-200' : isCompleted ? 'bg-green-100' : 'bg-gray-100'}`}>
+            <Icon className={`w-4 h-4 ${isCompleted ? 'text-green-600' : 'text-gray-500'}`} />
           </div>
           <div className="flex-1">
             <div className="flex items-start justify-between gap-2">
@@ -96,14 +124,9 @@ export function AchievementCard({
                       "text-[12px] ml-0.5 inline-block origin-center",
                       revealPulse ? "opacity-100 scale-110 animate-[bounce_0.8s_ease-in-out_2]" : "opacity-70"
                     )}
-                    title="Unlocks secret achievements"
+                    title="Unlocks more achievements"
                   >
                     ✨
-                  </span>
-                )}
-                {isSecretChild && (
-                  <span className="inline-flex items-center rounded-full bg-violet-100 text-violet-700 font-medium text-[10px] px-1.5 py-0.5 shrink-0 whitespace-nowrap">
-                    Secret
                   </span>
                 )}
               </div>
@@ -152,8 +175,8 @@ export function AchievementCard({
             {hasSecrets && lockedChildCount != null && lockedChildCount > 0 && (
               <p className="text-[11px] text-muted-foreground pt-1">
                 {totalChildrenCount != null && lockedChildCount === totalChildrenCount
-                  ? "Secrets hidden here"
-                  : `${lockedChildCount} secret${lockedChildCount === 1 ? "" : "s"} remaining`}
+                  ? "Achievements hidden here"
+                  : `${lockedChildCount} achievement${lockedChildCount === 1 ? "" : "s"} remaining`}
               </p>
             )}
           </div>

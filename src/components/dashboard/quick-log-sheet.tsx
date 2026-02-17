@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import type { Achievement, Achievements } from "@/lib/useAchievements";
+import { isGatedVisible, isUnlocked } from "@/lib/achievementProgress";
 
 const RECENT_KEY = "dgj_recent_achievements";
 const RECENT_MAX = 8;
@@ -98,7 +99,16 @@ export function QuickLogSheet({
     };
   }, []);
 
-  const flat = useMemo(() => flattenAchievements(achievements), [achievements]);
+  const flat = useMemo(() => {
+    const all = flattenAchievements(achievements);
+    const byId: Record<string, Achievement> = {};
+    for (const a of all) byId[a.id] = a;
+    return all.filter((a) => {
+      if (!isGatedVisible(a as any, byId as any)) return false;
+      if ((a as any).requiresId && !isUnlocked(a as any, byId as any)) return false;
+      return true;
+    });
+  }, [achievements]);
   const byKey = useMemo(() => {
     const m = new Map<string, FlatAchievement>();
     for (const a of flat) m.set(`${a.category}:${a.id}`, a);
