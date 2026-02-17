@@ -167,16 +167,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const attempt = (async () => {
       try {
         setRedirectError(null);
-        await ensurePersistence();
 
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: "select_account" });
 
-        if (shouldPreferRedirect()) {
+        if (shouldPreferRedirect() || isIOS()) {
+          await setPersistence(auth, browserSessionPersistence);
+          if (DEBUG_AUTH) console.error("AUTH: persistence=session (redirect)");
           setRedirectSettling(true);
           await signInWithRedirect(auth, provider);
           return;
         }
+
+        await setPersistence(auth, browserLocalPersistence);
+        if (DEBUG_AUTH) console.error("AUTH: persistence=local (popup)");
 
         try {
           await withTimeout(signInWithPopup(auth, provider), 15000, "Sign-in popup timed out");
