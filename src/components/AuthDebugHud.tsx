@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 export function AuthDebugHud() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { user, loading } = useAuth();
+  const { user, loading, redirectError, redirectSettling } = useAuth();
   const [timestamp, setTimestamp] = useState(() => new Date().toLocaleTimeString());
 
   const show = searchParams.get("debugAuth") === "1";
@@ -37,6 +37,13 @@ export function AuthDebugHud() {
         </div>
         <div>
           <span className="text-amber-400">time:</span> {timestamp}
+        </div>
+        <div>
+          <span className="text-amber-400">redirectSettling:</span> {String(redirectSettling)}
+        </div>
+        <div>
+          <span className="text-amber-400">redirectError:</span>{" "}
+          {redirectError ? (redirectError.length > 120 ? `${redirectError.slice(0, 120)}…` : redirectError) : "(none)"}
         </div>
       </div>
     </div>

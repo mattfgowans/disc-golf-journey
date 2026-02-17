@@ -12,6 +12,7 @@ import {
   signOut as firebaseSignOut,
   setPersistence,
   browserLocalPersistence,
+  browserSessionPersistence,
   getRedirectResult,
   AuthError,
 } from "firebase/auth";
@@ -19,6 +20,20 @@ import { auth } from "./firebase";
 import { shouldPreferRedirect, isIOS, isInAppBrowser } from "./authEnv";
 
 const DEBUG_AUTH = true;
+
+async function ensurePersistence() {
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    if (DEBUG_AUTH) console.error("AUTH: persistence=local");
+  } catch (e) {
+    try {
+      await setPersistence(auth, browserSessionPersistence);
+      if (DEBUG_AUTH) console.error("AUTH: persistence=session (fallback)", String(e));
+    } catch (e2) {
+      if (DEBUG_AUTH) console.error("AUTH: persistence failed", String(e2));
+    }
+  }
+}
 
 function isPopupFallbackError(e: unknown) {
   const code = (e as AuthError | undefined)?.code;
@@ -85,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       try {
+        await ensurePersistence();
         await getRedirectResult(auth);
       } catch (error: any) {
         const code = error?.code as string | undefined;
@@ -137,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const attempt = (async () => {
       try {
         setRedirectError(null);
-        await setPersistence(auth, browserLocalPersistence);
+        await ensurePersistence();
 
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: "select_account" });
