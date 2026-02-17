@@ -101,7 +101,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         await ensurePersistence();
-        await getRedirectResult(auth);
+        const result = await getRedirectResult(auth);
+        if (DEBUG_AUTH) {
+          const u = result?.user;
+          if (u) {
+            console.error("AUTH: redirect result -> user", { uid: u.uid, email: u.email ?? null });
+          } else {
+            console.error("AUTH: redirect result -> null");
+          }
+        }
       } catch (error: any) {
         const code = error?.code as string | undefined;
         const msg = (error?.message ?? "").toLowerCase();

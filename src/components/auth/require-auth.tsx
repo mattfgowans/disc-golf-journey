@@ -24,7 +24,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, redirectSettling } = useAuth();
   const {
     profile,
     exists,
@@ -55,8 +55,8 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   // Compute the one route we should be on (or null = ok to stay).
   const desiredPath = useMemo(() => {
-    // 1) Not logged in -> login (unless already there)
-    if (!authLoading && !user) {
+    // 1) Not logged in -> login (unless already there). Do NOT redirect while redirect sign-in is settling.
+    if (!authLoading && !redirectSettling && !user) {
       return pathname === LOGIN_PATH ? null : LOGIN_PATH;
     }
 
@@ -89,26 +89,35 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     }
 
     return null;
-  }, [authLoading, user, usernameStatus, pathname]);
+  }, [authLoading, redirectSettling, user, usernameStatus, pathname]);
 
   if (process.env.NODE_ENV === "development") {
     console.debug({ pathname, authLoading, uid: user?.uid, usernameStatus, desiredPath });
   }
 
   useEffect(() => {
-    if (!desiredPath) return;
-    if (DEBUG_AUTH && desiredPath === LOGIN_PATH) {
-      console.error("GUARD: redirect to /login", { pathname, hasUser: !!user, loading: authLoading });
+    if (!desiredPath || redirectSettling) return;
+    if (DEBUG_AUTH) {
+      console.error("GUARD: redirect", { pathname, loading: authLoading, redirectSettling, hasUser: !!user });
     }
     router.replace(desiredPath);
-  }, [desiredPath, router, pathname, user, authLoading]);
+  }, [desiredPath, router, pathname, user, authLoading, redirectSettling]);
 
   /**
    * Rendering rules (prevents flashes):
+   * - If redirect sign-in is settling, show loading (do not redirect).
    * - If we *know* we should be elsewhere, render nothing.
    * - If auth/profile state isn't settled, render nothing.
    * - If there's an error loading profile, show the error UI (no redirects).
    */
+  if (redirectSettling) {
+    return (
+      <div className="flex min-h-[120px] items-center justify-center text-sm text-muted-foreground">
+        Signing in…
+      </div>
+    );
+  }
+
   const shouldBlockRender =
     !!desiredPath ||
     authLoading ||
