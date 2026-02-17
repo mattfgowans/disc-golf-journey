@@ -1,33 +1,13 @@
 "use client";
-
-import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useIncomingFriendRequestsCount } from "@/lib/use-incoming-requests-count";
+import { cn } from "@/lib/utils";
 
-export function PendingRequestsBell({ currentUserId }: { currentUserId: string }) {
-  const router = useRouter();
-  const { count } = useIncomingFriendRequestsCount(currentUserId);
-
+export function PendingRequestsBell({ count = 0, className }: { count?: number; className?: string }) {
+  const has = count > 0;
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="relative h-10 w-10"
-      onClick={() => router.push("/notifications")}
-      aria-label="Notifications"
-    >
-      <Bell className="h-5 w-5" />
-      {count > 0 && (
-        <Badge
-          variant="destructive"
-          className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center text-[10px] leading-none"
-        >
-          {count}
-        </Badge>
-      )}
-    </Button>
+    <span className={cn("relative inline-flex items-center justify-center", className)}>
+      <Bell className={cn("h-5 w-5", has ? "text-red-500" : "text-muted-foreground")} />
+      {has && <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-background" />}
+    </span>
   );
 }
-

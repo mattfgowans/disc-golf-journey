@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, LayoutDashboard, Trophy, Users, LogOut } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/firebase-auth";
 import { PendingRequestsBell } from "@/components/notifications/pending-requests-bell";
@@ -25,7 +26,7 @@ export function Navbar() {
   // Determine active states for dropdown menu items
   const isDashboardActive = pathname === "/" || pathname.startsWith("/dashboard");
   const isProfileActive = pathname === "/profile";
-  const isLeaderboardActive = pathname === "/leaderboard" || pathname === "/leaderboard/all";
+  const isLeaderboardActive = pathname.startsWith("/leaderboard");
   const isFriendsActive = pathname === "/friends";
 
   // Classes for active dropdown items that persist through highlighting
@@ -52,20 +53,47 @@ export function Navbar() {
         </Link>
         {user ? (
           <div className="flex flex-1 items-center justify-center gap-2 min-w-0 flex-wrap sm:flex-nowrap">
-            <Link href="/dashboard">
-              <Button variant="ghost" className="flex w-16 flex-col items-center justify-center sm:w-auto sm:flex-row">
+            <Link href="/dashboard" aria-current={isDashboardActive ? "page" : undefined}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "flex w-16 flex-col items-center justify-center sm:w-auto sm:flex-row text-muted-foreground transition-colors hover:bg-transparent",
+                  isDashboardActive ? "text-blue-600 font-medium" : "hover:text-blue-600"
+                )}
+              >
                 <LayoutDashboard className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Dashboard</span>
-                <span className="sm:hidden text-[10px] leading-none text-muted-foreground mt-1">
-                  Dashboard
-                </span>
+                <span className="sm:hidden text-[10px] leading-none mt-1">Dashboard</span>
               </Button>
             </Link>
-            <Link href="/leaderboard">
-              <Button variant="ghost" className="flex w-16 flex-col items-center justify-center sm:w-auto sm:flex-row">
-                <Trophy className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Leaderboard</span>
-                <span className="sm:hidden text-[10px] leading-none text-muted-foreground mt-1">
+            <Link href="/leaderboard" aria-current={isLeaderboardActive ? "page" : undefined}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "group flex w-16 flex-col items-center justify-center sm:w-auto sm:flex-row transition-colors hover:bg-transparent",
+                  isLeaderboardActive && "font-medium"
+                )}
+              >
+                <Trophy
+                  className={cn(
+                    "h-4 w-4 sm:mr-2",
+                    isLeaderboardActive ? "text-amber-600" : "text-amber-500 group-hover:text-amber-600"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "hidden sm:inline",
+                    isLeaderboardActive ? "text-amber-600" : "text-muted-foreground"
+                  )}
+                >
+                  Leaderboard
+                </span>
+                <span
+                  className={cn(
+                    "sm:hidden text-[10px] leading-none mt-1",
+                    isLeaderboardActive ? "text-amber-600" : "text-muted-foreground"
+                  )}
+                >
                   Leaderboard
                 </span>
               </Button>
@@ -79,7 +107,13 @@ export function Navbar() {
             </Button>
           ) : (
             <>
-              <PendingRequestsBell currentUserId={user.uid} />
+              <Link
+                href="/notifications"
+                className="flex items-center justify-center h-10 w-10 rounded-md hover:bg-transparent"
+                aria-label="Notifications"
+              >
+                <PendingRequestsBell />
+              </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger className="shrink-0">
                   <Avatar className="shrink-0">

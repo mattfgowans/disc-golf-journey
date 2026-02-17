@@ -6,7 +6,10 @@ import { db } from "./firebase";
 import { useAuth } from "./firebase-auth";
 import { useUserDoc } from "./useUserDoc";
 import { computePointTotals, getPeriodKeys } from "./points";
-import { getCurrentYear, getEffectiveProgress, getResetPolicy, isUnlocked } from "./achievementProgress";
+import { getCurrentYear, getEffectiveProgress, getResetPolicy, isUnlocked, isAchievementCompleted, isGatedVisible } from "./achievementProgress";
+import { ACHIEVEMENTS_CATALOG, getActiveTierAchievements, getCategoryAchievementsForTier, getCategoryCardDefById, getTieredCategoryIds, isTieredCategoryId } from "@/data/achievements";
+import type { CategoryDef } from "@/data/achievements";
+import { isAchievementDisabled } from "./disabledAchievements";
 
 // Schema version for achievements - increment when template structure changes
 const ACHIEVEMENTS_SCHEMA_VERSION = 1;
@@ -16,6 +19,8 @@ export type AchievementBase = {
   title: string;
   description: string;
   category: "skill" | "social" | "collection";
+  /** Stable id for a category card (tier progression), e.g. "putting-mastery". */
+  categoryId?: string;
   subcategory?: string;
   isCompleted: boolean;
   completedDate?: Timestamp;
@@ -25,8 +30,12 @@ export type AchievementBase = {
   resetPolicy?: "never" | "yearly";
   /** Locked until this parent achievement is completed. */
   requiresId?: string;
+  /** Hidden until this gate achievement is completed (no secret UX). */
+  gateRequiresId?: string;
   /** Set when writing yearly achievements; used to reset when year changes. */
   year?: number;
+  /** New (optional) anchor for year-aware yearly completion. */
+  completedYear?: number;
 };
 
 export type ToggleAchievement = AchievementBase & {
@@ -81,6 +90,12 @@ const defaultAchievements: Achievements = {
   collection: [],
 };
 
+const FILTERED_CATALOG: Achievements = {
+  skill: ACHIEVEMENTS_CATALOG.skill.filter((a) => !isAchievementDisabled(a.id)),
+  social: ACHIEVEMENTS_CATALOG.social.filter((a) => !isAchievementDisabled(a.id)),
+  collection: ACHIEVEMENTS_CATALOG.collection.filter((a) => !isAchievementDisabled(a.id)),
+};
+
 // Helper function to merge saved achievements with template data
 // Keeps template as source of truth for titles/points/order
 // Applies effective progress (yearly reset when stored.year !== currentYear)
@@ -93,15 +108,14 @@ function mergeAchievementsWithTemplate(saved: Achievements, template: Achievemen
   for (const category of categories) {
     merged[category] = template[category].map((templateAchievement) => {
       const savedAchievement = saved[category]?.find((a) => a.id === templateAchievement.id);
+      // Old saved counter fields (progress/target/kind) are ignored; template is source of truth.
       const stored = savedAchievement
         ? {
             isCompleted: savedAchievement.isCompleted,
             completedDate: savedAchievement.completedDate,
-            progress:
-              templateAchievement.kind === "counter" && typeof (savedAchievement as any).progress === "number"
-                ? (savedAchievement as any).progress
-                : 0,
+            progress: 0,
             year: (savedAchievement as any).year,
+            completedYear: (savedAchievement as any).completedYear,
           }
         : null;
 
@@ -113,8 +127,23 @@ function mergeAchievementsWithTemplate(saved: Achievements, template: Achievemen
         completedDate: effective.completedDate,
       };
 
-      if (templateAchievement.kind === "counter") {
-        (mergedAchievement as CounterAchievement).progress = effective.progress;
+      // Preserve/derive year anchors for yearly achievements so normal saves don't erase history.
+      if (getResetPolicy(templateAchievement) === "yearly") {
+        const fromCompletedYear =
+          typeof (stored as any)?.completedYear === "number" ? (stored as any).completedYear : undefined;
+        const fromLegacyYear = typeof (stored as any)?.year === "number" ? (stored as any).year : undefined;
+        const fromDate =
+          (stored as any)?.completedDate ? (stored as any).completedDate.toDate().getFullYear() : undefined;
+        const derived =
+          fromCompletedYear ??
+          fromLegacyYear ??
+          fromDate ??
+          (((stored as any)?.isCompleted ?? false) ? currentYear : undefined);
+
+        if (typeof derived === "number" && Number.isFinite(derived)) {
+          (mergedAchievement as any).completedYear = derived;
+          (mergedAchievement as any).year = derived; // keep legacy field in sync
+        }
       }
 
       return mergedAchievement;
@@ -128,15 +157,98 @@ export function useAchievements(initialAchievements?: Achievements) {
   const { user, loading: authLoading } = useAuth();
   const { userData, mergeUserData, loading: userDocLoading } = useUserDoc();
   const [achievements, setAchievements] = useState<Achievements>(
-    initialAchievements || defaultAchievements
+    initialAchievements ? FILTERED_CATALOG : defaultAchievements
   );
   const [loading, setLoading] = useState(true);
   const [authResolved, setAuthResolved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newUnlocks, setNewUnlocks] = useState<Achievement[]>([]);
+  const [tierUpMessage, setTierUpMessage] = useState<string | null>(null);
+  const [aceCelebratingId, setAceCelebratingId] = useState<string | null>(null);
+  const [aceCelebrationPhase, setAceCelebrationPhase] = useState<
+    "idle" | "shake" | "pop"
+  >("idle");
 
   const prevUnlockedIdsRef = useRef<Set<string>>(new Set());
   const firstRunRef = useRef(true);
+  const categoryTiersRef = useRef<Record<string, number> | undefined>(undefined);
+  const aceUnlockCelebratedRef = useRef<boolean>(false);
+  const celebrationTokenRef = useRef<number>(0);
+
+  // Per-user category tier index scaffolding (read-only for now).
+  // Stored on the user doc as: user.categoryTiers?: Record<string, number>
+  const getUserCategoryTierIndex = (categoryId: string): number => {
+    const raw = (userData as any)?.categoryTiers?.[categoryId];
+    if (typeof raw !== "number" || !Number.isFinite(raw)) return 0;
+    return Math.max(0, Math.floor(raw));
+  };
+
+  useEffect(() => {
+    categoryTiersRef.current = (userData as any)?.categoryTiers;
+  }, [userData]);
+
+  useEffect(() => {
+    aceUnlockCelebratedRef.current = (userData as any)?.aceUnlockCelebrated === true;
+  }, [userData]);
+
+  function triggerAceCelebration(achievementId: string) {
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[GATE][CELEBRATE] trigger", { parentId: achievementId });
+    }
+    setAceCelebratingId(achievementId);
+    setAceCelebrationPhase("shake");
+
+    // Wobble 1200ms + suspense pause 250ms, then pop 520ms.
+    window.setTimeout(() => {
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[GATE][CELEBRATE]", { parentId: achievementId, phase: "pop" });
+      }
+      setAceCelebrationPhase("pop");
+      window.dispatchEvent(new CustomEvent("ace-pop"));
+    }, 1450);
+    window.setTimeout(() => {
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[GATE][CELEBRATE]", { parentId: achievementId, phase: "idle" });
+      }
+      setAceCelebrationPhase("idle");
+      setAceCelebratingId(null);
+    }, 2100);
+  }
+
+  const getAchievementCategoryId = (achievement: Achievement): string | null => {
+    const v = (achievement as any)?.categoryId;
+    return typeof v === "string" && v.trim() ? v : null;
+  };
+
+  // Tier-aware template selection (all categories currently only have tier 0, so behavior is unchanged).
+  const getTierAwareCatalog = (base: Achievements): Achievements => {
+    const makeCategoryDef = (categoryKey: keyof Achievements): CategoryDef => ({
+      categoryKey,
+      tiers: [
+        {
+          tierIndex: 0,
+          tierKey: "beginner",
+          themeToken: "beginner",
+          achievements: base[categoryKey] ?? [],
+        },
+      ],
+    });
+
+    return {
+      skill: getCategoryAchievementsForTier(
+        makeCategoryDef("skill"),
+        0
+      ),
+      social: getCategoryAchievementsForTier(
+        makeCategoryDef("social"),
+        0
+      ),
+      collection: getCategoryAchievementsForTier(
+        makeCategoryDef("collection"),
+        0
+      ),
+    };
+  };
 
   // Debounced save refs
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -240,7 +352,7 @@ export function useAchievements(initialAchievements?: Achievements) {
     try {
       if (process.env.NODE_ENV !== "production") {
         const progressSummary = Object.entries(newAchievements).map(([cat, achievements]) => {
-          const withProgress = achievements.filter(a => a.kind === "counter" ? (a as CounterAchievement).progress > 0 : a.isCompleted).length;
+          const withProgress = achievements.filter(a => a.isCompleted).length;
           return `${cat}: ${withProgress}/${achievements.length}`;
         }).join(', ');
         console.log(`[ACH][WRITE] saveAchievements starting - uid: ${user.uid}, doc: users/${user.uid}, context: ${context ? `${context.category}/${context.id}` : 'none'}, progress: ${progressSummary}`);
@@ -254,11 +366,18 @@ export function useAchievements(initialAchievements?: Achievements) {
       const userDocRef = doc(db, "users", user.uid);
 
       // DEV-ONLY: Pre-flight check
-      batch.set(userDocRef, {
-        achievements: sanitizeAchievementsForFirestore(newAchievements),
-        achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION,
-        updatedAt: now,
-      }, { merge: true });
+      const categoryTiers = categoryTiersRef.current ?? (userData as any)?.categoryTiers;
+      batch.set(
+        userDocRef,
+        {
+          achievements: sanitizeAchievementsForFirestore(newAchievements),
+          achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION,
+          updatedAt: now,
+          ...(categoryTiers ? { categoryTiers } : {}),
+          ...(aceUnlockCelebratedRef.current ? { aceUnlockCelebrated: true } : {}),
+        },
+        { merge: true }
+      );
 
       // Compute point totals and update stats
       const allAchievements = [
@@ -340,7 +459,8 @@ export function useAchievements(initialAchievements?: Achievements) {
       // Update shared userData state locally
       mergeUserData({
         achievements: sanitizeAchievementsForFirestore(newAchievements),
-        achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION
+        achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION,
+        ...(aceUnlockCelebratedRef.current ? { aceUnlockCelebrated: true } : {}),
       });
     } catch (error) {
       if (process.env.NODE_ENV !== "production") {
@@ -425,6 +545,9 @@ export function useAchievements(initialAchievements?: Achievements) {
     // Only reset to defaults when auth is resolved and user is actually signed out
     if (authResolved && !user) {
       setAchievementsFromRemote(initialAchievements || defaultAchievements, "reset");
+      setNewUnlocks([]);
+      prevUnlockedIdsRef.current = new Set();
+      firstRunRef.current = true;
       setLoading(false);
       lastHydratedUidRef.current = null;
       return;
@@ -478,12 +601,19 @@ export function useAchievements(initialAchievements?: Achievements) {
       }
 
         if (data) {
-          // Ensure savedAchievements has valid Achievements shape with fallbacks
-          const savedAchievements: Achievements = data.achievements && typeof data.achievements === 'object' ? {
-            skill: Array.isArray(data.achievements.skill) ? data.achievements.skill : [],
-            social: Array.isArray(data.achievements.social) ? data.achievements.social : [],
-            collection: Array.isArray(data.achievements.collection) ? data.achievements.collection : [],
-          } : defaultAchievements;
+          // Ensure savedAchievements has valid Achievements shape with fallbacks; filter out disabled IDs
+          const rawSaved: Achievements = data.achievements && typeof data.achievements === "object"
+            ? {
+                skill: Array.isArray(data.achievements.skill) ? data.achievements.skill : [],
+                social: Array.isArray(data.achievements.social) ? data.achievements.social : [],
+                collection: Array.isArray(data.achievements.collection) ? data.achievements.collection : [],
+              }
+            : defaultAchievements;
+          const savedAchievements: Achievements = {
+            skill: rawSaved.skill.filter((a) => !isAchievementDisabled(a.id)),
+            social: rawSaved.social.filter((a) => !isAchievementDisabled(a.id)),
+            collection: rawSaved.collection.filter((a) => !isAchievementDisabled(a.id)),
+          };
 
           // Check schema version for migration needs
           const savedVersion = data.achievementsSchemaVersion ?? 0;
@@ -501,7 +631,10 @@ export function useAchievements(initialAchievements?: Achievements) {
           if (hasDuplicateIds || needsMigration) {
             // Write when: corrupted data OR schema version changed
             const userDocRef = doc(db, "users", currentUser.uid);
-            const achievementsToSave = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
+            const achievementsToSave = mergeAchievementsWithTemplate(
+              savedAchievements,
+              getTierAwareCatalog(FILTERED_CATALOG)
+            );
             await updateDoc(userDocRef, {
               achievements: sanitizeAchievementsForFirestore(achievementsToSave),
               achievementsSchemaVersion: ACHIEVEMENTS_SCHEMA_VERSION,
@@ -515,7 +648,7 @@ export function useAchievements(initialAchievements?: Achievements) {
 
             if (process.env.NODE_ENV !== "production") {
               const progressSummary = Object.entries(achievementsToSave).map(([cat, achievements]) => {
-                const withProgress = achievements.filter(a => a.kind === "counter" ? (a as CounterAchievement).progress > 0 : a.isCompleted).length;
+                const withProgress = achievements.filter(a => a.isCompleted).length;
                 return `${cat}: ${withProgress}/${achievements.length}`;
               }).join(', ');
               console.log(`[ACH][READ] hydrated from firestore - uid: ${currentUser.uid}, progress: ${progressSummary}`);
@@ -525,11 +658,14 @@ export function useAchievements(initialAchievements?: Achievements) {
               lastHydratedUidRef.current = currentUser.uid;
           } else {
             // Normal hydration - merge saved data with template, no Firestore write
-            const mergedAchievements = mergeAchievementsWithTemplate(savedAchievements, initialAchievements || defaultAchievements);
+            const mergedAchievements = mergeAchievementsWithTemplate(
+              savedAchievements,
+              getTierAwareCatalog(FILTERED_CATALOG)
+            );
 
             if (process.env.NODE_ENV !== "production") {
               const progressSummary = Object.entries(mergedAchievements).map(([cat, achievements]) => {
-                const withProgress = achievements.filter(a => a.kind === "counter" ? (a as CounterAchievement).progress > 0 : a.isCompleted).length;
+                const withProgress = achievements.filter(a => a.isCompleted).length;
                 return `${cat}: ${withProgress}/${achievements.length}`;
               }).join(', ');
               console.log(`[ACH][READ] hydrated from firestore - uid: ${currentUser.uid}, progress: ${progressSummary}`);
@@ -540,7 +676,7 @@ export function useAchievements(initialAchievements?: Achievements) {
           }
         } else {
           // userData exists but achievements is missing - set defaults locally, don't write
-          const fallbackAchievements = initialAchievements || defaultAchievements;
+          const fallbackAchievements = getTierAwareCatalog(FILTERED_CATALOG);
 
           if (process.env.NODE_ENV !== "production") {
             console.log(`[ACH][READ] hydrated from firestore - uid: ${currentUser.uid}, progress: (defaults)`);
@@ -580,7 +716,7 @@ export function useAchievements(initialAchievements?: Achievements) {
 
   // Detect newly unlocked secret achievements (requiresId) for one-time modal
   useEffect(() => {
-    const catalog = initialAchievements ?? defaultAchievements;
+    const catalog = getTierAwareCatalog(FILTERED_CATALOG);
     const allDefs: Achievement[] = [
       ...(catalog.skill ?? []),
       ...(catalog.social ?? []),
@@ -590,6 +726,11 @@ export function useAchievements(initialAchievements?: Achievements) {
     const unlockedNow = new Set<string>();
     for (const def of allDefs) {
       if (isUnlocked(def, byId)) unlockedNow.add(def.id);
+    }
+
+    if (loading) {
+      prevUnlockedIdsRef.current = unlockedNow;
+      return;
     }
 
     if (firstRunRef.current) {
@@ -612,89 +753,215 @@ export function useAchievements(initialAchievements?: Achievements) {
       });
     }
     prevUnlockedIdsRef.current = unlockedNow;
-  }, [achievements, initialAchievements]);
+  }, [achievements, loading]);
 
   const clearNewUnlocks = () => setNewUnlocks([]);
+  const clearTierUpMessage = () => setTierUpMessage(null);
+
+  const devResetPuttingMasteryTier = async () => {
+    if (process.env.NODE_ENV === "production") return;
+    if (!user) return;
+
+    const categoryId = "putting-mastery";
+    const prevMap =
+      (categoryTiersRef.current ?? (userData as any)?.categoryTiers ?? {}) as Record<
+        string,
+        number
+      >;
+    const updatedMap = { ...prevMap, [categoryId]: 0 };
+
+    // Update local state immediately
+    categoryTiersRef.current = updatedMap;
+    mergeUserData({ categoryTiers: updatedMap });
+    setTierUpMessage("Putting Mastery tier reset to Beginner");
+
+    // Persist to Firestore (merge)
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, {
+        categoryTiers: updatedMap,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (e) {
+      // dev-only function; safe to always log here
+      console.error("[TIER][DBG] reset failed", e);
+    }
+  };
+
+  const devResetAllTieredCategoryTiers = async () => {
+    if (process.env.NODE_ENV === "production") return;
+    if (!user) return;
+
+    const ids = getTieredCategoryIds();
+    if (ids.length === 0) return;
+
+    const prevMap =
+      (categoryTiersRef.current ?? (userData as any)?.categoryTiers ?? {}) as Record<
+        string,
+        number
+      >;
+    const updatedMap: Record<string, number> = { ...prevMap };
+    for (const id of ids) updatedMap[id] = 0;
+
+    categoryTiersRef.current = updatedMap;
+    mergeUserData({ categoryTiers: updatedMap });
+    setTierUpMessage("Tiered categories reset to Beginner");
+
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, {
+        categoryTiers: updatedMap,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.error("[TIER][DBG] reset all failed", e);
+    }
+  };
 
   // Toggle a single achievement (only for toggle achievements)
   const toggleAchievement = async (category: keyof Achievements, id: string) => {
     if (!user) return;
+    if (isAchievementDisabled(id)) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("[ACH] toggleAchievement: ignoring disabled achievement", { category, id });
+      }
+      return;
+    }
     const ach = achievements[category]?.find((a) => a.id === id);
     if (ach && !isUnlocked(ach, effectiveById(achievements))) return;
+
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[TIER][DBG] toggled", {
+        tabCategory: category,
+        id,
+        found: !!ach,
+        currentIsCompleted: ach?.isCompleted,
+      });
+    }
+
+    const nextCompleted = !!ach && ach.kind !== "counter" ? !ach.isCompleted : false;
+
+    // Gate parent card celebration (Ace Race, League Night Rookie).
+    if (
+      nextCompleted &&
+      ((category === "skill" && id === "skill-35") || (category === "social" && id === "social-0"))
+    ) {
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[GATE][CELEBRATE]", { parentId: id, phase: "shake" });
+      }
+      triggerAceCelebration(id);
+    }
 
     const updatedAchievements: Achievements = {
       ...achievements,
       [category]: achievements[category].map((achievement) => {
         if (achievement.id !== id) return achievement;
 
-        // Skip counter achievements - use incrementAchievement instead
-        if (achievement.kind === "counter") return achievement;
-
         const nextCompleted = !achievement.isCompleted;
+        const policy = getResetPolicy(achievement);
+        const currentYear = getCurrentYear();
 
-        const nextCompletedDate =
-          nextCompleted
-            ? (achievement.completedDate ?? Timestamp.now())
-            : undefined;
+        const nextCompletedDate = nextCompleted
+          ? (policy === "yearly" ? Timestamp.now() : (achievement.completedDate ?? Timestamp.now()))
+          : undefined;
 
         const next: Achievement = {
           ...achievement,
           isCompleted: nextCompleted,
           completedDate: nextCompletedDate,
         };
-        if (getResetPolicy(achievement) === "yearly") {
-          (next as any).year = getCurrentYear();
+
+        if (policy === "yearly") {
+          if (nextCompleted) {
+            (next as any).completedYear = currentYear;
+            (next as any).year = currentYear; // legacy
+          } else {
+            (next as any).completedYear = undefined;
+            (next as any).year = undefined;
+          }
+        }
+
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[TIER][DBG] nextState", {
+            id: next.id,
+            nextCompleted: next.isCompleted,
+            resetPolicy: getResetPolicy(next),
+            completedYear: (next as any).completedYear,
+            year: (next as any).year,
+            categoryId: (next as any).categoryId,
+          });
         }
         return next;
         }),
       };
 
+    const updated = updatedAchievements[category]?.find((a) => a.id === id);
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[TIER][DBG] updatedLookup", {
+        id,
+        updatedFound: !!updated,
+        updatedCompleted: updated?.isCompleted,
+        updatedCategoryId: (updated as any)?.categoryId,
+      });
+    }
 
     setAchievements(updatedAchievements);
 
-    // Schedule debounced save (UI updates immediately, save happens later)
-    scheduleSave(updatedAchievements, { category, id });
-  };
+    // Tier-up (per category card): only runs when the toggled achievement is marked complete.
+    // Only runs when an achievement is marked complete.
+    const toggled = updatedAchievements[category]?.find((a) => a.id === id);
+    if (toggled?.isCompleted) {
+      const categoryId = toggled ? getAchievementCategoryId(toggled) : null;
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[TIER][DBG] tierCheck", { id, categoryId });
+      }
+      if (categoryId && isTieredCategoryId(categoryId)) {
+        const cardDef = getCategoryCardDefById(categoryId);
+        const currentTierIndex = getUserCategoryTierIndex(categoryId);
+        const activeTierDefs = getActiveTierAchievements(categoryId, currentTierIndex);
+        const currentYear = getCurrentYear();
+        const byId = effectiveById(updatedAchievements);
 
-  // Increment counter achievement progress
-  const incrementAchievement = async (category: keyof Achievements, id: string, amount: number = 1) => {
-    if (!user) return;
-    const ach = achievements[category]?.find((a) => a.id === id);
-    if (ach && !isUnlocked(ach, effectiveById(achievements))) return;
+        const visibleTierDefs = activeTierDefs.filter((def) => isGatedVisible(def as any, byId as any));
+        const allComplete =
+          visibleTierDefs.length > 0 &&
+          visibleTierDefs.every((def) => isAchievementCompleted(def as any, byId[def.id] as any, currentYear));
 
-    const updatedAchievements: Achievements = {
-      ...achievements,
-      [category]: achievements[category].map((achievement) => {
-        if (achievement.id !== id) return achievement;
-
-        // Only increment counter achievements
-        if (achievement.kind !== "counter") return achievement;
-
-        const currentProgress = (achievement as CounterAchievement).progress;
-        const target = (achievement as CounterAchievement).target;
-        const nextProgress = Math.min(target, Math.max(0, currentProgress + amount));
-
-        const nextCompleted = nextProgress >= target;
-
-        const nextCompletedDate = nextCompleted
-          ? (achievement.completedDate ?? Timestamp.now())
-          : undefined;
-
-        const next: Achievement = {
-          ...achievement,
-          progress: nextProgress,
-          isCompleted: nextCompleted,
-          completedDate: nextCompletedDate,
-        };
-        if (getResetPolicy(achievement) === "yearly") {
-          (next as any).year = getCurrentYear();
+        const nextTier = cardDef?.tiers?.[currentTierIndex + 1];
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[TIER][DBG] tierEval", {
+            categoryId,
+            currentTierIndex,
+            activeTierIds: activeTierDefs.map((d) => d.id),
+            allComplete,
+            nextTierExists: !!nextTier,
+          });
         }
-        return next;
-      }),
-    };
+        if (allComplete && nextTier && nextTier.achievements.length > 0) {
+          const prevMap = (categoryTiersRef.current ?? (userData as any)?.categoryTiers ?? {}) as Record<string, number>;
+          const updatedMap = { ...prevMap, [categoryId]: currentTierIndex + 1 };
 
+          categoryTiersRef.current = updatedMap;
+          mergeUserData({ categoryTiers: updatedMap });
 
-    setAchievements(updatedAchievements);
+          const tierLabels: Record<string, string> = {
+            beginner: "Beginner",
+            intermediate: "Intermediate",
+            advanced: "Advanced",
+            expert: "Expert",
+          };
+          const nextLabel = tierLabels[nextTier.tierKey] ?? `Tier ${currentTierIndex + 1}`;
+          const title = cardDef?.title ?? "Category";
+          setTierUpMessage(`${title} leveled up to ${nextLabel}`);
+          if (process.env.NODE_ENV !== "production") {
+            console.log("[TIER][DBG] tierUp", {
+              categoryId,
+              newTierIndex: currentTierIndex + 1,
+            });
+          }
+        }
+      }
+    }
 
     // Schedule debounced save (UI updates immediately, save happens later)
     scheduleSave(updatedAchievements, { category, id });
@@ -704,10 +971,16 @@ export function useAchievements(initialAchievements?: Achievements) {
     achievements,
     loading,
     toggleAchievement,
-    incrementAchievement,
     saveAchievements,
     newUnlocks,
     clearNewUnlocks,
+    getUserCategoryTierIndex,
+    tierUpMessage,
+    clearTierUpMessage,
+    devResetPuttingMasteryTier,
+    devResetAllTieredCategoryTiers,
+    aceCelebratingId,
+    aceCelebrationPhase,
   };
 }
 
