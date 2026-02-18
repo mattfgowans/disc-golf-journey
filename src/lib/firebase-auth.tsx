@@ -52,6 +52,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   redirectError: string | null;
   redirectSettling: boolean;
+  lastSignInAttempt: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -89,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
   const [redirectError, setRedirectError] = useState<string | null>(null);
   const [redirectSettling, setRedirectSettling] = useState(false);
+  const [lastSignInAttempt, setLastSignInAttempt] = useState<string | null>(null);
 
   // Store the actual in-flight PROMISE (not a boolean)
   const signInPromiseRef = useRef<Promise<void> | null>(null);
@@ -158,6 +160,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
+    setLastSignInAttempt(`clicked ${new Date().toLocaleTimeString()}`);
+    console.error("LOGIN: clicked sign in");
+
     // If a sign-in attempt is already running, return the same promise.
     if (signInPromiseRef.current) return signInPromiseRef.current;
 
@@ -212,7 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, redirectError, redirectSettling }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, redirectError, redirectSettling, lastSignInAttempt }}>
       {children}
     </AuthContext.Provider>
   );
