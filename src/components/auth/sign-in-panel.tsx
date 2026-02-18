@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/firebase-auth";
 
@@ -13,7 +14,8 @@ export function SignInPanel({
   title = "Welcome to Disc Golf Journey",
   subtitle = "Track your achievements, celebrate your progress, and become a better disc golfer.",
 }: Props) {
-  const { user, loading, signInWithGoogle } = useAuth();
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const [signingIn, setSigningIn] = useState(false);
 
   // Safety net: if auth finishes and there's still no user, re-enable UI
@@ -23,17 +25,11 @@ export function SignInPanel({
     }
   }, [loading, user]);
 
-  const handleSignIn = async () => {
+  const handleSignIn = () => {
     if (signingIn || loading) return;
-
+    console.error("LOGIN: routing to /auth/callback?start=1");
     setSigningIn(true);
-    try {
-      await signInWithGoogle();
-    } catch {
-      // firebase-auth already logs unexpected errors
-    } finally {
-      setSigningIn(false);
-    }
+    router.push("/auth/callback?start=1");
   };
 
   const disabled = signingIn || loading;

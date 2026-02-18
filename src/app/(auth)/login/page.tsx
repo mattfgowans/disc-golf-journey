@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function LoginPage() {
-  const { user, loading, signInWithGoogle, redirectError, redirectSettling } = useAuth();
+  const { user, loading, redirectError, redirectSettling } = useAuth();
   const router = useRouter();
   const [signingIn, setSigningIn] = useState(false);
 
@@ -24,15 +24,10 @@ export default function LoginPage() {
     }
   }, [user, loading, router]);
 
-  const handleSignIn = async () => {
-    console.error("LOGIN: clicked sign in");
+  const handleSignIn = () => {
+    console.error("LOGIN: routing to /auth/callback?start=1");
     setSigningIn(true);
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      console.error("Error signing in:", error);
-      setSigningIn(false);
-    }
+    router.push("/auth/callback?start=1");
   };
 
   if (user) {

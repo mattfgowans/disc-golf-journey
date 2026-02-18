@@ -11,13 +11,19 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, LayoutDashboard, Trophy, Users, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/firebase-auth";
 import { PendingRequestsBell } from "@/components/notifications/pending-requests-bell";
 
 export function Navbar() {
-  const { user, loading, signInWithGoogle, signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
+
+  const handleSignIn = () => {
+    console.error("LOGIN: routing to /auth/callback?start=1");
+    router.push("/auth/callback?start=1");
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -102,7 +108,7 @@ export function Navbar() {
         ) : null}
         <div className="flex items-center gap-2 shrink-0">
           {!user ? (
-            <Button variant="ghost" onClick={signInWithGoogle}>
+            <Button variant="ghost" onClick={handleSignIn}>
               Sign in with Google
             </Button>
           ) : (

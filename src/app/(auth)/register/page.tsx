@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function RegisterPage() {
-  const { user, loading, signInWithGoogle } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   // Redirect to dashboard if already signed in
@@ -23,13 +23,9 @@ export default function RegisterPage() {
     }
   }, [user, loading, router]);
 
-  const handleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-      // Redirect will happen automatically via useEffect
-    } catch (error) {
-      console.error("Error signing in:", error);
-    }
+  const handleSignIn = () => {
+    console.error("LOGIN: routing to /auth/callback?start=1");
+    router.push("/auth/callback?start=1");
   };
 
   if (loading) {
