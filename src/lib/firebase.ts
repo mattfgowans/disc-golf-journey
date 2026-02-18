@@ -14,6 +14,13 @@ const firebaseConfig = {
 // Initialize Firebase (singleton: reuse existing app if already initialized)
 const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
+console.error("[FIREBASE CONFIG]", {
+  projectId: app.options.projectId,
+  authDomain: app.options.authDomain,
+  apiKeyPresent: !!app.options.apiKey,
+  appIdPresent: !!app.options.appId,
+});
+
 // Initialize Firebase services
 export const auth: Auth = getAuth(app);
 export const db: Firestore = getFirestore(app);
