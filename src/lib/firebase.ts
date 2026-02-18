@@ -2,18 +2,9 @@ import { initializeApp, getApps, FirebaseApp, getApp } from "firebase/app";
 import { getAuth, Auth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, Firestore, connectFirestoreEmulator } from "firebase/firestore";
 
-const isGithubPages =
-  typeof window !== "undefined" && window.location.hostname.endsWith("github.io");
-const baseAuthDomain =
-  process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "demo-project.firebaseapp.com";
-const authDomain = isGithubPages ? window.location.hostname : baseAuthDomain;
-if (isGithubPages) {
-  console.error("[FIREBASE AUTH DOMAIN OVERRIDE]", authDomain);
-}
-
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "demo-api-key",
-  authDomain,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "demo-project.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "demo-project",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789",
@@ -24,10 +15,8 @@ const firebaseConfig = {
 const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 console.error("[FIREBASE CONFIG]", {
-  projectId: app.options.projectId,
-  authDomain: app.options.authDomain,
-  apiKeyPresent: !!app.options.apiKey,
-  appIdPresent: !!app.options.appId,
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
 });
 
 // Initialize Firebase services
