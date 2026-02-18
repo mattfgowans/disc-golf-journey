@@ -106,15 +106,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       try {
-        await ensurePersistence();
         const result = await getRedirectResult(auth);
-        if (DEBUG_AUTH) {
-          const u = result?.user;
-          if (u) {
-            console.error("AUTH: redirect result -> user", { uid: u.uid, email: u.email ?? null });
-          } else {
-            console.error("AUTH: redirect result -> null");
-          }
+        if (result?.user) {
+          const { uid, email } = result.user;
+          console.error("AUTH: redirect result -> user", { uid, email: email ?? null });
+        } else {
+          console.error("AUTH: redirect result -> null");
         }
       } catch (error: any) {
         const code = error?.code as string | undefined;
@@ -171,32 +168,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: "select_account" });
 
-        if (shouldPreferRedirect() || isIOS()) {
-          await setPersistence(auth, browserSessionPersistence);
-          if (DEBUG_AUTH) console.error("AUTH: persistence=session (redirect)");
-          setRedirectSettling(true);
-          await signInWithRedirect(auth, provider);
-          return;
-        }
-
-        await setPersistence(auth, browserLocalPersistence);
-        if (DEBUG_AUTH) console.error("AUTH: persistence=local (popup)");
-
-        try {
-          await withTimeout(signInWithPopup(auth, provider), 15000, "Sign-in popup timed out");
-        } catch (e: any) {
-          if (isPopupFallbackError(e)) {
-            // iOS/in-app already use redirect above; here we're desktop with blocked popup → fallback to redirect
-            if (isInAppBrowser()) {
-              setRedirectError("Google sign-in was blocked by this browser. Try again. If it keeps happening, disable content blockers or Private Browsing, or open in full Safari.");
-              return;
-            }
-            setRedirectSettling(true);
-            await signInWithRedirect(auth, provider);
-            return;
-          }
-          throw e;
-        }
+        await setPersistence(auth, browserSessionPersistence);
+        console.error("AUTH: persistence=session (forced redirect)");
+        setRedirectSettling(true);
+        console.error("AUTH: starting signInWithRedirect");
+        await signInWithRedirect(auth, provider);
+        return;
       } catch (err: any) {
         const code = err?.code as string | undefined;
 
