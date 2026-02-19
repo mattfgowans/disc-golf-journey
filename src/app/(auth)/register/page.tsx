@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function RegisterPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, redirectSettling, redirectError, signInWithGoogle } = useAuth();
   const router = useRouter();
 
   // Redirect to dashboard if already signed in
@@ -23,12 +23,12 @@ export default function RegisterPage() {
     }
   }, [user, loading, router]);
 
-  const handleSignIn = () => {
-    console.error("LOGIN: routing to /auth/callback?start=1");
-    router.push("/auth/callback?start=1");
+  const handleSignIn = async () => {
+    console.log("LOGIN -> signInWithGoogle");
+    await signInWithGoogle();
   };
 
-  if (loading) {
+  if (loading || redirectSettling) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <p className="text-gray-600">Loading...</p>
@@ -50,7 +50,15 @@ export default function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={handleSignIn} className="w-full" size="lg">
+          {redirectError && (
+            <p className="mb-4 text-sm text-red-600">{redirectError}</p>
+          )}
+          <Button
+            onClick={handleSignIn}
+            disabled={loading || redirectSettling}
+            className="w-full"
+            size="lg"
+          >
             Sign in with Google
           </Button>
         </CardContent>

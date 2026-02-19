@@ -13,15 +13,17 @@ const firebaseConfig = {
 
 // Initialize Firebase (singleton: reuse existing app if already initialized)
 const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+export const auth: Auth = getAuth(app);
+export const db: Firestore = getFirestore(app);
+
+if (process.env.NODE_ENV !== "production") {
+  console.log("[FIREBASE] app name:", app.name, "| auth instance:", auth.app?.name ?? "n/a");
+}
 
 console.error("[FIREBASE CONFIG]", {
   projectId: firebaseConfig.projectId,
   authDomain: firebaseConfig.authDomain,
 });
-
-// Initialize Firebase services
-export const auth: Auth = getAuth(app);
-export const db: Firestore = getFirestore(app);
 
 // Conditionally connect to emulators in development
 if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true") {

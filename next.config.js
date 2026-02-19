@@ -1,13 +1,15 @@
 /** @type {import('next').NextConfig} */
-const BASE_PATH = '/disc-golf-journey';
+const isGithub = process.env.DEPLOY_TARGET === "github";
 
 const nextConfig = {
-  ...(process.env.NODE_ENV === 'production' ? {
-    output: 'export',
-    basePath: BASE_PATH,
-    assetPrefix: `${BASE_PATH}/`,
-    trailingSlash: true,
-  } : {}),
+  ...(process.env.NODE_ENV === "production"
+    ? {
+        output: "export",
+        basePath: isGithub ? "/disc-golf-journey" : "",
+        assetPrefix: isGithub ? "/disc-golf-journey/" : "",
+        trailingSlash: true,
+      }
+    : {}),
   images: {
     unoptimized: true,
   },

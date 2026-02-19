@@ -10,12 +10,11 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/lib/firebase-auth";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function LoginPage() {
-  const { user, loading, redirectError, redirectSettling } = useAuth();
+  const { user, loading, redirectSettling, redirectError, signInWithGoogle } = useAuth();
   const router = useRouter();
-  const [signingIn, setSigningIn] = useState(false);
 
   // Redirect to dashboard if already signed in
   useEffect(() => {
@@ -24,12 +23,6 @@ export default function LoginPage() {
     }
   }, [user, loading, router]);
 
-  const handleSignIn = () => {
-    console.error("LOGIN: routing to /auth/callback?start=1");
-    setSigningIn(true);
-    router.push("/auth/callback?start=1");
-  };
-
   if (user) {
     return null; // Will redirect via useEffect
   }
@@ -37,7 +30,7 @@ export default function LoginPage() {
   if (loading || redirectSettling) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-gray-600">{redirectSettling ? "Signing in…" : "Loading..."}</p>
       </div>
     );
   }
@@ -58,12 +51,15 @@ export default function LoginPage() {
             </div>
           )}
           <Button
-            onClick={handleSignIn}
-            disabled={loading || redirectSettling || signingIn}
+            onClick={async () => {
+              console.log("LOGIN -> signInWithGoogle");
+              await signInWithGoogle();
+            }}
+            disabled={loading || redirectSettling}
             className="w-full"
             size="lg"
           >
-            {loading || redirectSettling || signingIn ? "Signing in..." : "Sign in with Google"}
+            Sign in with Google
           </Button>
         </CardContent>
       </Card>

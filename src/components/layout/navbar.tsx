@@ -16,13 +16,14 @@ import { useAuth } from "@/lib/firebase-auth";
 import { PendingRequestsBell } from "@/components/notifications/pending-requests-bell";
 
 export function Navbar() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, redirectSettling, signOut, signInWithGoogle } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleSignIn = () => {
-    console.error("LOGIN: routing to /auth/callback?start=1");
-    router.push("/auth/callback?start=1");
+  const handleSignIn = async () => {
+    if (loading || redirectSettling) return;
+    console.log("LOGIN -> signInWithGoogle");
+    await signInWithGoogle();
   };
 
   const handleSignOut = async () => {
@@ -108,8 +109,12 @@ export function Navbar() {
         ) : null}
         <div className="flex items-center gap-2 shrink-0">
           {!user ? (
-            <Button variant="ghost" onClick={handleSignIn}>
-              Sign in with Google
+            <Button
+              variant="ghost"
+              onClick={handleSignIn}
+              disabled={loading || redirectSettling}
+            >
+              {redirectSettling ? "Signing in…" : "Sign in with Google"}
             </Button>
           ) : (
             <>

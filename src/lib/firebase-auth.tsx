@@ -1,53 +1,26 @@
-// Redirect preferred for iOS and in-app browsers; desktop uses popup. getRedirectResult runs once on load.
-
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
-import { usePathname } from "next/navigation";
 import {
   User,
   onAuthStateChanged,
   signInWithPopup,
   signInWithRedirect,
   GoogleAuthProvider,
+  getRedirectResult,
   signOut as firebaseSignOut,
   setPersistence,
   browserLocalPersistence,
-  browserSessionPersistence,
-  getRedirectResult,
   AuthError,
 } from "firebase/auth";
 import { auth } from "./firebase";
-import { shouldPreferRedirect, isIOS, isInAppBrowser } from "./authEnv";
 
 const DEBUG_AUTH = true;
-
-async function ensurePersistence() {
-  try {
-    await setPersistence(auth, browserLocalPersistence);
-    if (DEBUG_AUTH) console.error("AUTH: persistence=local");
-  } catch (e) {
-    try {
-      await setPersistence(auth, browserSessionPersistence);
-      if (DEBUG_AUTH) console.error("AUTH: persistence=session (fallback)", String(e));
-    } catch (e2) {
-      if (DEBUG_AUTH) console.error("AUTH: persistence failed", String(e2));
-    }
-  }
-}
-
-function isPopupFallbackError(e: unknown) {
-  const code = (e as AuthError | undefined)?.code;
-  return (
-    code === "auth/popup-blocked" ||
-    code === "auth/popup-closed-by-user" ||
-    code === "auth/operation-not-supported-in-this-environment"
-  );
-}
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  authInitialized: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   redirectError: string | null;
@@ -57,159 +30,154 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-
-function withTimeout<T>(promise: Promise<T>, ms: number, message = "Sign-in timed out") {
-  let timeoutId: number | null = null;
-
-  const timeoutPromise = new Promise<T>((_, reject) => {
-    timeoutId = window.setTimeout(() => reject(new Error(message)), ms);
-  });
-
-  return Promise.race([promise, timeoutPromise]).finally(() => {
-    if (timeoutId !== null) window.clearTimeout(timeoutId);
-  }) as Promise<T>;
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (DEBUG_AUTH) console.error("AUTH: init");
-    if (DEBUG_AUTH) {
-      const lsOk = typeof window !== "undefined" && typeof window.localStorage !== "undefined";
-      try {
-        if (lsOk) window.localStorage.setItem("__auth_check", "1");
-        console.error("AUTH: persistence check", { localStorageAvailable: lsOk });
-        if (lsOk) window.localStorage.removeItem("__auth_check");
-      } catch (e) {
-        console.log("AUTH: persistence check", { localStorageAvailable: false, error: String(e) });
-      }
-    }
-  }, []);
+  const [authInitialized, setAuthInitialized] = useState(false);
   const [redirectError, setRedirectError] = useState<string | null>(null);
   const [redirectSettling, setRedirectSettling] = useState(false);
   const [lastSignInAttempt, setLastSignInAttempt] = useState<string | null>(null);
-
-  // Store the actual in-flight PROMISE (not a boolean)
   const signInPromiseRef = useRef<Promise<void> | null>(null);
-  const redirectHandledRef = useRef(false);
+  const initRanRef = useRef(false);
+  const signInStartedRef = useRef(false);
+  const redirectConsumerRanRef = useRef(false);
 
-  // Handle redirect result once on app load (skip when callback page handles it)
+  // Consume redirect result when returning from signInWithRedirect (e.g. popup was blocked).
+  // Do NOT treat null result as error—it will often be null when using popup.
   useEffect(() => {
-    if (redirectHandledRef.current) return;
-    if (pathname === "/auth/callback") {
-      redirectHandledRef.current = true;
-      return;
-    }
-    redirectHandledRef.current = true;
-    setRedirectSettling(true);
+    if (redirectConsumerRanRef.current) return;
+    redirectConsumerRanRef.current = true;
 
-    (async () => {
+    const consumeRedirectResult = async () => {
+      if (typeof window === "undefined") return;
+      setRedirectSettling(true);
+      try {
+        await setPersistence(auth, browserLocalPersistence);
+      } catch (e) {
+        if (DEBUG_AUTH) console.log("AUTH: redirect consume setPersistence failed", e);
+      }
       try {
         const result = await getRedirectResult(auth);
-        if (result?.user) {
-          const { uid, email } = result.user;
-          console.error("AUTH: redirect result -> user", { uid, email: email ?? null });
-        } else {
-          console.error("AUTH: redirect result -> null");
+        if (DEBUG_AUTH) {
+          console.log("AUTH: getRedirectResult", { hasResult: !!result, hasUser: !!result?.user });
         }
-      } catch (error: any) {
-        const code = error?.code as string | undefined;
-        const msg = (error?.message ?? "").toLowerCase();
-        const isMissingInitialState =
-          code === "auth/missing-initial-state" ||
-          msg.includes("missing initial state") ||
-          msg.includes("sessionstorage") ||
-          msg.includes("storage-partition");
-
-        console.error("Redirect result error:", error);
-
-        if (isMissingInitialState) {
-          setRedirectError("Sign-in failed due to browser storage restrictions. If you're on iPhone, open this link in Safari (not inside Messages) and try again.");
-        } else {
-          setRedirectError("Sign-in failed. Please try again.");
+        if (result?.user && typeof window !== "undefined") {
+          sessionStorage.removeItem("dgjauth_processing");
+          sessionStorage.removeItem("dgjauth_return_to");
+          sessionStorage.removeItem("dgjauth_redirect_started");
+          localStorage.removeItem("dgjauth_redirect_started");
+          localStorage.removeItem("dgjauth_redirect_started_at");
+          localStorage.removeItem("dgjauth_redirect_from");
         }
+      } catch (err: unknown) {
+        const code = (err as AuthError)?.code;
+        const msg = String((err as { message?: string })?.message ?? "");
+        const readable =
+          code === "auth/missing-initial-state" || msg.toLowerCase().includes("storage")
+            ? "Login failed: browser storage may be blocked. Try Safari if on iPhone."
+            : "Sign-in failed. Please try again.";
+        setRedirectError(readable);
+        if (DEBUG_AUTH) console.error("AUTH: getRedirectResult error", err);
       } finally {
         setRedirectSettling(false);
       }
-    })();
-  }, [pathname]);
+    };
 
-  // Register auth state listener
+    consumeRedirectResult();
+  }, []);
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      if (DEBUG_AUTH) {
-        if (u) {
-          console.error("AUTH: state -> user", { uid: u.uid, email: u.email ?? null });
-        } else {
-          console.error("AUTH: state -> null");
+    if (initRanRef.current) return;
+    initRanRef.current = true;
+
+    const init = async () => {
+      if (DEBUG_AUTH) console.error("AUTH: init");
+      try {
+        await setPersistence(auth, browserLocalPersistence);
+        if (DEBUG_AUTH) console.error("AUTH: persistence=local");
+      } catch (e) {
+        if (DEBUG_AUTH) console.error("AUTH: persistence failed", String(e));
+      }
+
+      const unsubscribe = onAuthStateChanged(auth, (u) => {
+        if (DEBUG_AUTH) {
+          if (u) {
+            console.log("AUTH: onAuthStateChanged -> user", { uid: u.uid, email: u.email ?? null });
+          } else {
+            console.log("AUTH: onAuthStateChanged -> null");
+          }
         }
-      }
-      setUser(u);
-      if (u) setRedirectError(null);
-      setLoading(false);
-      signInPromiseRef.current = null;
-      if (process.env.NODE_ENV !== "production" && !DEBUG_AUTH) {
-        console.log("[Auth] state", { uid: u?.uid ?? null });
-      }
+        setUser(u ?? null);
+        if (u) {
+          setRedirectError(null);
+          setRedirectSettling(false);
+        }
+        setAuthInitialized(true);
+        setLoading(false);
+        signInPromiseRef.current = null;
+      });
+
+      return unsubscribe;
+    };
+
+    let unsubscribe: (() => void) | undefined;
+    init().then((unsub) => {
+      unsubscribe = unsub ?? undefined;
     });
 
-    return unsubscribe;
+    return () => {
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
   }, []);
 
   const signInWithGoogle = async () => {
-    setLastSignInAttempt(`clicked ${new Date().toLocaleTimeString()}`);
-    console.error("LOGIN: clicked sign in");
+    if (typeof window === "undefined") return;
+    if (signInStartedRef.current) return;
+    signInStartedRef.current = true;
 
-    // If a sign-in attempt is already running, return the same promise.
-    if (signInPromiseRef.current) return signInPromiseRef.current;
+    setRedirectError(null);
+    setRedirectSettling(true);
 
-    const attempt = (async () => {
-      try {
-        setRedirectError(null);
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+    } catch (e) {
+      if (DEBUG_AUTH) console.log("AUTH: signInWithGoogle setPersistence failed", e);
+    }
 
-        const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: "select_account" });
+    sessionStorage.setItem("dgjauth_return_to", "/dashboard");
+    sessionStorage.setItem("dgjauth_processing", "1");
 
-        await setPersistence(auth, browserSessionPersistence);
-        console.error("AUTH: persistence=session (forced redirect)");
-        setRedirectSettling(true);
-        console.error("AUTH: starting signInWithRedirect");
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    if (DEBUG_AUTH) {
+      console.log("AUTH: signInWithGoogle -> trying popup first", {
+        href: window.location.href,
+        dgjauth_processing: sessionStorage.getItem("dgjauth_processing"),
+        signInStartedRef: signInStartedRef.current,
+      });
+    }
+
+    try {
+      await signInWithPopup(auth, provider);
+      signInStartedRef.current = false;
+    } catch (err: unknown) {
+      const code = (err as AuthError)?.code;
+      if (code === "auth/popup-blocked" || code === "auth/cancelled-popup-request") {
+        if (DEBUG_AUTH) console.log("AUTH: popup blocked/cancelled, falling back to redirect");
         await signInWithRedirect(auth, provider);
-        return;
-      } catch (err: any) {
-        const code = err?.code as string | undefined;
-
-        // Handle other error cases
-        const msg = (err?.message ?? "").toLowerCase();
-        const isMissingInitialState =
-          code === "auth/missing-initial-state" ||
-          msg.includes("missing initial state") ||
-          msg.includes("sessionstorage") ||
-          msg.includes("storage-partition");
-
-        // Detect Firebase redirect state issues (common on iOS in-app browsers)
-        if (isMissingInitialState) {
-          throw new Error("Login failed due to browser storage restrictions. If you're on iPhone, open this link in Safari (not inside Messages) and try again.");
-        }
-
-        // Normal user behaviors: don't treat as error
-        if (code === "auth/cancelled-popup-request") {
-          return;
-        }
-
-        console.error("Google sign-in failed:", err);
-        throw new Error("Sign-in failed. Please try again.");
-      } finally {
-        // Always clear so the button can be clicked again
-        signInPromiseRef.current = null;
+      } else {
+        signInStartedRef.current = false;
+        setRedirectSettling(false);
+        const msg = String((err as { message?: string })?.message ?? "");
+        const readable =
+          code === "auth/missing-initial-state" || msg.toLowerCase().includes("storage")
+            ? "Login failed: browser storage may be blocked. Try Safari if on iPhone."
+            : "Sign-in failed. Please try again.";
+        setRedirectError(readable);
+        throw err;
       }
-    })();
-
-    signInPromiseRef.current = attempt;
-    return attempt;
+    }
   };
 
   const signOut = async () => {
@@ -217,7 +185,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, redirectError, redirectSettling, lastSignInAttempt }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        authInitialized,
+        signInWithGoogle,
+        signOut,
+        redirectError,
+        redirectSettling,
+        lastSignInAttempt,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

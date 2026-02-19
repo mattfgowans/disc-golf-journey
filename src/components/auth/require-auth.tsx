@@ -11,6 +11,20 @@ const ONBOARDING_PATH = "/onboarding/username";
 const LOGIN_PATH = "/login";
 const DEFAULT_APP_PATH = "/dashboard"; // justified by src/app/dashboard/page.tsx
 
+/** Paths that never force redirect to /login; auth callback must render so getRedirectResult() can run. */
+const PUBLIC_PATHS = new Set([
+  "/",
+  LOGIN_PATH,
+  "/register",
+  "/auth/callback",
+]);
+
+function isPublicPath(pathname: string): boolean {
+  if (PUBLIC_PATHS.has(pathname)) return true;
+  if (pathname.startsWith("/auth/callback/")) return true;
+  return false;
+}
+
 type UsernameStatus = "loading" | "missing" | "present" | "error";
 
 /**
@@ -55,9 +69,17 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   // Compute the one route we should be on (or null = ok to stay).
   const desiredPath = useMemo(() => {
-    // 1) Not logged in -> login (unless already there). Do NOT redirect while redirect sign-in is settling.
-    if (!authLoading && !redirectSettling && !user) {
-      return pathname === LOGIN_PATH ? null : LOGIN_PATH;
+    // 0) Public paths: never redirect, let the page render (critical for /auth/callback + getRedirectResult).
+    if (isPublicPath(pathname)) {
+      return null;
+    }
+
+    // 0b) Do NOT redirect while initiating sign-in redirect.
+    if (redirectSettling) return null;
+
+    // 1) Not logged in -> login. Only redirect when loading=false AND user is null.
+    if (!authLoading && !user) {
+      return LOGIN_PATH;
     }
 
     // 2) Logged in user on login page -> redirect based on username status
@@ -106,6 +128,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   /**
    * Rendering rules (prevents flashes):
    * - If redirect sign-in is settling, show loading (do not redirect).
+   * - Public paths: always render children (critical for /auth/callback + getRedirectResult).
    * - If we *know* we should be elsewhere, render nothing.
    * - If auth/profile state isn't settled, render nothing.
    * - If there's an error loading profile, show the error UI (no redirects).
@@ -118,14 +141,17 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Public paths: never block—let /auth/callback run getRedirectResult() etc.
+  if (isPublicPath(pathname)) {
+    if (DEBUG_AUTH) console.log("GUARD: public route bypass", pathname);
+    return <>{children}</>;
+  }
+
   const shouldBlockRender =
-    !!desiredPath ||
-    authLoading ||
-    !user ||
-    usernameStatus === "loading";
+    !!desiredPath || authLoading || !user || usernameStatus === "loading";
 
   if (DEBUG_AUTH && authLoading && !desiredPath) {
-    console.error("GUARD: loading, no redirect");
+    console.log("GUARD: waiting (auth loading)", { authLoading });
   }
   if (shouldBlockRender) return null;
 

@@ -1,66 +1,81 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
-import { getRedirectResult, GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
+import { Suspense, useEffect, useRef, useState } from "react";
+import {
+  getRedirectResult,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
-const startedKey = "dgjauth_redirect_started";
+const DEFAULT_RETURN = "/dashboard";
 
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const start = searchParams.get("start");
-  const shouldStart = start === "1";
-  const startedValue =
-    typeof window !== "undefined" ? sessionStorage.getItem(startedKey) : null;
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const ranRef = useRef(false);
 
   useEffect(() => {
+    if (ranRef.current) return;
+    ranRef.current = true;
+
     (async () => {
-      if (shouldStart) {
-        if (sessionStorage.getItem(startedKey) === "1") {
-          console.error(
-            "AUTH CALLBACK: start=1 but already started; NOT redirecting again"
-          );
-          router.replace("/auth/callback");
-          return;
-        }
-        sessionStorage.setItem(startedKey, "1");
-        console.error("AUTH CALLBACK: starting redirect sign-in (one-time)");
-        const provider = new GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: "select_account" });
-        await signInWithRedirect(auth, provider);
+      if (typeof window === "undefined") return;
+
+      const hasCodeOrState =
+        searchParams.get("code") || searchParams.get("state");
+      const processing = sessionStorage.getItem("dgjauth_processing") === "1";
+
+      if (!processing && !hasCodeOrState) {
+        router.replace("/login");
         return;
       }
 
-      const result = await getRedirectResult(auth);
-      if (result?.user) {
-        const { uid, email } = result.user;
-        console.error("AUTH CALLBACK: redirect result -> user", {
-          uid,
-          email: email ?? null,
-        });
-      } else {
-        console.error("AUTH CALLBACK: redirect result -> null");
+      try {
+        await setPersistence(auth, browserLocalPersistence);
+      } catch (e) {
+        console.error("AUTH CALLBACK: setPersistence failed", e);
       }
-      sessionStorage.removeItem(startedKey);
-      router.replace("/dashboard");
+
+      const result = await getRedirectResult(auth);
+
+      if (result?.user) {
+        const returnTo =
+          (typeof window !== "undefined" && sessionStorage.getItem("dgjauth_return_to")) ||
+          DEFAULT_RETURN;
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("dgjauth_return_to");
+          sessionStorage.removeItem("dgjauth_processing");
+        }
+        setStatus("success");
+        router.replace(returnTo);
+      } else {
+        setStatus("error");
+        setError(
+          "No redirect result. This usually means the redirect URI did not match or storage was blocked (e.g. Private Browsing)."
+        );
+      }
     })();
-  }, [router, shouldStart]);
+  }, [router, searchParams]);
+
+  if (status === "error") {
+    return (
+      <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-4">
+        <p className="max-w-md text-center text-sm font-medium text-red-600">
+          {error}
+        </p>
+        <Button onClick={() => router.replace("/login")}>Back to login</Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-4">
+    <div className="flex min-h-[200px] items-center justify-center">
       <p className="text-muted-foreground">Signing you in…</p>
-      <div className="rounded border border-amber-500/40 bg-amber-950/50 px-3 py-2 font-mono text-[10px] text-amber-200">
-        <div>Callback page</div>
-        <div>
-          start: <span className="text-amber-400">{start ?? "(none)"}</span>
-        </div>
-        <div>
-          {startedKey}:{" "}
-          <span className="text-amber-400">{startedValue ?? "(none)"}</span>
-        </div>
-      </div>
     </div>
   );
 }
