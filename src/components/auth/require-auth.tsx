@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/firebase-auth";
 import { useUserProfile } from "@/lib/useUserProfile";
@@ -38,7 +38,51 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const { user, loading: authLoading, redirectSettling } = useAuth();
+  const { user, loading: authLoading, authInitialized, redirectSettling } = useAuth();
+  const [redirectProcessing, setRedirectProcessing] = useState(false);
+  const userRef = useRef(user);
+  userRef.current = user;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const read = () => sessionStorage.getItem("dgjauth_processing") === "1";
+
+    // initialize
+    setRedirectProcessing(read());
+
+    // If redirect is in progress, poll briefly until it clears (max 10s).
+    let alive = true;
+    let interval: number | null = null;
+    let timeout: number | null = null;
+
+    if (read()) {
+      interval = window.setInterval(() => {
+        if (!alive) return;
+        const v = read();
+        setRedirectProcessing(v);
+        if (!v && interval != null) {
+          window.clearInterval(interval);
+          interval = null;
+        }
+      }, 250);
+
+      timeout = window.setTimeout(() => {
+        if (!alive) return;
+        // Stop polling after 10s to avoid perpetual work
+        if (interval != null) window.clearInterval(interval);
+        interval = null;
+        setRedirectProcessing(read());
+      }, 10000);
+    }
+
+    return () => {
+      alive = false;
+      if (interval != null) window.clearInterval(interval);
+      if (timeout != null) window.clearTimeout(timeout);
+    };
+  }, []);
+
   const {
     profile,
     exists,
@@ -74,11 +118,14 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
       return null;
     }
 
-    // 0b) Do NOT redirect while initiating sign-in redirect.
+    // 0b) Do NOT redirect while initiating sign-in redirect or redirect-in-progress.
     if (redirectSettling) return null;
 
-    // 1) Not logged in -> login. Only redirect when loading=false AND user is null.
-    if (!authLoading && !user) {
+    // 0c) Do NOT redirect while sessionStorage indicates redirect sign-in in progress.
+    if (redirectProcessing) return null;
+
+    // 1) Not logged in -> login. Only redirect when auth initialized, loading done, and user is null.
+    if (authInitialized && !authLoading && !redirectSettling && !user) {
       return LOGIN_PATH;
     }
 
@@ -111,19 +158,32 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     }
 
     return null;
-  }, [authLoading, redirectSettling, user, usernameStatus, pathname]);
+  }, [authInitialized, authLoading, redirectProcessing, redirectSettling, user, usernameStatus, pathname]);
 
   if (process.env.NODE_ENV === "development") {
     console.debug({ pathname, authLoading, uid: user?.uid, usernameStatus, desiredPath });
   }
 
   useEffect(() => {
-    if (!desiredPath || redirectSettling) return;
+    if (!desiredPath || redirectSettling || redirectProcessing) return;
     if (DEBUG_AUTH) {
       console.error("GUARD: redirect", { pathname, loading: authLoading, redirectSettling, hasUser: !!user });
     }
     router.replace(desiredPath);
-  }, [desiredPath, router, pathname, user, authLoading, redirectSettling]);
+  }, [desiredPath, router, pathname, user, authLoading, redirectSettling, redirectProcessing]);
+
+  // If redirect sign-in appears in progress, start a 10s timeout; on expiry with no user, clear storage and redirect.
+  useEffect(() => {
+    if (!redirectProcessing || typeof window === "undefined") return;
+    const tid = setTimeout(() => {
+      if (userRef.current == null) {
+        sessionStorage.removeItem("dgjauth_processing");
+        sessionStorage.removeItem("dgjauth_return_to");
+        router.replace("/login?reason=auth_timeout");
+      }
+    }, 10_000);
+    return () => clearTimeout(tid);
+  }, [redirectProcessing, user, router]);
 
   /**
    * Rendering rules (prevents flashes):
@@ -133,7 +193,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
    * - If auth/profile state isn't settled, render nothing.
    * - If there's an error loading profile, show the error UI (no redirects).
    */
-  if (redirectSettling) {
+  if (authLoading || !authInitialized || redirectSettling || redirectProcessing) {
     return (
       <div className="flex min-h-[120px] items-center justify-center text-sm text-muted-foreground">
         Signing in…
@@ -148,7 +208,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   }
 
   const shouldBlockRender =
-    !!desiredPath || authLoading || !user || usernameStatus === "loading";
+    !!desiredPath || authLoading || !authInitialized || !user || usernameStatus === "loading" || redirectProcessing;
 
   if (DEBUG_AUTH && authLoading && !desiredPath) {
     console.log("GUARD: waiting (auth loading)", { authLoading });

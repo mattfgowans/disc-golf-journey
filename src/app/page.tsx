@@ -5,19 +5,19 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading, authInitialized, redirectSettling } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || !authInitialized || redirectSettling) return;
     if (user) {
       router.replace("/dashboard");
     } else {
       router.replace("/login");
     }
-  }, [user, loading, router]);
+  }, [user, loading, authInitialized, redirectSettling, router]);
 
-  if (loading) {
+  if (loading || !authInitialized || redirectSettling) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center">
         <p className="text-gray-600">Loading...</p>

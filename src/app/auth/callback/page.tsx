@@ -7,14 +7,13 @@ import {
   browserLocalPersistence,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 const DEFAULT_RETURN = "/dashboard";
 
 function AuthCallbackContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const ranRef = useRef(false);
@@ -25,15 +24,6 @@ function AuthCallbackContent() {
 
     (async () => {
       if (typeof window === "undefined") return;
-
-      const hasCodeOrState =
-        searchParams.get("code") || searchParams.get("state");
-      const processing = sessionStorage.getItem("dgjauth_processing") === "1";
-
-      if (!processing && !hasCodeOrState) {
-        router.replace("/login");
-        return;
-      }
 
       try {
         await setPersistence(auth, browserLocalPersistence);
@@ -60,7 +50,7 @@ function AuthCallbackContent() {
         );
       }
     })();
-  }, [router, searchParams]);
+  }, [router]);
 
   if (status === "error") {
     return (

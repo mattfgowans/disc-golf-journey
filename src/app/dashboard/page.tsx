@@ -9,7 +9,6 @@ import { getCurrentYear, isAchievementCompleted, isGatedVisible } from "@/lib/ac
 import { StatsHeader } from "@/components/dashboard/stats-header";
 import { AchievementSection } from "@/components/dashboard/achievement-section";
 import { QuickLogSheet } from "@/components/dashboard/quick-log-sheet";
-import { RequireAuth } from "@/components/auth/require-auth";
 import { auth } from "@/lib/firebase";
 import { getUserStats } from "@/lib/leaderboard";
 import { getRankAndPrestige } from "@/lib/ranks";
@@ -128,11 +127,7 @@ function getInitialActiveTab(): string {
 }
 
 export default function DashboardPage() {
-  return (
-    <RequireAuth>
-      <DashboardInner />
-    </RequireAuth>
-  );
+  return <DashboardInner />;
 }
 
 // Helper function to get progress color based on percentage
