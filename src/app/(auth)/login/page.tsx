@@ -10,11 +10,21 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/lib/firebase-auth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const { user, loading, redirectSettling, redirectError, signInWithGoogle } = useAuth();
   const router = useRouter();
+  const [inApp, setInApp] = useState(false);
+
+  useEffect(() => {
+    const ua = navigator.userAgent || "";
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isInApp =
+      /Instagram|FBAN|FBAV|FBIOS|FB_IAB|Line|LinkedInApp|Twitter|TikTok/i.test(ua) ||
+      (isIOS && !/Safari/i.test(ua)); // iOS in-app webviews often omit "Safari"
+    setInApp(isInApp);
+  }, []);
 
   // Redirect to dashboard if already signed in
   useEffect(() => {
@@ -31,6 +41,38 @@ export default function LoginPage() {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <p className="text-gray-600">{redirectSettling ? "Signing in…" : "Loading..."}</p>
+      </div>
+    );
+  }
+
+  if (inApp) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Open in Safari to sign in</CardTitle>
+            <CardDescription>
+              In-app browsers can block Google sign-in. Tap below to open Disc Golf Journey in Safari, then sign in.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button
+              onClick={() => window.open(window.location.href, "_blank")}
+              className="w-full"
+              size="lg"
+            >
+              Open in Safari
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigator.clipboard.writeText(window.location.href)}
+              className="w-full"
+              size="lg"
+            >
+              Copy link
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
