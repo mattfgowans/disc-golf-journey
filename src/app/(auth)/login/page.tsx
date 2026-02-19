@@ -20,10 +20,21 @@ export default function LoginPage() {
   useEffect(() => {
     const ua = navigator.userAgent || "";
     const isIOS = /iPhone|iPad|iPod/i.test(ua);
-    const isInApp =
-      /Instagram|FBAN|FBAV|FBIOS|FB_IAB|Line|LinkedInApp|Twitter|TikTok/i.test(ua) ||
-      (isIOS && !/Safari/i.test(ua)); // iOS in-app webviews often omit "Safari"
-    setInApp(isInApp);
+
+    const isCriOS = /CriOS/i.test(ua);   // Chrome on iOS
+    const isFxiOS = /FxiOS/i.test(ua);   // Firefox on iOS
+
+    const hasSafari = /Safari/i.test(ua);
+    const hasVersion = /Version\//i.test(ua); // Full Safari usually has Version/x.y
+
+    const isKnownInApp =
+      /Instagram|FBAN|FBAV|FBIOS|FB_IAB|Line|LinkedInApp|Twitter|TikTok/i.test(ua);
+
+    // iOS "in-app" browsers (Messages/SFSafariViewController) often look Safari-ish,
+    // but may not include Version/. This catches them.
+    const isIOSSafariLikeInApp = isIOS && hasSafari && !hasVersion && !isCriOS && !isFxiOS;
+
+    setInApp(isKnownInApp || isIOSSafariLikeInApp);
   }, []);
 
   // Redirect to dashboard if already signed in
@@ -50,18 +61,20 @@ export default function LoginPage() {
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Open in Safari to sign in</CardTitle>
+            <CardTitle>Open in a browser to sign in</CardTitle>
             <CardDescription>
-              In-app browsers can block Google sign-in. Tap below to open Disc Golf Journey in Safari, then sign in.
+              In-app browsers can block Google sign-in. Tap below to open Disc Golf Journey in your browser, then sign in.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button
-              onClick={() => window.open(window.location.href, "_blank")}
+              onClick={() => {
+              window.location.href = "https://disc-golf-journey.web.app/login";
+            }}
               className="w-full"
               size="lg"
             >
-              Open in Safari
+              Open in Browser (Safari/Chrome)
             </Button>
             <Button
               variant="outline"
