@@ -16,25 +16,36 @@ export default function LoginPage() {
   const { user, loading, redirectSettling, redirectError, signInWithGoogle } = useAuth();
   const router = useRouter();
   const [inApp, setInApp] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     const ua = navigator.userAgent || "";
     const isIOS = /iPhone|iPad|iPod/i.test(ua);
 
-    const isCriOS = /CriOS/i.test(ua);   // Chrome on iOS
-    const isFxiOS = /FxiOS/i.test(ua);   // Firefox on iOS
-
-    const hasSafari = /Safari/i.test(ua);
-    const hasVersion = /Version\//i.test(ua); // Full Safari usually has Version/x.y
+    const isCriOS = /CriOS/i.test(ua); // Chrome iOS
+    const isFxiOS = /FxiOS/i.test(ua); // Firefox iOS
 
     const isKnownInApp =
       /Instagram|FBAN|FBAV|FBIOS|FB_IAB|Line|LinkedInApp|Twitter|TikTok/i.test(ua);
 
-    // iOS "in-app" browsers (Messages/SFSafariViewController) often look Safari-ish,
-    // but may not include Version/. This catches them.
-    const isIOSSafariLikeInApp = isIOS && hasSafari && !hasVersion && !isCriOS && !isFxiOS;
+    // Full Safari on iOS typically includes "Version/x" and "Safari"
+    const isFullSafari = isIOS && /Safari/i.test(ua) && /Version\//i.test(ua);
 
-    setInApp(isKnownInApp || isIOSSafariLikeInApp);
+    // iOS webviews / in-app browsers often expose window.webkit.messageHandlers
+    const hasIOSWebkitHandlers =
+      typeof window !== "undefined" &&
+      (window as any).webkit &&
+      (window as any).webkit.messageHandlers;
+
+    // Treat as in-app if:
+    // - it's a known in-app UA OR
+    // - it's iOS but NOT full Safari/Chrome/Firefox OR
+    // - it has iOS webkit messageHandlers (webview signal)
+    const isIOSSuspicious =
+      isIOS && !isFullSafari && !isCriOS && !isFxiOS;
+
+    setInApp(Boolean(isKnownInApp || hasIOSWebkitHandlers || isIOSSuspicious));
+    setIsIOS(isIOS);
   }, []);
 
   // Redirect to dashboard if already signed in
@@ -116,6 +127,20 @@ export default function LoginPage() {
           >
             Sign in with Google
           </Button>
+          {isIOS && (
+            <button
+              type="button"
+              className="mt-2 text-xs text-muted-foreground underline hover:text-foreground"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(window.location.href);
+                } catch {}
+                window.location.href = window.location.href;
+              }}
+            >
+              Having trouble? Open in Safari/Chrome
+            </button>
+          )}
         </CardContent>
       </Card>
     </div>

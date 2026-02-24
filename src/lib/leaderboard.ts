@@ -9,6 +9,7 @@ import {
   doc,
   getDoc,
   setDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { getPeriodKeys, getLegacyWeekKey } from "./points";
@@ -159,6 +160,29 @@ export async function getUserStats(uid: string) {
       updatedAt: new Date().toISOString(),
     };
   }
+}
+
+// Subscribe to user stats for live updates (rank/points)
+export function subscribeToUserStats(
+  uid: string,
+  onChange: (stats: { allTime: number }) => void
+): () => void {
+  const statsRef = doc(db, "users", uid, "stats", "points");
+  return onSnapshot(
+    statsRef,
+    (snap) => {
+      if (snap.exists()) {
+        const raw = snap.data() as any;
+        onChange({ allTime: Number(raw.allTime ?? 0) });
+      } else {
+        onChange({ allTime: 0 });
+      }
+    },
+    (err) => {
+      console.error("subscribeToUserStats error:", err);
+      onChange({ allTime: 0 });
+    }
+  );
 }
 
 // Development helper: Add sample leaderboard entries

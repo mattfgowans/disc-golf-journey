@@ -1,6 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
+type Handedness = "RHBH" | "RHFH" | "LHBH" | "LHFH";
+const HANDEDNESS_LABELS: Record<Handedness, string> = {
+  RHBH: "Right Hand Backhand",
+  RHFH: "Right Hand Forehand",
+  LHBH: "Left Hand Backhand",
+  LHFH: "Left Hand Forehand",
+};
+const HANDEDNESS_OPTIONS: Handedness[] = ["RHBH", "RHFH", "LHBH", "LHFH"];
+
+function isHandedness(v: unknown): v is Handedness {
+  return typeof v === "string" && HANDEDNESS_OPTIONS.includes(v as Handedness);
+}
+
+function deepClean<T extends Record<string, unknown>>(obj: T): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === undefined) continue;
+    if (v !== null && typeof v === "object" && !Array.isArray(v) && !(v instanceof Date)) {
+      const cleaned = deepClean(v as Record<string, unknown>);
+      if (Object.keys(cleaned).length > 0) out[k] = cleaned;
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +36,7 @@ import { useUserDoc } from "@/lib/useUserDoc";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Loader2, Edit2, Save, X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { doc, setDoc, getDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/firebase-auth";
@@ -16,7 +44,7 @@ import { getUserStats } from "@/lib/leaderboard";
 import { getRankAndPrestige, PRESTIGE_STEP_POINTS } from "@/lib/ranks";
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { userData: profile, loading: profileLoading } = useUserDoc();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Record<string, any>>({});
@@ -25,11 +53,12 @@ export default function ProfilePage() {
   const updateProfile = async (updates: Record<string, any>) => {
     if (!user) throw new Error("Not authenticated");
 
+    const cleanedUpdates = deepClean(updates) as Record<string, any>;
     const userRef = doc(db, "users", user.uid);
 
     // If username is being updated, check availability and sync usernames + publicProfiles
-    if (updates.username && updates.username !== (profile?.username ?? profile?.profile?.username)) {
-      const normalizedUsername = updates.username.trim().toLowerCase().replace(/^@/, "");
+    if (cleanedUpdates.username && cleanedUpdates.username !== (profile?.username ?? profile?.profile?.username)) {
+      const normalizedUsername = cleanedUpdates.username.trim().toLowerCase().replace(/^@/, "");
       const oldUsername = (profile?.username ?? profile?.profile?.username ?? "").toString().trim().toLowerCase().replace(/^@/, "");
       const usernameRef = doc(db, "usernames", normalizedUsername);
       const usernameSnap = await getDoc(usernameRef);
@@ -54,14 +83,14 @@ export default function ProfilePage() {
         updatedAt: serverTimestamp()
       }, { merge: true });
 
-      updates.username = normalizedUsername;
-      updates.profile = { ...updates.profile, username: normalizedUsername };
+      cleanedUpdates.username = normalizedUsername;
+      cleanedUpdates.profile = { ...(cleanedUpdates.profile ?? {}), username: normalizedUsername };
     }
 
-    await setDoc(userRef, updates, { merge: true });
+    await setDoc(userRef, cleanedUpdates, { merge: true });
 
     // Keep publicProfiles in sync (username and photoURL)
-    const currentUsername = (updates.username ?? profile?.username ?? profile?.profile?.username ?? "").toString().trim().toLowerCase().replace(/^@/, "");
+    const currentUsername = (cleanedUpdates.username ?? profile?.username ?? profile?.profile?.username ?? "").toString().trim().toLowerCase().replace(/^@/, "");
     const photoURL = updates.profile?.photoURL ?? profile?.profile?.photoURL ?? profile?.photoURL ?? null;
     if (currentUsername) {
       await setDoc(doc(db, "publicProfiles", user.uid), {
@@ -78,7 +107,8 @@ export default function ProfilePage() {
     if (profile) {
       setEditForm({
         ...profile,
-        username: profile.username ?? "", // Ensure username is always a string
+        username: profile.username ?? "",
+        handedness: isHandedness(profile.handedness) ? profile.handedness : "",
       });
     }
   }, [profile]);
@@ -121,6 +151,8 @@ export default function ProfilePage() {
       ) : (
         <ProfileContent
           profile={profile}
+          user={user}
+          signOut={signOut}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           editForm={editForm}
@@ -136,6 +168,8 @@ export default function ProfilePage() {
 
 function ProfileContent({
   profile,
+  user,
+  signOut,
   isEditing,
   setIsEditing,
   editForm,
@@ -145,6 +179,8 @@ function ProfileContent({
   prestigeStep,
 }: {
   profile: Record<string, any>;
+  user: { displayName?: string | null; email?: string | null } | null;
+  signOut: () => Promise<void>;
   isEditing: boolean;
   setIsEditing: (editing: boolean) => void;
   editForm: Record<string, any>;
@@ -153,15 +189,23 @@ function ProfileContent({
   rankPrestige: ReturnType<typeof getRankAndPrestige>;
   prestigeStep: number;
 }) {
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     try {
-      await updateProfile({
-        displayName: editForm.displayName ?? profile.displayName,
-        bio: editForm.bio ?? "",
-        homeCourse: editForm.homeCourse ?? "",
-        handedness: editForm.handedness ?? "RHBH",
-        username: editForm.username ?? "",
-      });
+      const displayNameVal = (editForm.displayName ?? profile.displayName ?? "").toString().trim();
+      const payload: Record<string, unknown> = {
+        bio: (editForm.bio ?? "").toString(),
+        homeCourse: (editForm.homeCourse ?? "").toString(),
+        username: (editForm.username ?? "").toString(),
+      };
+      if (displayNameVal) payload.displayName = displayNameVal;
+      if (isHandedness(editForm.handedness)) payload.handedness = editForm.handedness;
+
+      await updateProfile(payload as Record<string, any>);
       setIsEditing(false);
     } catch (error: any) {
       console.error("Failed to update profile:", error);
@@ -170,11 +214,17 @@ function ProfileContent({
       } else {
         alert("Failed to update profile. Please try again.");
       }
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleCancel = () => {
-    setEditForm(profile);
+    setEditForm({
+      ...profile,
+      username: profile.username ?? "",
+      handedness: isHandedness(profile.handedness) ? profile.handedness : "",
+    });
     setIsEditing(false);
   };
 
@@ -237,8 +287,12 @@ function ProfileContent({
               </Button>
             ) : (
               <div className="flex gap-2">
-                <Button onClick={handleSave}>
-                  <Save className="w-4 h-4 mr-2" />
+                <Button onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
                   Save
                 </Button>
                 <Button onClick={handleCancel} variant="outline">
@@ -308,26 +362,46 @@ function ProfileContent({
               {isEditing ? (
                 <select
                   id="handedness"
-                  value={editForm.handedness || "RHBH"}
+                  value={editForm.handedness ?? ""}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                    setEditForm(prev => ({ ...prev, handedness: e.target.value as string }))
+                    setEditForm(prev => ({ ...prev, handedness: e.target.value }))
                   }
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <option value="RHBH">Right Hand Backhand</option>
-                  <option value="RHFH">Right Hand Forehand</option>
-                  <option value="LHBH">Left Hand Backhand</option>
-                  <option value="LHFH">Left Hand Forehand</option>
+                  <option value="" disabled>Select handedness…</option>
+                  {HANDEDNESS_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{HANDEDNESS_LABELS[opt]}</option>
+                  ))}
                 </select>
               ) : (
                 <p className="mt-1 text-sm">
-                  {profile.handedness === "RHBH" ? "Right Hand Backhand" :
-                   profile.handedness === "RHFH" ? "Right Hand Forehand" :
-                   profile.handedness === "LHBH" ? "Left Hand Backhand" :
-                   "Left Hand Forehand"}
+                  {isHandedness(profile.handedness) ? HANDEDNESS_LABELS[profile.handedness] : "Not set"}
                 </p>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Account */}
+        <div className="rounded-xl border border-border bg-muted/30 p-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">Account</h3>
+          <div className="space-y-3">
+            <div className="text-sm">
+              <div className="font-medium">{user?.displayName ?? profile.displayName ?? "—"}</div>
+              {user?.email && (
+                <div className="text-muted-foreground truncate">{user.email}</div>
+              )}
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={async () => {
+                await signOut();
+                router.push("/");
+              }}
+            >
+              Sign out
+            </Button>
           </div>
         </div>
       </div>
