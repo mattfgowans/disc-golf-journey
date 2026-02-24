@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAchievements, type Achievement, type Achievements } from "@/lib/useAchievements";
 import { Button } from "@/components/ui/button";
@@ -8,15 +9,14 @@ import { ACHIEVEMENTS_CATALOG, getActiveTierAchievements, isTieredCategoryId } f
 import { getCurrentYear, isAchievementCompleted, isGatedVisible } from "@/lib/achievementProgress";
 import { StatsHeader } from "@/components/dashboard/stats-header";
 import { AchievementSection } from "@/components/dashboard/achievement-section";
-import { QuickLogSheet } from "@/components/dashboard/quick-log-sheet";
 import { auth } from "@/lib/firebase";
-import { getUserStats } from "@/lib/leaderboard";
+import { subscribeToUserStats } from "@/lib/leaderboard";
 import { getRankAndPrestige } from "@/lib/ranks";
 import { computeTabPointTotals } from "@/lib/points";
 import { getTabMastery } from "@/lib/mastery";
 import { isAchievementDisabled } from "@/lib/disabledAchievements";
-import { Plus } from "lucide-react";
 import confetti from "canvas-confetti";
+import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 
@@ -149,23 +149,20 @@ function TabTriggerWithFill({
   label,
   percent,
   isActive,
-  eligibleThreshold = 80,
 }: {
   value: string;
   label: string;
   percent: number;
   isActive: boolean;
-  eligibleThreshold?: number;
 }) {
   const colorClass = getProgressColorClass(percent, isActive);
   const clampedPercent = Math.min(100, Math.max(0, percent));
   const fillRounding = getFillRounding(clampedPercent);
-  const eligible = clampedPercent >= eligibleThreshold;
 
   return (
     <TabsTrigger
       value={value}
-      className="relative min-w-[112px] overflow-hidden rounded-full ring-1 ring-inset ring-muted-foreground/20 bg-muted/40 py-1 data-[state=active]:ring-2 data-[state=active]:ring-inset data-[state=active]:ring-blue-500/50 focus-visible:ring-2 focus-visible:ring-blue-400/60 focus-visible:ring-offset-2"
+      className="relative flex-1 min-w-0 overflow-hidden rounded-full ring-1 ring-inset ring-muted-foreground/20 bg-muted/40 py-1 text-xs sm:text-sm data-[state=active]:ring-2 data-[state=active]:ring-inset data-[state=active]:ring-blue-500/50 data-[state=active]:font-semibold focus-visible:ring-2 focus-visible:ring-blue-400/60 focus-visible:ring-offset-2 whitespace-nowrap transition-colors duration-200"
     >
       {/* Progress fill layer */}
       <div
@@ -174,19 +171,9 @@ function TabTriggerWithFill({
       />
 
       {/* Text layer on top */}
-      <div className="relative z-10 flex min-w-0 items-center justify-between w-full px-1 gap-1">
-        <span className="whitespace-nowrap data-[state=active]:font-semibold shrink-0">{label}</span>
-        <div className="flex shrink-0 items-center gap-1 min-w-0">
-          {eligible && (
-            <span
-              className="text-[10px] font-medium opacity-70 text-muted-foreground"
-              title="Eligible when this tab reaches 80% completion."
-            >
-              Eligible
-            </span>
-          )}
-          <span className="text-[11px] opacity-80 tabular-nums">{Math.round(clampedPercent)}%</span>
-        </div>
+      <div className="relative z-10 flex min-w-0 items-center justify-between w-full px-2 gap-2">
+        <span className="whitespace-nowrap shrink-0">{label}</span>
+        <span className="text-[11px] opacity-80 tabular-nums shrink-0">{Math.round(clampedPercent)}%</span>
       </div>
     </TabsTrigger>
   );
@@ -210,10 +197,18 @@ function DashboardInner() {
 
   const uid = auth.currentUser?.uid ?? "(no user)";
 
+  const router = useRouter();
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
-  const [quickLogOpen, setQuickLogOpen] = useState(false);
   const [userStats, setUserStats] = useState<{ allTime: number } | null>(null);
+  const [patchCtaDismissed, setPatchCtaDismissed] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    const set = new Set<string>();
+    for (const t of ["skill", "social", "collection"]) {
+      if (localStorage.getItem("dgjauth_patch_cta_dismissed_" + t) === "1") set.add(t);
+    }
+    return set;
+  });
   const [recentlyRevealedIds, setRecentlyRevealedIds] = useState<Set<string>>(new Set());
   const [revealPulseParentIds, setRevealPulseParentIds] = useState<Set<string>>(new Set());
   const [secretModalOpen, setSecretModalOpen] = useState(false);
@@ -284,19 +279,13 @@ function DashboardInner() {
     }
   }, [activeTab]);
 
-  // Fetch Firestore stats (allTime) for rank/prestige
+  // Subscribe to Firestore stats (allTime) for live rank/prestige updates
   useEffect(() => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
-    let cancelled = false;
-    getUserStats(uid)
-      .then((s) => {
-        if (!cancelled) setUserStats({ allTime: s.allTime });
-      })
-      .catch(() => {
-        if (!cancelled) setUserStats({ allTime: 0 });
-      });
-    return () => { cancelled = true; };
+    if (!auth.currentUser?.uid) return;
+    const unsub = subscribeToUserStats(auth.currentUser.uid, (s) =>
+      setUserStats({ allTime: s.allTime })
+    );
+    return () => unsub?.();
   }, [auth.currentUser?.uid]);
 
   // Use achievements from Firebase, or fallback to catalog if not loaded yet
@@ -543,7 +532,11 @@ function DashboardInner() {
   const nextRankTier = next
     ? { name: next.name, minPoints: next.min, color: RANK_COLORS[next.key] ?? "from-gray-400 to-gray-600" }
     : null;
-  const rankProgressPct = Math.round(rp.progress.ratio * 100);
+  const raw = rp.progress.ratio * 100;
+  const rankProgressPct =
+    rp.progress.pointsToNext > 0
+      ? Math.min(99, Math.floor(raw))
+      : Math.round(raw);
 
   // Calculate daily streak (simplified - counts unique completion days; excludes disabled)
   const getCurrentStreak = () => {
@@ -570,9 +563,16 @@ function DashboardInner() {
     activeTab === "skill" ? skillCompletion :
     activeTab === "social" ? socialCompletion :
     collectionCompletion;
+  const eligibleNow = activeCompletion >= 80;
+  const patchCtaDismissedForTab = patchCtaDismissed.has(activeTab);
+  const showPatchPromo = eligibleNow && !patchCtaDismissedForTab;
+  const handlePatchCtaDismiss = () => {
+    localStorage.setItem("dgjauth_patch_cta_dismissed_" + activeTab, "1");
+    setPatchCtaDismissed((prev) => new Set(prev).add(activeTab));
+  };
 
   return (
-    <div className="container mx-auto py-4 -mt-8 pb-24" data-gramm="false">
+    <div className="w-full" data-gramm="false">
       <Dialog
         open={secretModalOpen}
         onOpenChange={(open) => {
@@ -601,12 +601,40 @@ function DashboardInner() {
       </Dialog>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="sticky top-16 z-50 bg-background border-b">
-          <TabsList className="grid w-full grid-cols-3 gap-2 rounded-full bg-muted/30 p-0.5">
-            <TabTriggerWithFill value="skill" label="Skill" percent={skillCompletion} isActive={activeTab === "skill"} eligibleThreshold={80} />
-            <TabTriggerWithFill value="social" label="Social" percent={socialCompletion} isActive={activeTab === "social"} eligibleThreshold={80} />
-            <TabTriggerWithFill value="collection" label="Collection" percent={collectionCompletion} isActive={activeTab === "collection"} eligibleThreshold={80} />
+        <div id="dg-tabsbar" className="sticky top-[var(--dg-navbar-h,60px)] z-40 pt-2 pb-3 bg-background border-b shadow-[0_1px_0_rgba(0,0,0,0.06)] px-3 sm:px-4 min-w-0">
+          <TabsList className="flex w-full gap-1.5 sm:gap-0 sm:-space-x-px rounded-full bg-muted/30 p-0.5 min-w-0 overflow-hidden flex-wrap sm:flex-nowrap">
+            <TabTriggerWithFill value="skill" label="Skill" percent={skillCompletion} isActive={activeTab === "skill"} />
+            <TabTriggerWithFill value="social" label="Social" percent={socialCompletion} isActive={activeTab === "social"} />
+            <TabTriggerWithFill value="collection" label="Collection" percent={collectionCompletion} isActive={activeTab === "collection"} />
           </TabsList>
+          {showPatchPromo && (
+            <div className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-muted/50 px-3 py-2">
+              <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-medium text-foreground/80">
+                Patch unlocked
+              </span>
+              <span className="flex-1 min-w-0 truncate text-xs text-muted-foreground">
+                You&apos;re eligible to purchase the {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} patch.
+              </span>
+              <div className="flex items-center gap-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => router.push("/patches?category=" + activeTab)}
+                >
+                  View
+                </Button>
+                <button
+                  type="button"
+                  onClick={handlePatchCtaDismiss}
+                  className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                  aria-label="Dismiss"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {showDevTools && (
@@ -772,13 +800,6 @@ function DashboardInner() {
           </div>
         </TabsContent>
       </Tabs>
-      <QuickLogSheet
-        open={quickLogOpen}
-        onOpenChange={setQuickLogOpen}
-        achievements={achievementsForUI}
-        onToggle={toggleAchievement}
-        defaultCategory={activeTab as keyof Achievements}
-      />
       {tierUpMessage && (
         <div
           className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[120] px-4 py-2 rounded-lg bg-foreground text-background text-sm shadow-lg animate-in fade-in duration-200"
@@ -788,14 +809,6 @@ function DashboardInner() {
           {tierUpMessage}
         </div>
       )}
-      <Button
-        size="icon"
-        className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg z-50"
-        onClick={() => setQuickLogOpen(true)}
-        aria-label="Quick log"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
     </div>
   );
 }

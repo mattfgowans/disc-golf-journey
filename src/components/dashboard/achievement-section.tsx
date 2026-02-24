@@ -19,37 +19,42 @@ type TierHeaderInfo = {
 
 const TIER_ACCENT: Record<
   string,
-  { accentBg: string; accentBorder: string; badge: string; pill: string }
+  { accentBg: string; accentBorder: string; badge: string; pill: string; ring: string }
 > = {
   beginner: {
     accentBg: "bg-emerald-500",
     accentBorder: "border-emerald-400/60",
     badge: "bg-emerald-500/15 text-emerald-100 border border-emerald-300/30",
     pill: "border border-emerald-300/30 text-emerald-100 bg-white/5",
+    ring: "ring-emerald-500/20",
   },
   intermediate: {
     accentBg: "bg-sky-500",
     accentBorder: "border-sky-400/60",
     badge: "bg-sky-500/15 text-sky-100 border border-sky-300/30",
     pill: "border border-sky-300/30 text-sky-100 bg-white/5",
+    ring: "ring-sky-500/20",
   },
   advanced: {
     accentBg: "bg-amber-500",
     accentBorder: "border-amber-400/60",
     badge: "bg-amber-500/15 text-amber-100 border border-amber-300/30",
     pill: "border border-amber-300/30 text-amber-100 bg-white/5",
+    ring: "ring-amber-500/20",
   },
   expert: {
     accentBg: "bg-violet-500",
     accentBorder: "border-violet-400/60",
     badge: "bg-violet-500/15 text-violet-100 border border-violet-300/30",
     pill: "border border-violet-300/30 text-violet-100 bg-white/5",
+    ring: "ring-violet-500/20",
   },
 };
 
 // Neutral grayscale background for tiered headers (Option 3). Keep accents colored by tier.
+// Use solid opacity to avoid translucency when sticky (no backdrop-blur).
 const TIERED_NEUTRAL_BG =
-  "bg-gradient-to-br from-slate-500/60 to-slate-400/40 backdrop-blur";
+  "bg-gradient-to-br from-slate-500 to-slate-400";
 
 interface AchievementSectionProps {
   category: keyof Achievements;
@@ -143,10 +148,18 @@ export function AchievementSection({
 
   return (
     <Collapsible open={isOpen}>
-      <div className={cn("sticky top-24 md:top-20 z-40 shadow-sm", headerClassName)}>
+      <div
+        className={cn(
+          "sticky top-[calc(var(--dg-sticky-offset,120px)-3px)] z-30 w-full isolate rounded-2xl transition-shadow duration-200 ring-1 ring-black/5 bg-background",
+          isOpen ? "shadow-[0_6px_18px_rgba(0,0,0,0.12)]" : "shadow-[0_2px_10px_rgba(0,0,0,0.08)]",
+          theme ? `ring-2 ${theme.ring}` : headerVariant === "aces" ? "ring-2 ring-fuchsia-500/20" : "ring-2 ring-emerald-500/20",
+          headerClassName
+        )}
+      >
+        <div className="absolute inset-0 bg-background z-0" aria-hidden="true" />
         <div
           className={cn(
-            "relative overflow-hidden rounded-2xl border-b",
+            "relative z-10 overflow-hidden rounded-2xl border-b",
             theme
               ? cn(TIERED_NEUTRAL_BG, theme.accentBorder)
               : headerVariant === "aces"
@@ -160,7 +173,7 @@ export function AchievementSection({
           {theme && (
             <div
               className={cn(
-                "pointer-events-none absolute left-0 top-0 h-full w-1.5 rounded-l-2xl z-20",
+                "pointer-events-none absolute left-0 top-0 h-full w-[6px] rounded-l-2xl z-20",
                 theme.accentBg
               )}
             />
@@ -168,7 +181,7 @@ export function AchievementSection({
           <button
             type="button"
             onClick={onToggle}
-            className="flex items-center justify-between w-full p-4 rounded-lg transition-colors cursor-pointer relative z-10"
+            className="flex items-center justify-between w-full p-4 rounded-lg transition-transform duration-100 active:scale-[0.99] active:opacity-95 cursor-pointer relative z-10"
             style={{ outline: "none", border: "none", background: "none" }}
           >
             {/* Left: title (+ optional tier badge) */}
@@ -210,7 +223,7 @@ export function AchievementSection({
           </button>
         </div>
       </div>
-      <CollapsibleContent>
+      <CollapsibleContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
         <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-3">
           {achievements.map((achievement) => {
             if (!isGatedVisible(achievement as any, effectiveById as any)) return null;

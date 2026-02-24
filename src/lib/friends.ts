@@ -1,4 +1,4 @@
-import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, writeBatch, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, writeBatch, runTransaction, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 
 // Helper to remove undefined and null values from objects before writing to Firestore
@@ -39,7 +39,7 @@ export async function sendFriendRequest(currentUid: string, targetUid: string, t
   const currentUserData = currentUserDoc.data();
 
   // Normalize and validate usernames
-  const fromUsername = normalizeUsername(currentUserData?.profile?.username);
+  const fromUsername = normalizeUsername(currentUserData?.username ?? currentUserData?.profile?.username);
   const toUsername = normalizeUsername(targetUsername);
 
   if (!fromUsername) {
@@ -68,9 +68,15 @@ export async function sendFriendRequest(currentUid: string, targetUid: string, t
     throw new Error("This user already sent you a friend request. Go accept it in Notifications.");
   }
 
-  // Extract display fields from current user's profile
-  const fromDisplayName = currentUserData?.profile?.displayName ?? null;
-  const fromPhotoURL = currentUserData?.profile?.photoURL ?? null;
+  // Extract display fields (root-level from auth bootstrap, fallback to profile)
+  const fromDisplayNameRaw = currentUserData?.displayName ?? currentUserData?.profile?.displayName;
+  const fromDisplayName =
+    fromDisplayNameRaw && String(fromDisplayNameRaw).trim()
+      ? fromDisplayNameRaw
+      : fromUsername
+        ? `@${fromUsername}`
+        : "Friend";
+  const fromPhotoURL = currentUserData?.photoURL ?? currentUserData?.profile?.photoURL ?? null;
 
   // Build payload once
   const payload = cleanFirestoreData({
@@ -119,56 +125,73 @@ export async function sendFriendRequest(currentUid: string, targetUid: string, t
 // Accept an incoming friend request (idempotent: already friends => success)
 export async function acceptFriendRequest(currentUid: string, fromUid: string): Promise<void> {
   try {
-    // Read current user's user doc
-    const currentUserDoc = await getDoc(doc(db, "users", currentUid));
-    const currentUserData = currentUserDoc.data();
+    await runTransaction(db, async (transaction) => {
+      // A) Incoming request
+      const reqInRef = doc(db, "users", currentUid, "friendRequestsIn", fromUid);
+      // B) Outgoing request (sender's side)
+      const reqOutRef = doc(db, "users", fromUid, "friendRequestsOut", currentUid);
+      // C) Existing friend doc (for idempotency)
+      const friendRef = doc(db, "users", currentUid, "friends", fromUid);
 
-    // Read the incoming request doc and existing friend doc
-    const reqDoc = await getDoc(doc(db, "users", currentUid, "friendRequestsIn", fromUid));
-    const friendDoc = await getDoc(doc(db, "users", currentUid, "friends", fromUid));
+      const [reqInSnap, reqOutSnap, friendSnap] = await Promise.all([
+        transaction.get(reqInRef),
+        transaction.get(reqOutRef),
+        transaction.get(friendRef),
+      ]);
 
-    // Idempotent: if request is gone but we're already friends, treat as success
-    if (!reqDoc.exists()) {
-      if (friendDoc.exists()) return;
-      throw new Error("Friend request no longer exists.");
-    }
+      const reqInExists = reqInSnap.exists();
+      const reqOutExists = reqOutSnap.exists();
 
-    const req = reqDoc.data();
-    const currentUsername = normalizeUsername(currentUserData?.profile?.username);
+      // If either request missing: idempotent if already friends, else throw
+      if (!reqInExists || !reqOutExists) {
+        if (friendSnap.exists()) return;
+        throw new Error("Friend request no longer exists.");
+      }
 
-    const batch = writeBatch(db);
+      const req = reqInSnap.data()!;
 
-    // 1. Create friend document for current user (using request data: displayName, photoURL, username)
-    const friendDisplayName =
-      req.fromDisplayName != null && req.fromDisplayName !== ""
-        ? req.fromDisplayName
-        : req.fromUsername
-          ? `@${req.fromUsername}`
-          : "Friend";
-    batch.set(doc(db, "users", currentUid, "friends", fromUid), cleanFirestoreData({
-      uid: fromUid,
-      displayName: friendDisplayName,
-      username: normalizeUsername(req.fromUsername),
-      photoURL: req.fromPhotoURL ?? undefined,
-      createdAt: serverTimestamp(),
-    }));
+      // Read current user doc for building friend doc for sender
+      const currentUserDoc = await transaction.get(doc(db, "users", currentUid));
+      const currentUserData = currentUserDoc.data();
 
-    // 2. Create friend document for sender (using current user's data)
-    batch.set(doc(db, "users", fromUid, "friends", currentUid), cleanFirestoreData({
-      uid: currentUid,
-      displayName: currentUserData?.profile?.displayName || "Unknown User",
-      username: currentUsername,
-      photoURL: currentUserData?.profile?.photoURL,
-      createdAt: serverTimestamp(),
-    }));
+      const currentUsername = normalizeUsername(currentUserData?.username ?? currentUserData?.profile?.username);
+      const currentDisplayNameRaw = currentUserData?.displayName ?? currentUserData?.profile?.displayName;
+      const currentDisplayName =
+        currentDisplayNameRaw && String(currentDisplayNameRaw).trim()
+          ? currentDisplayNameRaw
+          : currentUsername
+            ? `@${currentUsername}`
+            : "Friend";
+      const currentPhotoURL = currentUserData?.photoURL ?? currentUserData?.profile?.photoURL;
 
-    // 3. Delete incoming request from current user
-    batch.delete(doc(db, "users", currentUid, "friendRequestsIn", fromUid));
+      // 1. Create friend document for current user (using request data)
+      const friendDisplayName =
+        req.fromDisplayName != null && req.fromDisplayName !== ""
+          ? req.fromDisplayName
+          : req.fromUsername
+            ? `@${req.fromUsername}`
+            : "Friend";
+      transaction.set(doc(db, "users", currentUid, "friends", fromUid), cleanFirestoreData({
+        uid: fromUid,
+        displayName: friendDisplayName,
+        username: normalizeUsername(req.fromUsername),
+        photoURL: req.fromPhotoURL ?? undefined,
+        createdAt: serverTimestamp(),
+      }));
 
-    // 4. Delete outgoing request from the other user
-    batch.delete(doc(db, "users", fromUid, "friendRequestsOut", currentUid));
+      // 2. Create friend document for sender (using current user's data)
+      transaction.set(doc(db, "users", fromUid, "friends", currentUid), cleanFirestoreData({
+        uid: currentUid,
+        displayName: currentDisplayName,
+        username: currentUsername,
+        photoURL: currentPhotoURL ?? undefined,
+        createdAt: serverTimestamp(),
+      }));
 
-    await batch.commit();
+      // 3. Delete both request docs
+      transaction.delete(reqInRef);
+      transaction.delete(reqOutRef);
+    });
   } catch (error) {
     console.error("acceptFriendRequest failed", error);
     throw error;

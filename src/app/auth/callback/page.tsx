@@ -16,7 +16,34 @@ function AuthCallbackContent() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [inApp, setInApp] = useState(false);
   const ranRef = useRef(false);
+
+  const loginUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/login`
+      : "https://disc-golf-journey.web.app/login";
+
+  useEffect(() => {
+    const ua = navigator.userAgent || "";
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isCriOS = /CriOS/i.test(ua);
+    const isFxiOS = /FxiOS/i.test(ua);
+
+    const isKnownInApp =
+      /Instagram|FBAN|FBAV|FBIOS|FB_IAB|Line|LinkedInApp|Twitter|TikTok/i.test(ua);
+
+    const isFullSafari = isIOS && /Safari/i.test(ua) && /Version\//i.test(ua);
+
+    const hasIOSWebkitHandlers =
+      typeof window !== "undefined" &&
+      (window as any).webkit &&
+      (window as any).webkit.messageHandlers;
+
+    const isIOSSuspicious = isIOS && !isFullSafari && !isCriOS && !isFxiOS;
+
+    setInApp(Boolean(isKnownInApp || hasIOSWebkitHandlers || isIOSSuspicious));
+  }, []);
 
   useEffect(() => {
     if (ranRef.current) return;
@@ -44,6 +71,10 @@ function AuthCallbackContent() {
         setStatus("success");
         router.replace(returnTo);
       } else {
+        try {
+          sessionStorage.removeItem("dgjauth_processing");
+          sessionStorage.removeItem("dgjauth_redirect_started_at");
+        } catch {}
         setStatus("error");
         setError(
           "No redirect result. This usually means the redirect URI did not match or storage was blocked (e.g. Private Browsing)."
@@ -58,6 +89,32 @@ function AuthCallbackContent() {
         <p className="max-w-md text-center text-sm font-medium text-red-600">
           {error}
         </p>
+        {inApp && (
+          <div className="flex w-full max-w-xs flex-col gap-2">
+            <Button
+              onClick={() => {
+                window.location.href = loginUrl;
+              }}
+              className="w-full"
+            >
+              Open in browser to sign in
+            </Button>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(loginUrl);
+                } catch {
+                  // Fallback for iOS/in-app browsers where clipboard is blocked
+                  window.prompt("Copy this link:", loginUrl);
+                }
+              }}
+              className="w-full"
+            >
+              Copy link
+            </Button>
+          </div>
+        )}
         <Button onClick={() => router.replace("/login")}>Back to login</Button>
       </div>
     );

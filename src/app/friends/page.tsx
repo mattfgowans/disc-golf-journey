@@ -7,56 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Users, UserPlus } from "lucide-react";
-import {
-  getFriends,
-  getIncomingFriendRequests,
-  getOutgoingFriendRequests,
-  sendFriendRequest,
-  acceptFriendRequest,
-  cancelFriendRequest,
-  rejectFriendRequest,
-  removeFriend,
-} from "@/lib/friends";
 import type { Friend, FriendRequest } from "@/lib/friends";
-import { resolveUsernameToUid } from "@/lib/usernames";
+import { useFriends } from "@/lib/useFriends";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { useAuth } from "@/lib/firebase-auth";
 
 function FriendsSection({ currentUserId }: { currentUserId: string }) {
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
-  const [outgoingRequests, setOutgoingRequests] = useState<FriendRequest[]>([]);
+  const { friends, incomingRequests, outgoingRequests, isLoading, error: hookError, actions } = useFriends(
+    currentUserId || null
+  );
   const [friendUid, setFriendUid] = useState("");
-  const [loading, setLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [unfriendingFriend, setUnfriendingFriend] = useState<string | null>(null);
   const [busyRequestId, setBusyRequestId] = useState<string | null>(null);
-
-  const loadFriendsData = async () => {
-    try {
-      const [friendsData, incomingRequestsData, outgoingRequestsData] = await Promise.all([
-        getFriends(currentUserId),
-        getIncomingFriendRequests(currentUserId),
-        getOutgoingFriendRequests(currentUserId),
-      ]);
-      setFriends(friendsData);
-      setIncomingRequests(incomingRequestsData);
-      setOutgoingRequests(outgoingRequestsData);
-    } catch (error) {
-      console.error("Error loading friends data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!currentUserId) return;
-    loadFriendsData();
-  }, [currentUserId]);
 
   // Clear messages when input changes
   useEffect(() => {
@@ -65,6 +31,18 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
       setSuccessMessage("");
     }
   }, [friendUid]);
+
+  const typed = friendUid.trim().replace(/^@/, "").toLowerCase();
+  const outgoingMatch = outgoingRequests.some(
+    (r) => (r.toUsername ?? "").replace(/^@/, "").trim().toLowerCase() === typed
+  );
+  const friendMatch = friends.some(
+    (f) => (f.username ?? "").replace(/^@/, "").trim().toLowerCase() === typed
+  );
+  const incomingMatch = incomingRequests.some(
+    (r) => (r.fromUsername ?? "").replace(/^@/, "").trim().toLowerCase() === typed
+  );
+  const disableSend = isSending || !typed || outgoingMatch || friendMatch || incomingMatch;
 
   const handleSendRequest = async () => {
     if (!friendUid.trim()) return;
@@ -76,56 +54,26 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
     try {
       // Normalize input: allow "@username" or "username"
       const raw = friendUid.trim();
-      const normalized = raw.startsWith("@") ? raw.slice(1) : raw;
+      const normalized = (raw.startsWith("@") ? raw.slice(1) : raw).toLowerCase();
 
-      console.log("Resolving username:", normalized);
-
-      // Resolve username to UID
-      let targetUid;
-      try {
-        targetUid = await resolveUsernameToUid(normalized);
-      } catch (e) {
-        console.error("FAILED resolveUsernameToUid", e);
-        throw e;
-      }
-
-      if (!targetUid) {
-        setErrorMessage("User not found. Please check the username.");
-        return;
-      }
-
-      if (targetUid === currentUserId) {
-        setErrorMessage("You can't add yourself as a friend.");
-        return;
-      }
-
-      console.log("Resolved UID:", targetUid, "Now sending request...");
-
-      try {
-        await sendFriendRequest(currentUserId, targetUid, normalized);
-      } catch (e) {
-        console.error("FAILED sendFriendRequest", e);
-        throw e;
-      }
-
-      await loadFriendsData(); // Refresh friends/incoming/outgoing lists
+      await actions.sendByUsername(normalized);
       setFriendUid("");
       setSuccessMessage("Friend request sent!");
     } catch (error) {
       console.error("Error sending friend request:", error);
 
       // Handle specific friend request errors with user-friendly messages
-      const errorMessage = (error as any)?.message || "";
-      if (errorMessage === "You're already friends with this user.") {
+      const msg = (error as any)?.message || "";
+      if (msg === "You're already friends with this user.") {
         setErrorMessage("You're already friends with this user.");
-      } else if (errorMessage === "You already sent a friend request to this user.") {
+      } else if (msg === "You already sent a friend request to this user.") {
         setErrorMessage("You already sent a friend request to this user.");
-      } else if (errorMessage.includes("already sent you a friend request")) {
-        setErrorMessage("They already sent you a request — check Notifications to accept it.");
-      } else if (errorMessage.toLowerCase().includes("permission")) {
+      } else if (msg.includes("already sent you a friend request")) {
+        setErrorMessage("They already sent you a request — check Incoming Requests below to accept it.");
+      } else if (msg.toLowerCase().includes("permission")) {
         setErrorMessage("Permissions error. Please try again after refresh.");
-      } else if (errorMessage) {
-        setErrorMessage(errorMessage);
+      } else if (msg) {
+        setErrorMessage(msg);
       } else {
         setErrorMessage("Failed to send friend request. Please try again.");
       }
@@ -140,8 +88,7 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
     setSuccessMessage("");
 
     try {
-      await acceptFriendRequest(currentUserId, fromUid);
-      await loadFriendsData();
+      await actions.accept(fromUid);
       setSuccessMessage("Friend request accepted.");
     } catch (error) {
       console.error("Error accepting friend request:", error);
@@ -161,8 +108,7 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
     setSuccessMessage("");
 
     try {
-      await rejectFriendRequest(currentUserId, request.fromUid);
-      await loadFriendsData(); // Refresh friends/incoming/outgoing lists
+      await actions.reject(request.fromUid);
       setSuccessMessage("Friend request rejected.");
     } catch (error) {
       console.error("Error rejecting friend request:", error);
@@ -182,8 +128,7 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
     setSuccessMessage("");
 
     try {
-      await cancelFriendRequest(currentUserId, request.toUid);
-      await loadFriendsData(); // Refresh friends/incoming/outgoing lists
+      await actions.cancel(request.toUid);
       setSuccessMessage("Friend request canceled.");
     } catch (error) {
       console.error("Error canceling friend request:", error);
@@ -205,8 +150,7 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
     setSuccessMessage("");
 
     try {
-      await removeFriend(currentUserId, friend.uid);
-      await loadFriendsData(); // Refresh friends/incoming/outgoing lists
+      await actions.unfriend(friend.uid);
       setSuccessMessage("Unfriended.");
     } catch (error) {
       console.error("Error unfriending:", error);
@@ -216,7 +160,7 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -242,6 +186,9 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {hookError && (
+          <p className="text-sm text-destructive">{hookError}</p>
+        )}
         {/* Send Friend Request */}
         <div className="space-y-2">
           <Label htmlFor="friend-uid">Send Friend Request</Label>
@@ -253,10 +200,19 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
               onChange={(e) => setFriendUid(e.target.value)}
               disabled={isSending}
             />
-            <Button onClick={handleSendRequest} size="sm" disabled={isSending}>
+            <Button onClick={handleSendRequest} size="sm" disabled={disableSend}>
               {isSending ? "Sending..." : <UserPlus className="h-4 w-4" />}
             </Button>
           </div>
+          {friendMatch && typed && (
+            <p className="text-sm text-muted-foreground">You&apos;re already friends with this user.</p>
+          )}
+          {outgoingMatch && typed && !friendMatch && (
+            <p className="text-sm text-muted-foreground">Friend request already sent.</p>
+          )}
+          {incomingMatch && typed && !friendMatch && !outgoingMatch && (
+            <p className="text-sm text-muted-foreground">This user already sent you a request — accept it below.</p>
+          )}
           {errorMessage && (
             <p className="text-sm text-destructive">{errorMessage}</p>
           )}
@@ -463,7 +419,7 @@ export default function FriendsPage() {
 
   return (
     <RequireAuth>
-      <div className="container mx-auto py-8 max-w-4xl">
+      <div className="w-full max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">👥 Friends</h1>
           <p className="text-muted-foreground">

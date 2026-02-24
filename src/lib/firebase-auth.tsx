@@ -13,7 +13,8 @@ import {
   browserLocalPersistence,
   AuthError,
 } from "firebase/auth";
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const DEBUG_AUTH = true;
 
@@ -21,6 +22,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   authInitialized: boolean;
+  userDocReady: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   redirectError: string | null;
@@ -37,12 +39,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [redirectError, setRedirectError] = useState<string | null>(null);
   const [redirectSettling, setRedirectSettling] = useState(false);
   const [lastSignInAttempt, setLastSignInAttempt] = useState<string | null>(null);
+  const [userDocReady, setUserDocReady] = useState(false);
   const initRanRef = useRef(false);
   const redirectConsumerRanRef = useRef(false);
 
   useEffect(() => {
     if (initRanRef.current) return;
     initRanRef.current = true;
+
+    async function ensureUserDoc(u: User): Promise<void> {
+      const userRef = doc(db, "users", u.uid);
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) {
+        await setDoc(userRef, {
+          uid: u.uid,
+          email: u.email ?? null,
+          displayName: u.displayName ?? null,
+          photoURL: u.photoURL ?? null,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      } else {
+        await setDoc(userRef, { updatedAt: serverTimestamp() }, { merge: true });
+      }
+    }
 
     const init = async () => {
       if (DEBUG_AUTH) console.error("AUTH: init");
@@ -65,12 +85,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (u) {
           setRedirectError(null);
           setRedirectSettling(false);
+          setUserDocReady(false);
 
           // If auth state resolved to a user, we are no longer "processing" a redirect.
-          if (typeof window !== "undefined") {
+          try {
             sessionStorage.removeItem("dgjauth_processing");
             sessionStorage.removeItem("dgjauth_return_to");
-          }
+          } catch {}
+
+          (async () => {
+            try {
+              await ensureUserDoc(u);
+            } catch (e) {
+              if (DEBUG_AUTH) console.error("AUTH: ensureUserDoc failed", e);
+            } finally {
+              setUserDocReady(true);
+            }
+          })();
+        } else {
+          setUserDocReady(true);
         }
         setAuthInitialized(true);
         setLoading(false);
@@ -151,7 +184,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     sessionStorage.setItem("dgjauth_return_to", "/dashboard");
-    sessionStorage.setItem("dgjauth_processing", "1");
 
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });
@@ -169,6 +201,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const code = (err as AuthError)?.code;
       if (code === "auth/popup-blocked" || code === "auth/cancelled-popup-request") {
         if (DEBUG_AUTH) console.log("AUTH: popup blocked/cancelled, falling back to redirect");
+        sessionStorage.setItem("dgjauth_processing", "1");
+        sessionStorage.setItem("dgjauth_redirect_started_at", String(Date.now()));
         await signInWithRedirect(auth, provider);
       } else {
         setRedirectSettling(false);
@@ -193,6 +227,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         loading,
         authInitialized,
+        userDocReady,
         signInWithGoogle,
         signOut,
         redirectError,
