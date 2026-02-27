@@ -8,19 +8,22 @@ import { PatchCard } from "@/components/patches/PatchCard";
 
 function PatchesPageInner() {
   const { completion, eligibleBySlug } = usePatchEligibility();
-  const eligibleCount = [eligibleBySlug.skill, eligibleBySlug.social, eligibleBySlug.collection].filter(Boolean).length;
+  const total = PATCHES.length;
+  const readyCount = PATCHES.filter((p) => eligibleBySlug[p.tabKey]).length;
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-6">
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <h1 className="text-2xl font-bold">Patches</h1>
-        {eligibleCount > 0 && (
-          <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">
-            {eligibleCount} ready
-          </span>
+      <h1 className="text-2xl font-bold">Patches</h1>
+      <div className="mt-1 text-sm text-muted-foreground">
+        {readyCount === total ? (
+          "Full set ready"
+        ) : (
+          <>
+            Your collection: <span className="font-medium text-foreground">{readyCount}</span> / {total} ready
+          </>
         )}
       </div>
-      <p className="text-muted-foreground text-sm mb-6">
+      <p className="text-muted-foreground text-sm mb-6 mt-2">
         Collect premium patches by reaching 80% mastery in each tab.
       </p>
 

@@ -13,24 +13,24 @@ service cloud.firestore {
   function isValidUsername(username) {
     return username is string && username.matches('^[a-z0-9._]{3,20}$');
   }
+
+  function isClubMember(clubId) {
+    return isAuthed()
+      && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+      && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.clubId == clubId;
+  }
     // Users collection
     match /users/{userId} {
       // Allow users to read and manage their own user document
       allow read, create: if isOwner(userId);
-      allow update: if isOwner(userId)
-        && (
-          // If username is not being changed, allow update
-          request.resource.data.username == resource.data.username
-
-          // Or: allow setting username once (from null/empty to a valid username)
-          || (
-            // previously empty/missing
-            (!("username" in resource.data) || resource.data.username == null || resource.data.username == "")
-            // new username present and valid
-            && request.resource.data.username is string
-            && isValidUsername(request.resource.data.username)
-          )
-        );
+      allow update: if isOwner(userId) && (
+        request.resource.data.username == resource.data.username
+        || (
+          (!("username" in resource.data) || resource.data.username == null || resource.data.username == "")
+          && request.resource.data.username is string
+          && isValidUsername(request.resource.data.username)
+        )
+      );
       allow delete: if isAuthed() && isOwner(userId);
 
       match /friendRequestsOut/{toUid} {
@@ -96,6 +96,27 @@ service cloud.firestore {
     match /publicProfiles/{userId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Clubs - create/read by authenticated users; join by querying joinCode
+    match /clubs/{clubId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+
+      match /members/{uid} {
+        allow read: if isClubMember(clubId);
+        allow create: if isOwner(uid);
+        allow update: if isOwner(uid);
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // Club leaderboards - members can read; users can write their own entry only for their club
+    match /clubLeaderboards/{clubId}/entries/{userId} {
+      allow read: if isClubMember(clubId);
+      allow create, update: if isOwner(userId) && isClubMember(clubId);
+      allow delete: if isOwner(userId);
     }
   }
 }

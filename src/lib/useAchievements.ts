@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { doc, updateDoc, Timestamp, writeBatch } from "firebase/firestore";
+import { doc, updateDoc, Timestamp, writeBatch, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { useAuth } from "./firebase-auth";
 import { useUserDoc } from "./useUserDoc";
@@ -108,12 +108,16 @@ function mergeAchievementsWithTemplate(saved: Achievements, template: Achievemen
   for (const category of categories) {
     merged[category] = template[category].map((templateAchievement) => {
       const savedAchievement = saved[category]?.find((a) => a.id === templateAchievement.id);
-      // Old saved counter fields (progress/target/kind) are ignored; template is source of truth.
+      const isCounter = templateAchievement.kind === "counter";
+      const storedProgress =
+        isCounter && savedAchievement && typeof (savedAchievement as any).progress === "number"
+          ? (savedAchievement as any).progress
+          : 0;
       const stored = savedAchievement
         ? {
             isCompleted: savedAchievement.isCompleted,
             completedDate: savedAchievement.completedDate,
-            progress: 0,
+            progress: storedProgress,
             year: (savedAchievement as any).year,
             completedYear: (savedAchievement as any).completedYear,
           }
@@ -126,6 +130,10 @@ function mergeAchievementsWithTemplate(saved: Achievements, template: Achievemen
         isCompleted: effective.isCompleted,
         completedDate: effective.completedDate,
       };
+
+      if (isCounter && (mergedAchievement as any).kind === "counter") {
+        (mergedAchievement as any).progress = effective.progress;
+      }
 
       // Preserve/derive year anchors for yearly achievements so normal saves don't erase history.
       if (getResetPolicy(templateAchievement) === "yearly") {
@@ -449,6 +457,19 @@ export function useAchievements(initialAchievements?: Achievements) {
         points: pointTotals.allTime,
       }, { merge: true });
 
+      // Club leaderboard (if user belongs to a club)
+      const clubId = (userData as any)?.clubId;
+      if (clubId && typeof clubId === "string") {
+        const clubEntryRef = doc(db, "clubLeaderboards", clubId, "entries", user.uid);
+        batch.set(clubEntryRef, {
+          ...userInfo,
+          points: pointTotals.allTime,
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[ACH][WRITE] club leaderboard sync", { clubId, uid: user.uid, points: pointTotals.allTime });
+        }
+      }
 
       // Commit all writes atomically
       await batch.commit();
@@ -758,9 +779,25 @@ export function useAchievements(initialAchievements?: Achievements) {
   const clearNewUnlocks = () => setNewUnlocks([]);
   const clearTierUpMessage = () => setTierUpMessage(null);
 
+  const devToolsEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
+  const devUid = process.env.NEXT_PUBLIC_DEV_UID;
+  const uid = user?.uid ?? null;
+  const isDevAdmin = devToolsEnabled && (!devUid || uid === devUid);
+
   const devResetPuttingMasteryTier = async () => {
-    if (process.env.NODE_ENV === "production") return;
-    if (!user) return;
+    console.log("[DEV] devResetPuttingMasteryTier invoked", {
+      uid: user?.uid,
+      devUid: process.env.NEXT_PUBLIC_DEV_UID,
+      enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
+    });
+    if (!isDevAdmin) {
+      console.log("[DEV] devResetPuttingMasteryTier early return: !isDevAdmin");
+      return;
+    }
+    if (!user) {
+      console.log("[DEV] devResetPuttingMasteryTier early return: !user");
+      return;
+    }
 
     const categoryId = "putting-mastery";
     const prevMap =
@@ -789,11 +826,26 @@ export function useAchievements(initialAchievements?: Achievements) {
   };
 
   const devResetAllTieredCategoryTiers = async () => {
-    if (process.env.NODE_ENV === "production") return;
-    if (!user) return;
+    console.log("[DEV] devResetAllTieredCategoryTiers invoked", {
+      uid: user?.uid,
+      devUid: process.env.NEXT_PUBLIC_DEV_UID,
+      enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
+    });
+    if (!isDevAdmin) {
+      console.log("[DEV] devResetAllTieredCategoryTiers early return: !isDevAdmin");
+      return;
+    }
+    if (!user) {
+      console.log("[DEV] devResetAllTieredCategoryTiers early return: !user");
+      return;
+    }
 
     const ids = getTieredCategoryIds();
-    if (ids.length === 0) return;
+    console.log("[DEV] tiered category ids", ids);
+    if (ids.length === 0) {
+      console.log("[DEV] devResetAllTieredCategoryTiers early return: ids.length === 0");
+      return;
+    }
 
     const prevMap =
       (categoryTiersRef.current ?? (userData as any)?.categoryTiers ?? {}) as Record<
@@ -818,7 +870,75 @@ export function useAchievements(initialAchievements?: Achievements) {
     }
   };
 
-  // Toggle a single achievement (only for toggle achievements)
+  // Increment/decrement a counter achievement
+  const incrementAchievement = (category: keyof Achievements, id: string, delta: number) => {
+    if (!user) return;
+    if (isAchievementDisabled(id)) return;
+    const ach = achievements[category]?.find((a) => a.id === id);
+    if (!ach || ach.kind !== "counter") return;
+    if (!isUnlocked(ach, effectiveById(achievements))) return;
+
+    const target = (ach as CounterAchievement).target;
+    const currentProgress = (ach as CounterAchievement).progress ?? 0;
+    const nextProgress = Math.max(0, Math.min(target, currentProgress + delta));
+    const wasCompleted = currentProgress >= target;
+    const isNowCompleted = nextProgress >= target;
+
+    const nextCompletedDate =
+      isNowCompleted && !wasCompleted ? Timestamp.now() : wasCompleted ? ach.completedDate : undefined;
+
+    const updatedAchievements: Achievements = {
+      ...achievements,
+      [category]: achievements[category].map((a) => {
+        if (a.id !== id) return a;
+        return {
+          ...a,
+          progress: nextProgress,
+          isCompleted: isNowCompleted,
+          completedDate: nextCompletedDate,
+        } as Achievement;
+      }),
+    };
+
+    setAchievements(updatedAchievements);
+
+    // Tier-up: same logic as toggle when counter reaches target
+    const toggled = updatedAchievements[category]?.find((a) => a.id === id);
+    if (toggled?.isCompleted) {
+      const categoryId = getAchievementCategoryId(toggled);
+      if (categoryId && isTieredCategoryId(categoryId)) {
+        const cardDef = getCategoryCardDefById(categoryId);
+        const currentTierIndex = getUserCategoryTierIndex(categoryId);
+        const activeTierDefs = getActiveTierAchievements(categoryId, currentTierIndex);
+        const currentYear = getCurrentYear();
+        const byId = effectiveById(updatedAchievements);
+        const visibleTierDefs = activeTierDefs.filter((def) => isGatedVisible(def as any, byId as any));
+        const allComplete =
+          visibleTierDefs.length > 0 &&
+          visibleTierDefs.every((def) => isAchievementCompleted(def as any, byId[def.id] as any, currentYear));
+        const nextTier = cardDef?.tiers?.[currentTierIndex + 1];
+        if (allComplete && nextTier && nextTier.achievements.length > 0) {
+          const prevMap = (categoryTiersRef.current ?? (userData as any)?.categoryTiers ?? {}) as Record<string, number>;
+          const updatedMap = { ...prevMap, [categoryId]: currentTierIndex + 1 };
+          categoryTiersRef.current = updatedMap;
+          mergeUserData({ categoryTiers: updatedMap });
+          const tierLabels: Record<string, string> = {
+            beginner: "Beginner",
+            intermediate: "Intermediate",
+            advanced: "Advanced",
+            expert: "Expert",
+          };
+          const nextLabel = tierLabels[nextTier.tierKey] ?? `Tier ${currentTierIndex + 1}`;
+          const title = cardDef?.title ?? "Category";
+          setTierUpMessage(`${title} leveled up to ${nextLabel}`);
+        }
+      }
+    }
+
+    scheduleSave(updatedAchievements, { category, id });
+  };
+
+  // Toggle a single achievement (only for toggle achievements; counters use incrementAchievement)
   const toggleAchievement = async (category: keyof Achievements, id: string) => {
     if (!user) return;
     if (isAchievementDisabled(id)) {
@@ -828,7 +948,9 @@ export function useAchievements(initialAchievements?: Achievements) {
       return;
     }
     const ach = achievements[category]?.find((a) => a.id === id);
-    if (ach && !isUnlocked(ach, effectiveById(achievements))) return;
+    if (!ach) return;
+    if (ach.kind === "counter") return; // counters use incrementAchievement
+    if (!isUnlocked(ach, effectiveById(achievements))) return;
 
     if (process.env.NODE_ENV !== "production") {
       console.log("[TIER][DBG] toggled", {
@@ -839,7 +961,7 @@ export function useAchievements(initialAchievements?: Achievements) {
       });
     }
 
-    const nextCompleted = !!ach && ach.kind !== "counter" ? !ach.isCompleted : false;
+    const nextCompleted = !ach.isCompleted;
 
     // Gate parent card celebration (Ace Race, League Night Rookie).
     if (
@@ -971,6 +1093,7 @@ export function useAchievements(initialAchievements?: Achievements) {
     achievements,
     loading,
     toggleAchievement,
+    incrementAchievement,
     saveAchievements,
     newUnlocks,
     clearNewUnlocks,

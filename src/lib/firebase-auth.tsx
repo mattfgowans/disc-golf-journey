@@ -62,6 +62,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         await setDoc(userRef, { updatedAt: serverTimestamp() }, { merge: true });
       }
+
+      try {
+        await setDoc(doc(db, "publicProfiles", u.uid), {
+          displayName: u.displayName ?? null,
+          photoURL: u.photoURL ?? null,
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
+      } catch (e) {
+        if (DEBUG_AUTH) console.error("AUTH: ensurePublicProfile failed", e);
+      }
     }
 
     const init = async () => {

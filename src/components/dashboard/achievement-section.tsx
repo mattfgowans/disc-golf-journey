@@ -86,6 +86,7 @@ interface AchievementSectionProps {
   isOpen: boolean;
   onToggle: () => void;
   onToggleAchievement: (id: string) => void;
+  onIncrementAchievement?: (id: string, delta: number) => void;
   getCompletionColor: (value: number) => string;
 }
 
@@ -109,6 +110,7 @@ export function AchievementSection({
   isOpen,
   onToggle,
   onToggleAchievement,
+  onIncrementAchievement,
   getCompletionColor,
 }: AchievementSectionProps) {
   const localById = useMemo(() => {
@@ -240,11 +242,17 @@ export function AchievementSection({
             const lockedChildCount = children.filter((c) => !isUnlocked(c, effectiveById)).length;
             const hasSecrets = totalChildrenCount > 0;
 
+            const isCounter = achievement.kind === "counter";
+            const progress = typeof (achievement as any).progress === "number" ? (achievement as any).progress : 0;
+            const target = typeof (achievement as any).target === "number" ? (achievement as any).target : 1;
+
             return (
               <AchievementCard
                 key={achievement.id}
                 {...achievement}
                 category={category}
+                progress={progress}
+                target={target}
                 locked={!unlocked}
                 hasSecrets={hasSecrets}
                 lockedChildCount={hasSecrets ? lockedChildCount : undefined}
@@ -256,6 +264,16 @@ export function AchievementSection({
                   isAceCelebrating ? (aceCelebrationPhase ?? "idle") : "idle"
                 }
                 onToggle={() => onToggleAchievement(achievement.id)}
+                onIncrement={
+                  isCounter && onIncrementAchievement
+                    ? () => onIncrementAchievement(achievement.id, 1)
+                    : undefined
+                }
+                onDecrement={
+                  isCounter && onIncrementAchievement
+                    ? () => onIncrementAchievement(achievement.id, -1)
+                    : undefined
+                }
               />
             );
           })}

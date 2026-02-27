@@ -162,7 +162,7 @@ function TabTriggerWithFill({
   return (
     <TabsTrigger
       value={value}
-      className="relative flex-1 min-w-0 overflow-hidden rounded-full ring-1 ring-inset ring-muted-foreground/20 bg-muted/40 py-1 text-xs sm:text-sm data-[state=active]:ring-2 data-[state=active]:ring-inset data-[state=active]:ring-blue-500/50 data-[state=active]:font-semibold focus-visible:ring-2 focus-visible:ring-blue-400/60 focus-visible:ring-offset-2 whitespace-nowrap transition-colors duration-200"
+      className="relative inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-full px-4 py-2 ring-1 ring-inset ring-muted-foreground/20 bg-muted/40 text-xs sm:text-sm whitespace-nowrap data-[state=active]:ring-2 data-[state=active]:ring-inset data-[state=active]:ring-blue-500/50 data-[state=active]:font-semibold focus-visible:ring-2 focus-visible:ring-blue-400/60 focus-visible:ring-offset-2 transition-colors duration-200"
     >
       {/* Progress fill layer */}
       <div
@@ -171,10 +171,8 @@ function TabTriggerWithFill({
       />
 
       {/* Text layer on top */}
-      <div className="relative z-10 flex min-w-0 items-center justify-between w-full px-2 gap-2">
-        <span className="whitespace-nowrap shrink-0">{label}</span>
-        <span className="text-[11px] opacity-80 tabular-nums shrink-0">{Math.round(clampedPercent)}%</span>
-      </div>
+      <span className="relative z-10 font-medium">{label}</span>
+      <span className="relative z-10 ml-1 inline-flex items-center justify-center rounded-full bg-background/70 px-2 py-0.5 text-sm tabular-nums text-foreground/70 min-w-[3.25rem]">{Math.round(clampedPercent)}%</span>
     </TabsTrigger>
   );
 }
@@ -184,6 +182,7 @@ function DashboardInner() {
     achievements,
     loading: achievementsLoading,
     toggleAchievement,
+    incrementAchievement,
     newUnlocks,
     clearNewUnlocks,
     tierUpMessage,
@@ -214,9 +213,9 @@ function DashboardInner() {
   const [secretModalOpen, setSecretModalOpen] = useState(false);
   const [celebratingParentId, setCelebratingParentId] = useState<string | null>(null);
 
-  const showDevTools =
-    process.env.NODE_ENV !== "production" &&
-    process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
+  const devToolsEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
+  const devUid = process.env.NEXT_PUBLIC_DEV_UID;
+  const showDevTools = devToolsEnabled && (!devUid || uid === devUid);
 
   useEffect(() => {
     if (newUnlocks.length === 0) {
@@ -602,7 +601,7 @@ function DashboardInner() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div id="dg-tabsbar" className="sticky top-[var(--dg-navbar-h,60px)] z-40 pt-2 pb-3 bg-background border-b shadow-[0_1px_0_rgba(0,0,0,0.06)] px-3 sm:px-4 min-w-0">
-          <TabsList className="flex w-full gap-1.5 sm:gap-0 sm:-space-x-px rounded-full bg-muted/30 p-0.5 min-w-0 overflow-hidden flex-wrap sm:flex-nowrap">
+          <TabsList className="flex w-full gap-2 overflow-x-auto overflow-y-hidden pb-1 flex-nowrap rounded-full bg-muted/30 p-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <TabTriggerWithFill value="skill" label="Skill" percent={skillCompletion} isActive={activeTab === "skill"} />
             <TabTriggerWithFill value="social" label="Social" percent={socialCompletion} isActive={activeTab === "social"} />
             <TabTriggerWithFill value="collection" label="Collection" percent={collectionCompletion} isActive={activeTab === "collection"} />
@@ -643,14 +642,28 @@ function DashboardInner() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => devResetPuttingMasteryTier()}
+                onClick={() => {
+                  console.log("[DEV] clicked reset putting mastery", {
+                    uid,
+                    devUid,
+                    enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
+                  });
+                  devResetPuttingMasteryTier();
+                }}
               >
                 DEV: Reset Putting Mastery Tier
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => devResetAllTieredCategoryTiers()}
+                onClick={() => {
+                  console.log("[DEV] clicked reset all", {
+                    uid,
+                    devUid,
+                    enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
+                  });
+                  devResetAllTieredCategoryTiers();
+                }}
               >
                 DEV: Reset ALL Tiered Categories
               </Button>
@@ -707,6 +720,7 @@ function DashboardInner() {
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
                       onToggleAchievement={(id) => toggleAchievementWithCelebration("skill", id)}
+                      onIncrementAchievement={(id, delta) => incrementAchievement("skill", id, delta)}
                       getCompletionColor={getCompletionColor}
                     />
                   );
@@ -750,6 +764,7 @@ function DashboardInner() {
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
                       onToggleAchievement={(id) => toggleAchievementWithCelebration("social", id)}
+                      onIncrementAchievement={(id, delta) => incrementAchievement("social", id, delta)}
                       getCompletionColor={getCompletionColor}
                     />
                   );
@@ -791,6 +806,7 @@ function DashboardInner() {
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
                       onToggleAchievement={(id) => toggleAchievementWithCelebration("collection", id)}
+                      onIncrementAchievement={(id, delta) => incrementAchievement("collection", id, delta)}
                       getCompletionColor={getCompletionColor}
                     />
                   );

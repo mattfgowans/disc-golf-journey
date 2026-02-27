@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trophy, Users, Library } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Trophy, Users, Library, Minus, Plus } from "lucide-react";
 import confetti from 'canvas-confetti';
 import { Timestamp } from "firebase/firestore";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,8 @@ interface AchievementCardProps {
   points?: number;
   rarity?: "common" | "rare" | "epic" | "legendary";
   kind?: "toggle" | "counter";
+  progress?: number;
+  target?: number;
   locked?: boolean;
   hasSecrets?: boolean;
   lockedChildCount?: number;
@@ -31,6 +34,8 @@ interface AchievementCardProps {
   celebratePhase?: "idle" | "shake" | "pop";
   requiresId?: string;
   onToggle: () => void;
+  onIncrement?: () => void;
+  onDecrement?: () => void;
 }
 
 const categoryIcons = {
@@ -48,6 +53,9 @@ export function AchievementCard({
   completedDate,
   points,
   rarity = "common",
+  kind = "toggle",
+  progress = 0,
+  target = 1,
   locked = false,
   hasSecrets = false,
   lockedChildCount,
@@ -58,6 +66,8 @@ export function AchievementCard({
   celebratePhase = "idle",
   requiresId,
   onToggle,
+  onIncrement,
+  onDecrement,
 }: AchievementCardProps) {
   const Icon = categoryIcons[category];
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -71,6 +81,9 @@ export function AchievementCard({
     celebratePhase !== "idle"
       ? "ring-2 ring-amber-300/70 shadow-[0_0_0_10px_rgba(251,191,36,0.12)]"
       : "";
+
+  const isCounter = kind === "counter";
+  const counterCompleted = isCounter && progress >= target;
 
   const handleToggle = () => {
     if (locked) return;
@@ -97,7 +110,7 @@ export function AchievementCard({
     <>
       <Card
         className={cn(
-          isCompleted ? "bg-green-50" : "",
+          (isCompleted || counterCompleted) ? "bg-green-50" : "",
           locked ? "opacity-75" : "",
           isNewlyRevealed
             ? "ring-2 ring-yellow-400/40 shadow-[0_0_0_6px_rgba(250,204,21,0.12)] animate-pulse"
@@ -111,8 +124,8 @@ export function AchievementCard({
         )}
       >
         <CardHeader className="flex flex-row items-center gap-1.5 px-3 pt-2 pb-1">
-          <div className={`p-0.5 rounded-full ${locked ? 'bg-gray-200' : isCompleted ? 'bg-green-100' : 'bg-gray-100'}`}>
-            <Icon className={`w-4 h-4 ${isCompleted ? 'text-green-600' : 'text-gray-500'}`} />
+          <div className={`p-0.5 rounded-full ${locked ? 'bg-gray-200' : (isCompleted || counterCompleted) ? 'bg-green-100' : 'bg-gray-100'}`}>
+            <Icon className={`w-4 h-4 ${(isCompleted || counterCompleted) ? 'text-green-600' : 'text-gray-500'}`} />
           </div>
           <div className="flex-1">
             <div className="flex items-start justify-between gap-2">
@@ -151,7 +164,46 @@ export function AchievementCard({
         </CardHeader>
         <CardContent className="pt-1 pb-2">
           <div className="flex flex-col gap-1">
-            {!locked && (
+            {!locked && isCounter && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium tabular-nums">
+                    {progress} / {target}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7 shrink-0"
+                      onClick={onDecrement}
+                      disabled={progress <= 0}
+                    >
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-7 w-7 shrink-0"
+                      onClick={onIncrement}
+                      disabled={progress >= target}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+                <Progress value={target > 0 ? (progress / target) * 100 : 0} className="h-2" />
+                {counterCompleted && completedDate && (
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap leading-none">
+                    Completed {completedDate.toDate().toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </span>
+                )}
+              </div>
+            )}
+            {!locked && !isCounter && (
               <div className="flex items-center gap-2">
                 <Button
                   variant={isCompleted ? "outline" : "default"}
