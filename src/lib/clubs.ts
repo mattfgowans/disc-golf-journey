@@ -73,6 +73,7 @@ export async function createClub(
 
     const clubRef = doc(collection(db, "clubs"));
     const clubId = clubRef.id;
+    const memberRef = doc(db, "clubs", clubId, "members", createdByUid);
 
     const batch = writeBatch(db);
     batch.set(clubRef, {
@@ -88,9 +89,10 @@ export async function createClub(
       clubJoinedAt: serverTimestamp(),
     });
 
+    batch.set(memberRef, { joinedAt: serverTimestamp() }, { merge: true });
+
     await batch.commit();
 
-    await ensureClubMemberDoc(clubId, createdByUid);
     await ensureClubLeaderboardEntry(clubId, createdByUid);
 
     if (process.env.NODE_ENV !== "production") {
@@ -125,6 +127,15 @@ export async function joinClubByCode(
 
   const userRef = doc(db, "users", uid);
   const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    await setDoc(
+      userRef,
+      { uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() },
+      { merge: true }
+    );
+  }
+
   const existingClubId = userSnap.exists() ? (userSnap.data() as { clubId?: string })?.clubId : undefined;
   if (existingClubId) {
     if (existingClubId === clubId) {
@@ -135,15 +146,16 @@ export async function joinClubByCode(
     throw new Error("You're already in a club. Leave your current club before joining another.");
   }
 
+  const memberRef = doc(db, "clubs", clubId, "members", uid);
   const batch = writeBatch(db);
   batch.update(userRef, {
     clubId,
     clubJoinedAt: serverTimestamp(),
   });
+  batch.set(memberRef, { joinedAt: serverTimestamp() }, { merge: true });
 
   await batch.commit();
 
-  await ensureClubMemberDoc(clubId, uid);
   await ensureClubLeaderboardEntry(clubId, uid);
 
   if (process.env.NODE_ENV !== "production") {
@@ -190,26 +202,43 @@ export async function ensureClubMemberDoc(clubId: string, uid: string): Promise<
 
 export async function ensureClubLeaderboardEntry(clubId: string, uid: string): Promise<void> {
   try {
+    const publicRef = doc(db, "publicProfiles", uid);
+    const publicSnap = await getDoc(publicRef);
+    const publicData = publicSnap.exists() ? publicSnap.data() : null;
+
     const allTimeEntryRef = doc(db, "leaderboards", "allTime", "entries", uid);
     const allTimeSnap = await getDoc(allTimeEntryRef);
-    const clubEntryRef = doc(db, "clubLeaderboards", clubId, "entries", uid);
+    const allTime = allTimeSnap.exists() ? allTimeSnap.data() : null;
 
-    if (allTimeSnap.exists()) {
-      const data = allTimeSnap.data();
-      await setDoc(clubEntryRef, {
-        displayName: data.displayName || "Anonymous",
-        username: data.username,
-        photoURL: data.photoURL,
-        points: data.points || 0,
-        updatedAt: serverTimestamp(),
-      }, { merge: true });
-    } else {
-      await setDoc(clubEntryRef, {
-        displayName: "Anonymous",
-        points: 0,
-        updatedAt: serverTimestamp(),
-      }, { merge: true });
-    }
+    const displayName =
+      (publicData?.displayName as string | undefined) ||
+      (allTime?.displayName as string | undefined) ||
+      "Anonymous";
+
+    const username =
+      (publicData?.username as string | undefined) ||
+      (allTime?.username as string | undefined) ||
+      undefined;
+
+    const photoURL =
+      (publicData?.photoURL as string | undefined) ||
+      (allTime?.photoURL as string | undefined) ||
+      undefined;
+
+    const points = typeof allTime?.points === "number" ? allTime.points : 0;
+
+    const clubEntryRef = doc(db, "clubLeaderboards", clubId, "entries", uid);
+    const payload: Record<string, any> = {
+      uid,
+      displayName,
+      points,
+      updatedAt: serverTimestamp(),
+    };
+
+    if (username) payload.username = username;
+    if (photoURL) payload.photoURL = photoURL;
+
+    await setDoc(clubEntryRef, payload, { merge: true });
   } catch (err) {
     if (process.env.NODE_ENV !== "production") {
       console.error("[clubs] ensureClubLeaderboardEntry failed", err);
@@ -377,4 +406,50 @@ export function subscribeToClubLeaderboard(
       onChange([]);
     }
   };
+}
+
+export async function selfHealClubMembership(clubId: string, uid: string): Promise<void> {
+  // Idempotent repairs
+  await ensureClubMemberDoc(clubId, uid);
+  await ensureClubLeaderboardEntry(clubId, uid);
+}
+
+export async function selfHealUserClub(
+  uid: string
+): Promise<"ok" | "club_missing_cleared" | "no_club"> {
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
+  const clubId = userSnap.exists() ? (userSnap.data() as any)?.clubId : null;
+
+  if (!clubId || typeof clubId !== "string") return "no_club";
+
+  const clubRef = doc(db, "clubs", clubId);
+  const clubSnap = await getDoc(clubRef);
+
+  if (!clubSnap.exists()) {
+    // Club was deleted or is inaccessible; clear user state so they aren't stuck.
+    try {
+      await updateDoc(userRef, {
+        clubId: deleteField(),
+        clubJoinedAt: deleteField(),
+      });
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("[clubs] selfHealUserClub: failed clearing clubId", e);
+      }
+    }
+
+    // Best-effort cleanup; ignore failures (rules/network).
+    try {
+      await deleteDoc(doc(db, "clubLeaderboards", clubId, "entries", uid));
+    } catch {}
+    try {
+      await deleteDoc(doc(db, "clubs", clubId, "members", uid));
+    } catch {}
+
+    return "club_missing_cleared";
+  }
+
+  await selfHealClubMembership(clubId, uid);
+  return "ok";
 }

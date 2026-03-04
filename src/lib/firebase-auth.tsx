@@ -50,6 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function ensureUserDoc(u: User): Promise<void> {
       const userRef = doc(db, "users", u.uid);
       const snap = await getDoc(userRef);
+
+      const existing = snap.exists() ? snap.data() : null;
+      const rawUsername =
+        (existing?.username ?? (existing as any)?.profile?.username ?? null) as unknown;
+      const existingUsername =
+        typeof rawUsername === "string"
+          ? rawUsername.trim().toLowerCase().replace(/^@/, "")
+          : null;
+
       if (!snap.exists()) {
         await setDoc(userRef, {
           uid: u.uid,
@@ -64,11 +73,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        await setDoc(doc(db, "publicProfiles", u.uid), {
+        const payload: Record<string, any> = {
+          uid: u.uid,
           displayName: u.displayName ?? null,
           photoURL: u.photoURL ?? null,
           updatedAt: serverTimestamp(),
-        }, { merge: true });
+        };
+        if (existingUsername) payload.username = existingUsername;
+
+        await setDoc(doc(db, "publicProfiles", u.uid), payload, { merge: true });
       } catch (e) {
         if (DEBUG_AUTH) console.error("AUTH: ensurePublicProfile failed", e);
       }

@@ -30,6 +30,7 @@ import {
   getUserClub,
   getPublicProfiles,
   getClubRankForUser,
+  selfHealUserClub,
   subscribeToClubMembers,
   type ClubDoc,
   type PublicProfileInfo,
@@ -38,7 +39,7 @@ import {
 function ClubPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, userDocReady } = useAuth();
   const { userData, loading: userLoading } = useUserDoc();
   const clubId = (userData as any)?.clubId as string | undefined;
   const inviteCode = searchParams.get("code")?.trim().toUpperCase();
@@ -103,6 +104,29 @@ function ClubPageInner() {
   const [isSwitching, setIsSwitching] = useState(false);
   const [switchError, setSwitchError] = useState("");
   const autoJoinAttemptedRef = useRef(false);
+  const didHealRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const uid = user?.uid;
+    if (!uid) return;
+    if (!userDocReady) return;
+
+    if (didHealRef.current === uid) return;
+    didHealRef.current = uid;
+
+    (async () => {
+      try {
+        const res = await selfHealUserClub(uid);
+        if (res === "club_missing_cleared") {
+          router.replace("/dashboard");
+        }
+      } catch (e) {
+        if (process.env.NODE_ENV !== "production") {
+          console.error("[club] self-heal failed", e);
+        }
+      }
+    })();
+  }, [user?.uid, userDocReady, router]);
 
   useEffect(() => {
     const codeFromUrl = searchParams.get("code");

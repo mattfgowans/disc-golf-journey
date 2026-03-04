@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useLayoutEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAchievements, type Achievement, type Achievements } from "@/lib/useAchievements";
@@ -18,8 +18,7 @@ import { isAchievementDisabled } from "@/lib/disabledAchievements";
 import confetti from "canvas-confetti";
 import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-
-
+import { cn } from "@/lib/utils";
 
 // TODO: Add achievement badges (rarity-based and achievement-specific)
 
@@ -126,55 +125,31 @@ function getInitialActiveTab(): string {
   return 'skill';
 }
 
+function getActiveTabCompletion(
+  activeTab: string,
+  skillPct: number,
+  socialPct: number,
+  collectionPct: number
+): { label: string; pct: number } {
+  const pct = Math.round(Math.min(100, Math.max(0,
+    activeTab === "skill" ? skillPct :
+    activeTab === "social" ? socialPct :
+    collectionPct
+  )));
+  const label = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+  return { label, pct };
+}
+
+function getProgressFillClass(pct: number): string {
+  const clamped = Math.min(100, Math.max(0, pct));
+  if (clamped === 100) return "bg-emerald-500/35 shadow-[0_0_0_6px_rgba(16,185,129,0.08)]";
+  if (clamped >= 61) return "bg-emerald-500/25";
+  if (clamped >= 26) return "bg-slate-900/25";
+  return "bg-slate-900/15";
+}
+
 export default function DashboardPage() {
   return <DashboardInner />;
-}
-
-// Helper function to get progress color based on percentage
-function getProgressColorClass(percent: number, isActive: boolean = false): string {
-  if (percent === 100) return isActive ? "bg-blue-500/30" : "bg-blue-500/20";
-  if (percent >= 61) return isActive ? "bg-green-500/30" : "bg-green-500/20";
-  if (percent >= 26) return isActive ? "bg-yellow-500/30" : "bg-yellow-500/20";
-  return isActive ? "bg-red-500/30" : "bg-red-500/20";
-}
-
-// Helper function to get conditional rounding for small fills
-function getFillRounding(percent: number): string {
-  return "rounded-full"; // Pill cap for all fills (avoids squared right edge at low %)
-}
-
-// Helper component for tab triggers with background fill
-function TabTriggerWithFill({
-  value,
-  label,
-  percent,
-  isActive,
-}: {
-  value: string;
-  label: string;
-  percent: number;
-  isActive: boolean;
-}) {
-  const colorClass = getProgressColorClass(percent, isActive);
-  const clampedPercent = Math.min(100, Math.max(0, percent));
-  const fillRounding = getFillRounding(clampedPercent);
-
-  return (
-    <TabsTrigger
-      value={value}
-      className="relative inline-flex shrink-0 items-center gap-2 overflow-hidden rounded-full px-4 py-2 ring-1 ring-inset ring-muted-foreground/20 bg-muted/40 text-xs sm:text-sm whitespace-nowrap data-[state=active]:ring-2 data-[state=active]:ring-inset data-[state=active]:ring-blue-500/50 data-[state=active]:font-semibold focus-visible:ring-2 focus-visible:ring-blue-400/60 focus-visible:ring-offset-2 transition-colors duration-200"
-    >
-      {/* Progress fill layer */}
-      <div
-        className={`absolute inset-y-0 left-0 ${fillRounding} ${colorClass} z-0 pointer-events-none transition-[width] duration-300 ease-out`}
-        style={{ width: `calc(${clampedPercent}% + 1px)` }}
-      />
-
-      {/* Text layer on top */}
-      <span className="relative z-10 font-medium">{label}</span>
-      <span className="relative z-10 ml-1 inline-flex items-center justify-center rounded-full bg-background/70 px-2 py-0.5 text-sm tabular-nums text-foreground/70 min-w-[3.25rem]">{Math.round(clampedPercent)}%</span>
-    </TabsTrigger>
-  );
 }
 
 function DashboardInner() {
@@ -212,6 +187,61 @@ function DashboardInner() {
   const [revealPulseParentIds, setRevealPulseParentIds] = useState<Set<string>>(new Set());
   const [secretModalOpen, setSecretModalOpen] = useState(false);
   const [celebratingParentId, setCelebratingParentId] = useState<string | null>(null);
+
+  const tabsListRef = useRef<HTMLDivElement | null>(null);
+  const topChromeRef = useRef<HTMLDivElement | null>(null);
+  const [indicator, setIndicator] = useState<{ x: number; w: number; h: number } | null>(null);
+
+  useEffect(() => {
+    const el = topChromeRef.current;
+    if (!el) return;
+
+    const updateOffset = () => {
+      const h = el.offsetHeight;
+      document.documentElement.style.setProperty(
+        "--dg-sticky-offset",
+        `calc(var(--dg-navbar-h, 60px) + ${h}px)`
+      );
+    };
+
+    updateOffset();
+    const ro = new ResizeObserver(updateOffset);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      document.documentElement.style.removeProperty("--dg-sticky-offset");
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const el = tabsListRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      const active = el.querySelector<HTMLElement>('[data-state="active"]');
+      if (!active) return;
+
+      const list = active.parentElement;
+      if (!list) return;
+
+      const x = list.offsetLeft + active.offsetLeft;
+      const w = active.offsetWidth;
+      const h = el.clientHeight;
+
+      setIndicator({ x, w, h });
+    };
+
+    measure();
+    window.addEventListener("resize", measure);
+    const t1 = window.setTimeout(measure, 50);
+    const t2 = window.setTimeout(measure, 250);
+
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
+  }, [activeTab]);
 
   const devToolsEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
   const devUid = process.env.NEXT_PUBLIC_DEV_UID;
@@ -599,13 +629,61 @@ function DashboardInner() {
         </DialogContent>
       </Dialog>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div id="dg-tabsbar" className="sticky top-[var(--dg-navbar-h,60px)] z-40 pt-2 pb-3 bg-background border-b shadow-[0_1px_0_rgba(0,0,0,0.06)] px-3 sm:px-4 min-w-0">
-          <TabsList className="flex w-full gap-2 overflow-x-auto overflow-y-hidden pb-1 flex-nowrap rounded-full bg-muted/30 p-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <TabTriggerWithFill value="skill" label="Skill" percent={skillCompletion} isActive={activeTab === "skill"} />
-            <TabTriggerWithFill value="social" label="Social" percent={socialCompletion} isActive={activeTab === "social"} />
-            <TabTriggerWithFill value="collection" label="Collection" percent={collectionCompletion} isActive={activeTab === "collection"} />
-          </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full gap-0">
+        <div id="dg-top-chrome" ref={topChromeRef} className="sticky top-[var(--dg-navbar-h,60px)] z-50 py-2 px-3 sm:px-4 min-w-0 bg-background border-b border-border/60 shadow-[0_1px_0_rgba(0,0,0,0.06)] [transform:translateZ(0)]">
+          <div ref={tabsListRef} className="relative mx-auto w-full max-w-md">
+              {indicator && (
+                <div
+                  aria-hidden="true"
+                  className="absolute top-1 bottom-1 rounded-full bg-background shadow-[0_8px_20px_rgba(0,0,0,0.08)] ring-1 ring-black/5 transition-[transform,width] duration-300 ease-out will-change-transform"
+                  style={{
+                    left: 0,
+                    width: indicator.w,
+                    transform: `translateX(${indicator.x}px)`,
+                  }}
+                />
+              )}
+            <TabsList className="relative grid w-full grid-cols-3 gap-1 rounded-full bg-muted/60 p-1 h-12 shadow-sm ring-1 ring-black/5">
+              <TabsTrigger
+              value="skill"
+              className="relative z-10 h-full flex items-center justify-center rounded-full px-3 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground data-[state=active]:text-foreground border-0 focus-visible:ring-0 focus-visible:outline-none"
+            >
+              Skill
+            </TabsTrigger>
+            <TabsTrigger
+              value="social"
+              className="relative z-10 h-full flex items-center justify-center rounded-full px-3 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground data-[state=active]:text-foreground border-0 focus-visible:ring-0 focus-visible:outline-none"
+            >
+              Social
+            </TabsTrigger>
+            <TabsTrigger
+              value="collection"
+              className="relative z-10 h-full flex items-center justify-center rounded-full px-3 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground data-[state=active]:text-foreground border-0 focus-visible:ring-0 focus-visible:outline-none"
+            >
+              Collection
+            </TabsTrigger>
+            </TabsList>
+          </div>
+          <div className="mt-2 mx-auto w-full max-w-4xl px-3 sm:px-4">
+            {(() => {
+              const { label, pct } = getActiveTabCompletion(activeTab, skillCompletion, socialCompletion, collectionCompletion);
+              return (
+                <div className="flex items-center gap-3 rounded-xl bg-muted px-3 py-2 ring-1 ring-black/5">
+                  <span className="w-16 text-xs font-medium text-foreground/80">{label}</span>
+                  <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/10">
+                    <div
+                      className={cn(
+                        "absolute left-0 top-0 h-full rounded-full transition-[width,background-color] duration-300",
+                        getProgressFillClass(pct)
+                      )}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="w-10 text-right text-xs font-semibold tabular-nums text-foreground/80">{pct}%</span>
+                </div>
+              );
+            })()}
+          </div>
           {showPatchPromo && (
             <div className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-muted/50 px-3 py-2">
               <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-medium text-foreground/80">
@@ -685,8 +763,7 @@ function DashboardInner() {
         />
 
         <TabsContent value="skill">
-          <div className="mt-4">
-            <div className="space-y-4">
+          <div className="mt-6 space-y-4">
               {(() => {
                 const withTierInfo = SECTIONS.skill.map((s) => ({
                   section: s,
@@ -726,12 +803,10 @@ function DashboardInner() {
                   );
                 });
               })()}
-            </div>
           </div>
         </TabsContent>
         <TabsContent value="social">
-          <div className="mt-4">
-            <div className="space-y-4">
+          <div className="mt-6 space-y-4">
               {(() => {
                 const withTierInfo = SECTIONS.social.map((s) => ({
                   section: s,
@@ -770,12 +845,10 @@ function DashboardInner() {
                   );
                 });
               })()}
-            </div>
           </div>
         </TabsContent>
         <TabsContent value="collection">
-          <div className="mt-4">
-            <div className="space-y-4">
+          <div className="mt-6 space-y-4">
               {(() => {
                 const withTierInfo = SECTIONS.collection.map((s) => ({
                   section: s,
@@ -812,7 +885,6 @@ function DashboardInner() {
                   );
                 });
               })()}
-            </div>
           </div>
         </TabsContent>
       </Tabs>

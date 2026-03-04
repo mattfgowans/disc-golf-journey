@@ -152,13 +152,11 @@ export function AchievementSection({
     <Collapsible open={isOpen}>
       <div
         className={cn(
-          "sticky top-[calc(var(--dg-sticky-offset,120px)-3px)] z-30 w-full isolate rounded-2xl transition-shadow duration-200 ring-1 ring-black/5 bg-background",
-          isOpen ? "shadow-[0_6px_18px_rgba(0,0,0,0.12)]" : "shadow-[0_2px_10px_rgba(0,0,0,0.08)]",
+          "sticky top-[var(--dg-sticky-offset,120px)] z-20 w-full isolate rounded-2xl bg-background shadow-[0_6px_18px_rgba(0,0,0,0.10)] ring-1 ring-black/5",
           theme ? `ring-2 ${theme.ring}` : headerVariant === "aces" ? "ring-2 ring-fuchsia-500/20" : "ring-2 ring-emerald-500/20",
           headerClassName
         )}
       >
-        <div className="absolute inset-0 bg-background z-0" aria-hidden="true" />
         <div
           className={cn(
             "relative z-10 overflow-hidden rounded-2xl border-b",

@@ -2,13 +2,15 @@
   "name": "disc-golf-journey",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "backfill:leaderboardIdentity": "ts-node scripts/backfill-leaderboard-identity.ts"
-  },
+ "scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "lint": "next lint",
+  "backfill:leaderboardIdentity": "ts-node scripts/backfill-leaderboard-identity.ts",
+  "build:prod": "rm -rf out .next && next build",
+  "deploy": "npm run build:prod && firebase deploy --only hosting"
+},
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@opentelemetry/api": "^1.9.0",

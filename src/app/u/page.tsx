@@ -243,11 +243,6 @@ function PublicProfileContent() {
             )}
           </CardContent>
         </Card>
-        <div className="mt-4 text-center">
-          <Link href="/leaderboard" className="text-sm text-primary hover:underline">
-            ← Leaderboard
-          </Link>
-        </div>
       </div>
     </RequireAuth>
   );

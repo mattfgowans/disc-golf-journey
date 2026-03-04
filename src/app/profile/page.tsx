@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 type Handedness = "RHBH" | "RHFH" | "LHBH" | "LHFH";
 const HANDEDNESS_LABELS: Record<Handedness, string> = {
@@ -32,10 +32,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { usePageHeader } from "@/components/layout/header-context";
 import { useUserDoc } from "@/lib/useUserDoc";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Loader2, Edit2, Save, X } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { doc, setDoc, getDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -44,6 +44,8 @@ import { getUserStats } from "@/lib/leaderboard";
 import { getRankAndPrestige, PRESTIGE_STEP_POINTS } from "@/lib/ranks";
 
 export default function ProfilePage() {
+  const headerConfig = useMemo(() => ({ title: "You" }), []);
+  usePageHeader(headerConfig);
   const { user, signOut } = useAuth();
   const { userData: profile, loading: profileLoading } = useUserDoc();
   const [isEditing, setIsEditing] = useState(false);
@@ -239,11 +241,6 @@ function ProfileContent({
 
   return (
     <div className="container mx-auto py-8 max-w-2xl">
-      <div className="flex justify-start mb-4">
-        <Button asChild variant="outline" size="sm">
-          <Link href="/dashboard">← Back to Dashboard</Link>
-        </Button>
-      </div>
       <div className="space-y-8">
         {/* Profile Header */}
         <div className="text-center">

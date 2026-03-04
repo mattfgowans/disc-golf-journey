@@ -27,21 +27,12 @@ export default function FullLeaderboardPage() {
 
   return (
     <RequireAuth>
-      <div className="container mx-auto py-8 max-w-4xl">
-        <div className="text-center mb-8">
+      <div className="w-full">
+        <div className="text-center mb-6">
           <h1 className="text-3xl font-bold mb-2">🏆 Full Leaderboard</h1>
           <p className="text-muted-foreground">
             Complete rankings across all time periods
           </p>
-        </div>
-
-        <div className="mb-4">
-          <Link
-            href="/leaderboard"
-            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            ← Back to leaderboard
-          </Link>
         </div>
 
         <Card>
@@ -50,7 +41,7 @@ export default function FullLeaderboardPage() {
           </CardHeader>
           <CardContent>
             {/* Scope Toggle */}
-            <div className="sticky top-0 z-10 -mx-6 px-6 py-2 pb-3 bg-background/95 backdrop-blur border-b">
+            <div className="sticky top-0 z-10 -mx-4 px-4 md:-mx-6 md:px-6 py-2 pb-3 bg-background/95 backdrop-blur border-b">
               <div className="flex gap-2">
                 <Button
                   variant={scope === "global" ? "default" : "outline"}
@@ -72,11 +63,11 @@ export default function FullLeaderboardPage() {
             </div>
 
             <Tabs value={periodTab} onValueChange={(v) => setPeriodTab(v as LeaderboardPeriod)} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="weekly">Week</TabsTrigger>
-                <TabsTrigger value="monthly">Month</TabsTrigger>
-                <TabsTrigger value="yearly">Year</TabsTrigger>
-                <TabsTrigger value="allTime">All Time</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-4 rounded-full bg-muted p-1">
+                <TabsTrigger value="weekly" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">Week</TabsTrigger>
+                <TabsTrigger value="monthly" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">Month</TabsTrigger>
+                <TabsTrigger value="yearly" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">Year</TabsTrigger>
+                <TabsTrigger value="allTime" className="rounded-full data-[state=active]:bg-background data-[state=active]:shadow-sm">All Time</TabsTrigger>
               </TabsList>
 
               <TabsContent value="weekly" className="mt-6">
