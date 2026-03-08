@@ -68,6 +68,7 @@ interface AchievementSectionProps {
   headerVariant?: "default" | "aces";
   /** Optional class applied to the sticky header container (scoped; e.g. Aces unlock). */
   headerClassName?: string;
+  stickyTop: number;
   /** Ace Race card (skill-35) celebration target id. */
   aceCelebratingId?: string | null;
   /** Ace Race card celebration phase. */
@@ -99,6 +100,7 @@ export function AchievementSection({
   tierInfo,
   headerVariant = "default",
   headerClassName,
+  stickyTop,
   aceCelebratingId,
   aceCelebrationPhase = "idle",
   effectiveById: effectiveByIdProp,
@@ -151,132 +153,136 @@ export function AchievementSection({
   return (
     <Collapsible open={isOpen}>
       <div
-        className={cn(
-          "sticky top-[var(--dg-sticky-offset,120px)] z-20 w-full isolate rounded-2xl bg-background shadow-[0_6px_18px_rgba(0,0,0,0.10)] ring-1 ring-black/5",
-          theme ? `ring-2 ${theme.ring}` : headerVariant === "aces" ? "ring-2 ring-fuchsia-500/20" : "ring-2 ring-emerald-500/20",
-          headerClassName
-        )}
+        className={cn("w-full rounded-2xl", headerClassName)}
       >
+        {/* Sticky offset is controlled by dashboard/page.tsx via the stickyTop prop. */}
         <div
-          className={cn(
-            "relative z-10 overflow-hidden rounded-2xl border-b",
-            theme
-              ? cn(TIERED_NEUTRAL_BG, theme.accentBorder)
-              : headerVariant === "aces"
-                ? "bg-gradient-to-r from-fuchsia-600 to-indigo-600 border-b"
-                : "bg-gradient-to-r from-emerald-400 to-teal-500 border-b"
-          )}
+          className={cn("sticky z-40 rounded-2xl overflow-hidden")}
+          style={{ top: `${stickyTop}px` }}
         >
-          {theme && (
-            <div className="pointer-events-none absolute inset-0 bg-slate-950/35" />
-          )}
-          {theme && (
-            <div
-              className={cn(
-                "pointer-events-none absolute left-0 top-0 h-full w-[6px] rounded-l-2xl z-20",
-                theme.accentBg
-              )}
-            />
-          )}
-          <button
-            type="button"
-            onClick={onToggle}
-            className="flex items-center justify-between w-full p-4 rounded-lg transition-transform duration-100 active:scale-[0.99] active:opacity-95 cursor-pointer relative z-10"
-            style={{ outline: "none", border: "none", background: "none" }}
+          <div
+            className={cn(
+              "relative overflow-hidden rounded-2xl border-b shadow-[0_8px_20px_rgba(0,0,0,0.12)] ring-1 ring-black/5",
+              theme
+                ? cn(TIERED_NEUTRAL_BG, theme.accentBorder, `ring-2 ${theme.ring}`)
+                : headerVariant === "aces"
+                  ? "bg-gradient-to-r from-fuchsia-600 to-indigo-600 border-b ring-2 ring-fuchsia-500/20"
+                  : "bg-gradient-to-r from-emerald-400 to-teal-500 border-b ring-2 ring-emerald-500/20"
+            )}
           >
-            {/* Left: title (+ optional tier badge) */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 min-w-0">
-                <h2 className="text-2xl font-bold text-white">{title}</h2>
-                {tierInfo && (
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap",
-                      theme?.badge ?? "bg-black/15 ring-1 ring-white/25 text-white"
-                    )}
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
-                    <span>{tierInfo.label}</span>
-                    <span className="opacity-80 tabular-nums">{tierInfo.progressText}</span>
-                  </span>
+            {theme && <div className="pointer-events-none absolute inset-0 z-0 bg-slate-950/35" />}
+            {theme && (
+              <div
+                className={cn(
+                  "pointer-events-none absolute left-0 top-0 z-[1] h-full w-[6px] rounded-l-2xl",
+                  theme.accentBg
                 )}
+              />
+            )}
+
+            <button
+              type="button"
+              onClick={onToggle}
+              className="relative z-10 flex w-full items-center justify-between rounded-2xl p-4 transition-transform duration-100 active:scale-[0.99] active:opacity-95"
+              style={{ outline: "none", border: "none", background: "none" }}
+              aria-expanded={isOpen}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                  <h2 className="text-2xl font-bold text-white">{title}</h2>
+                  {tierInfo && (
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap",
+                        theme?.badge ?? "bg-black/15 ring-1 ring-white/25 text-white"
+                      )}
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+                      <span>{tierInfo.label}</span>
+                      <span className="opacity-80 tabular-nums">{tierInfo.progressText}</span>
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Right: pill + chevron (never overflow) */}
-            <div className="flex items-center gap-3 shrink-0">
-              <span
-                className={cn(
-                  "px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap",
-                  theme?.pill ?? "bg-black/20 text-white"
-                )}
-              >
-                {Math.round(completion)}%
-              </span>
-              <ChevronDown
-                className={cn(
-                  "h-6 w-6 text-white shrink-0 transition-transform",
-                  isOpen ? "rotate-180" : "rotate-0"
-                )}
-              />
-            </div>
-          </button>
+              <div className="flex items-center gap-3 shrink-0">
+                <span
+                  className={cn(
+                    "px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap",
+                    theme?.pill ?? "bg-black/20 text-white"
+                  )}
+                >
+                  {Math.round(completion)}%
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "h-6 w-6 text-white shrink-0 transition-transform",
+                    isOpen ? "rotate-180" : "rotate-0"
+                  )}
+                />
+              </div>
+            </button>
+          </div>
         </div>
+
+        {/* Content (now inside the same card) */}
+        <CollapsibleContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
+          <div className="p-3 pt-3 overflow-hidden">
+            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+              {achievements.map((achievement) => {
+                if (!isGatedVisible(achievement as any, effectiveById as any)) return null;
+                const unlocked = isUnlocked(achievement, effectiveById);
+                if (achievement.requiresId && !unlocked) return null;
+
+                const isAceCelebrating = achievement.id === aceCelebratingId;
+                if (process.env.NODE_ENV !== "production" && (achievement.id === "skill-35" || achievement.id === "social-0")) {
+                  console.log("[GATE][CELEBRATE] render", { id: achievement.id, isCelebrating: isAceCelebrating, phase: aceCelebrationPhase });
+                }
+
+                const children = childrenByParentId.get(achievement.id) ?? [];
+                const totalChildrenCount = children.length;
+                const lockedChildCount = children.filter((c) => !isUnlocked(c, effectiveById)).length;
+                const hasSecrets = totalChildrenCount > 0;
+
+                const isCounter = achievement.kind === "counter";
+                const progress = typeof (achievement as any).progress === "number" ? (achievement as any).progress : 0;
+                const target = typeof (achievement as any).target === "number" ? (achievement as any).target : 1;
+
+                return (
+                  <AchievementCard
+                    key={achievement.id}
+                    {...achievement}
+                    category={category}
+                    progress={progress}
+                    target={target}
+                    locked={!unlocked}
+                    hasSecrets={hasSecrets}
+                    lockedChildCount={hasSecrets ? lockedChildCount : undefined}
+                    totalChildrenCount={hasSecrets ? totalChildrenCount : undefined}
+                    isNewlyRevealed={newlyRevealedIds?.has(achievement.id) ?? false}
+                    revealPulse={revealPulseParentIds?.has(achievement.id) ?? false}
+                    celebrateParent={celebratingParentId === achievement.id}
+                    celebratePhase={
+                      isAceCelebrating ? (aceCelebrationPhase ?? "idle") : "idle"
+                    }
+                    onToggle={() => onToggleAchievement(achievement.id)}
+                    onIncrement={
+                      isCounter && onIncrementAchievement
+                        ? () => onIncrementAchievement(achievement.id, 1)
+                        : undefined
+                    }
+                    onDecrement={
+                      isCounter && onIncrementAchievement
+                        ? () => onIncrementAchievement(achievement.id, -1)
+                        : undefined
+                    }
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </CollapsibleContent>
       </div>
-      <CollapsibleContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
-        <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3 mt-3">
-          {achievements.map((achievement) => {
-            if (!isGatedVisible(achievement as any, effectiveById as any)) return null;
-            const unlocked = isUnlocked(achievement, effectiveById);
-            if (achievement.requiresId && !unlocked) return null;
-
-            const isAceCelebrating = achievement.id === aceCelebratingId;
-            if (process.env.NODE_ENV !== "production" && (achievement.id === "skill-35" || achievement.id === "social-0")) {
-              console.log("[GATE][CELEBRATE] render", { id: achievement.id, isCelebrating: isAceCelebrating, phase: aceCelebrationPhase });
-            }
-
-            const children = childrenByParentId.get(achievement.id) ?? [];
-            const totalChildrenCount = children.length;
-            const lockedChildCount = children.filter((c) => !isUnlocked(c, effectiveById)).length;
-            const hasSecrets = totalChildrenCount > 0;
-
-            const isCounter = achievement.kind === "counter";
-            const progress = typeof (achievement as any).progress === "number" ? (achievement as any).progress : 0;
-            const target = typeof (achievement as any).target === "number" ? (achievement as any).target : 1;
-
-            return (
-              <AchievementCard
-                key={achievement.id}
-                {...achievement}
-                category={category}
-                progress={progress}
-                target={target}
-                locked={!unlocked}
-                hasSecrets={hasSecrets}
-                lockedChildCount={hasSecrets ? lockedChildCount : undefined}
-                totalChildrenCount={hasSecrets ? totalChildrenCount : undefined}
-                isNewlyRevealed={newlyRevealedIds?.has(achievement.id) ?? false}
-                revealPulse={revealPulseParentIds?.has(achievement.id) ?? false}
-                celebrateParent={celebratingParentId === achievement.id}
-                celebratePhase={
-                  isAceCelebrating ? (aceCelebrationPhase ?? "idle") : "idle"
-                }
-                onToggle={() => onToggleAchievement(achievement.id)}
-                onIncrement={
-                  isCounter && onIncrementAchievement
-                    ? () => onIncrementAchievement(achievement.id, 1)
-                    : undefined
-                }
-                onDecrement={
-                  isCounter && onIncrementAchievement
-                    ? () => onIncrementAchievement(achievement.id, -1)
-                    : undefined
-                }
-              />
-            );
-          })}
-        </div>
-      </CollapsibleContent>
     </Collapsible>
   );
 }

@@ -189,29 +189,7 @@ function DashboardInner() {
   const [celebratingParentId, setCelebratingParentId] = useState<string | null>(null);
 
   const tabsListRef = useRef<HTMLDivElement | null>(null);
-  const topChromeRef = useRef<HTMLDivElement | null>(null);
   const [indicator, setIndicator] = useState<{ x: number; w: number; h: number } | null>(null);
-
-  useEffect(() => {
-    const el = topChromeRef.current;
-    if (!el) return;
-
-    const updateOffset = () => {
-      const h = el.offsetHeight;
-      document.documentElement.style.setProperty(
-        "--dg-sticky-offset",
-        `calc(var(--dg-navbar-h, 60px) + ${h}px)`
-      );
-    };
-
-    updateOffset();
-    const ro = new ResizeObserver(updateOffset);
-    ro.observe(el);
-    return () => {
-      ro.disconnect();
-      document.documentElement.style.removeProperty("--dg-sticky-offset");
-    };
-  }, []);
 
   useLayoutEffect(() => {
     const el = tabsListRef.current;
@@ -595,6 +573,10 @@ function DashboardInner() {
   const eligibleNow = activeCompletion >= 80;
   const patchCtaDismissedForTab = patchCtaDismissed.has(activeTab);
   const showPatchPromo = eligibleNow && !patchCtaDismissedForTab;
+  // Single source of truth for sticky section header position.
+  // If dashboard chrome spacing changes (navbar, tabs, progress row, patch promo/mask),
+  // retune this number here only.
+  const sectionStickyTop = 182;
   const handlePatchCtaDismiss = () => {
     localStorage.setItem("dgjauth_patch_cta_dismissed_" + activeTab, "1");
     setPatchCtaDismissed((prev) => new Set(prev).add(activeTab));
@@ -629,9 +611,15 @@ function DashboardInner() {
         </DialogContent>
       </Dialog>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full gap-0">
-        <div id="dg-top-chrome" ref={topChromeRef} className="sticky top-[var(--dg-navbar-h,60px)] z-50 py-2 px-3 sm:px-4 min-w-0 bg-background border-b border-border/60 shadow-[0_1px_0_rgba(0,0,0,0.06)] [transform:translateZ(0)]">
-          <div ref={tabsListRef} className="relative mx-auto w-full max-w-md">
+      <main className="min-h-svh pb-24">
+        <div className="mx-auto w-full max-w-4xl">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-0">
+            {/* Header: tabs + progress bar (does not scroll) */}
+            <div className="sticky top-[61px] z-50 isolate overflow-hidden bg-background border-b border-border/60 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+              <div className="absolute inset-0 bg-background" aria-hidden="true" />
+              <div className="relative z-10">
+                <div id="dg-top-chrome" className="pt-2 pb-2 min-w-0">
+                <div ref={tabsListRef} className="relative w-full">
               {indicator && (
                 <div
                   aria-hidden="true"
@@ -664,7 +652,7 @@ function DashboardInner() {
             </TabsTrigger>
             </TabsList>
           </div>
-          <div className="mt-2 mx-auto w-full max-w-4xl px-3 sm:px-4">
+          <div className="mt-2 w-full">
             {(() => {
               const { label, pct } = getActiveTabCompletion(activeTab, skillCompletion, socialCompletion, collectionCompletion);
               return (
@@ -712,57 +700,61 @@ function DashboardInner() {
               </div>
             </div>
           )}
-        </div>
-
-        {showDevTools && (
-          <div className="mt-3">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  console.log("[DEV] clicked reset putting mastery", {
-                    uid,
-                    devUid,
-                    enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
-                  });
-                  devResetPuttingMasteryTier();
-                }}
-              >
-                DEV: Reset Putting Mastery Tier
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  console.log("[DEV] clicked reset all", {
-                    uid,
-                    devUid,
-                    enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
-                  });
-                  devResetAllTieredCategoryTiers();
-                }}
-              >
-                DEV: Reset ALL Tiered Categories
-              </Button>
+                </div>
+                <div className="h-4 bg-background" aria-hidden="true" />
+              </div>
             </div>
-          </div>
-        )}
 
-        <StatsHeader
-          completionPercentage={activeCompletion}
-          totalPoints={allTimePoints}
-          currentStreak={currentStreak}
-          currentRank={currentRankTier}
-          nextRank={nextRankTier}
-          rankProgress={rankProgressPct}
-          prestige={rp.prestige}
-          pointsToNextRank={rp.progress.pointsToNext}
-          nextRankName={rp.progress.nextRank?.name}
-          pointsInPrestige={rp.pointsInPrestige}
-        />
+            <div className="mt-2 pb-6">
+              <StatsHeader
+                completionPercentage={activeCompletion}
+                totalPoints={allTimePoints}
+                currentStreak={currentStreak}
+                currentRank={currentRankTier}
+                nextRank={nextRankTier}
+                rankProgress={rankProgressPct}
+                prestige={rp.prestige}
+                pointsToNextRank={rp.progress.pointsToNext}
+                nextRankName={rp.progress.nextRank?.name}
+                pointsInPrestige={rp.pointsInPrestige}
+              />
 
-        <TabsContent value="skill">
+              {showDevTools && (
+                <div className="mt-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        console.log("[DEV] clicked reset putting mastery", {
+                          uid,
+                          devUid,
+                          enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
+                        });
+                        devResetPuttingMasteryTier();
+                      }}
+                    >
+                      DEV: Reset Putting Mastery Tier
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        console.log("[DEV] clicked reset all", {
+                          uid,
+                          devUid,
+                          enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
+                        });
+                        devResetAllTieredCategoryTiers();
+                      }}
+                    >
+                      DEV: Reset ALL Tiered Categories
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <TabsContent value="skill">
           <div className="mt-6 space-y-4">
               {(() => {
                 const withTierInfo = SECTIONS.skill.map((s) => ({
@@ -784,6 +776,7 @@ function DashboardInner() {
                       title={section.title}
                       sectionKey={sectionKey}
                       achievements={achievements}
+                      stickyTop={sectionStickyTop}
                       tierInfo={tierInfo}
                       headerVariant={section.key === "aces" ? "aces" : undefined}
                       aceCelebratingId={aceCelebratingId}
@@ -827,6 +820,7 @@ function DashboardInner() {
                       title={section.title}
                       sectionKey={sectionKey}
                       achievements={achievements}
+                      stickyTop={sectionStickyTop}
                       tierInfo={tierInfo}
                       aceCelebratingId={aceCelebratingId}
                       aceCelebrationPhase={aceCelebrationPhase}
@@ -869,6 +863,7 @@ function DashboardInner() {
                       title={section.title}
                       sectionKey={sectionKey}
                       achievements={achievements}
+                      stickyTop={sectionStickyTop}
                       tierInfo={tierInfo}
                       effectiveById={effectiveById}
                       allAchievements={allAchievements}
@@ -887,7 +882,10 @@ function DashboardInner() {
               })()}
           </div>
         </TabsContent>
-      </Tabs>
+            </div>
+          </Tabs>
+        </div>
+      </main>
       {tierUpMessage && (
         <div
           className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[120] px-4 py-2 rounded-lg bg-foreground text-background text-sm shadow-lg animate-in fade-in duration-200"

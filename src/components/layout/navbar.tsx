@@ -47,19 +47,37 @@ export function Navbar() {
 
   if (loading) {
     return (
-      <nav id="dg-navbar" className="sticky top-0 z-50 relative flex items-center justify-center h-[60px] border-b bg-background shadow-sm">
-        <Link href="/">
-          <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-semibold">
-            Disc Golf Journey
-          </h1>
-        </Link>
+      <nav
+        id="dg-navbar"
+        className="sticky top-0 z-50 border-b bg-background shadow-sm"
+      >
+        <div className="mx-auto flex h-[60px] w-full max-w-4xl items-center px-4 sm:px-6">
+          <div className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
+            {/* Left (empty while loading) */}
+            <div className="flex min-w-0 shrink-0 items-center justify-start" />
+
+            {/* Center title */}
+            <div className="min-w-0 justify-self-center overflow-hidden">
+              <Link href="/" className="block min-w-0 truncate text-center">
+                <h1 className="truncate text-base font-semibold sm:text-lg">
+                  Disc Golf Journey
+                </h1>
+              </Link>
+            </div>
+
+            {/* Right (empty while loading) */}
+            <div className="flex min-w-0 shrink-0 items-center justify-end" />
+          </div>
+        </div>
       </nav>
     );
   }
 
   const center = header?.title ?? (
-    <Link href="/">
-      <h1 className="text-lg font-semibold">Disc Golf Journey</h1>
+    <Link href="/" className="block min-w-0 truncate text-center">
+      <h1 className="truncate text-base font-semibold sm:text-lg">
+        Disc Golf Journey
+      </h1>
     </Link>
   );
 
@@ -68,13 +86,21 @@ export function Navbar() {
       variant="ghost"
       onClick={handleSignIn}
       disabled={loading || redirectSettling}
+      className="h-9 w-9 shrink-0 px-0 sm:w-auto sm:px-3"
+      aria-label={redirectSettling ? "Signing in…" : "Sign in with Google"}
     >
-      {redirectSettling ? "Signing in…" : "Sign in with Google"}
+      {/* Icon-only on small screens, icon + text on larger screens */}
+      <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-semibold sm:mr-2">
+        G
+      </span>
+      <span className="hidden truncate whitespace-nowrap text-sm sm:inline">
+        {redirectSettling ? "Signing in…" : "Sign in with Google"}
+      </span>
     </Button>
   ) : (
     <Link
       href="/notifications"
-      className="flex items-center justify-center h-10 w-10 rounded-md hover:bg-transparent"
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-transparent"
       aria-label="Notifications"
     >
       <PendingRequestsBell />
@@ -84,27 +110,43 @@ export function Navbar() {
   return (
     <nav
       id="dg-navbar"
-      className="sticky top-0 z-50 relative flex items-center justify-center h-[60px] border-b bg-background shadow-sm"
+      className="sticky top-0 z-50 border-b bg-background shadow-sm"
     >
-      {/* Left slot */}
-      <div className="absolute left-2 flex items-center sm:left-4">
-        {isRootTabPath(normalizedPath)
-          ? null
-          : header?.left
-            ? header.left
-            : backConfig
-              ? <BackButton fallbackHref={backConfig.fallbackHref} label="Back" className="-ml-1 h-8 px-2" />
-              : null}
-      </div>
+      <div className="mx-auto flex h-[60px] w-full max-w-4xl items-center px-4 sm:px-6">
+        <div className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
+          {/* Left slot */}
+          <div className="flex min-w-0 shrink-0 items-center justify-start">
+            {isRootTabPath(normalizedPath)
+              ? null
+              : header?.left
+                ? header.left
+                : backConfig
+                  ? (
+                    <BackButton
+                      fallbackHref={backConfig.fallbackHref}
+                      label="Back"
+                      className="-ml-1 h-8 px-2"
+                    />
+                    )
+                  : null}
+          </div>
 
-      {/* Center */}
-      <div className="absolute left-1/2 -translate-x-1/2">
-        {center}
-      </div>
+          {/* Center title: takes remaining space, truncates if needed */}
+          <div className="min-w-0 justify-self-center overflow-hidden">
+            <div className="min-w-0 truncate text-center">
+              {typeof center === "string" ? (
+                <span className="block truncate font-semibold">{center}</span>
+              ) : (
+                center
+              )}
+            </div>
+          </div>
 
-      {/* Right slot */}
-      <div className="absolute right-4 flex items-center">
-        {header?.right ?? rightDefault}
+          {/* Right slot: content-sized, never shrinks so icons/labels stay visible */}
+          <div className="flex min-w-0 shrink-0 items-center justify-end gap-1">
+            {header?.right ?? rightDefault}
+          </div>
+        </div>
       </div>
     </nav>
   );

@@ -26,7 +26,7 @@ export function BottomNav() {
   if (loading || redirectSettling || !user) return null;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden touch-pan-y select-none">
       <div className="mx-auto flex min-h-16 max-w-4xl items-center justify-around px-2">
         {NAV_ITEMS.map(({ href, label, icon: Icon, isActive }) => (
           <Link
