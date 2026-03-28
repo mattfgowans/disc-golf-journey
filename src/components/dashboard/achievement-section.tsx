@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Lock } from "lucide-react";
 import { AchievementCard } from "@/components/achievements/achievement-card";
 import { cn } from "@/lib/utils";
 import { isGatedVisible, isUnlocked } from "@/lib/achievementProgress";
@@ -11,6 +11,7 @@ import type { Achievement, Achievements } from "@/lib/useAchievements";
 type SectionKey = string;
 
 type TierHeaderInfo = {
+  categoryId?: string;
   tierIndex: number;
   tierKey?: string;
   label: string;
@@ -69,6 +70,10 @@ interface AchievementSectionProps {
   /** Optional class applied to the sticky header container (scoped; e.g. Aces unlock). */
   headerClassName?: string;
   stickyTop: number;
+  viewedTierIndex?: number;
+  activeTierIndex?: number;
+  isTierViewOnly?: boolean;
+  onSelectTier?: (tierIndex: number) => void;
   /** Ace Race card (skill-35) celebration target id. */
   aceCelebratingId?: string | null;
   /** Ace Race card celebration phase. */
@@ -101,6 +106,10 @@ export function AchievementSection({
   headerVariant = "default",
   headerClassName,
   stickyTop,
+  viewedTierIndex,
+  activeTierIndex,
+  isTierViewOnly = false,
+  onSelectTier,
   aceCelebratingId,
   aceCelebrationPhase = "idle",
   effectiveById: effectiveByIdProp,
@@ -149,6 +158,7 @@ export function AchievementSection({
             : "beginner");
 
   const theme = tierInfo ? (TIER_ACCENT[tierKey] ?? TIER_ACCENT.beginner) : null;
+  const TIER_LABELS = ["Beginner", "Intermed.", "Advanced", "Expert"];
 
   return (
     <Collapsible open={isOpen}>
@@ -162,19 +172,19 @@ export function AchievementSection({
         >
           <div
             className={cn(
-              "relative overflow-hidden rounded-2xl border-b shadow-[0_8px_20px_rgba(0,0,0,0.12)] ring-1 ring-black/5",
+              "relative overflow-hidden rounded-2xl border-b shadow-[0_6px_16px_rgba(0,0,0,0.10)] ring-1 ring-black/5",
               theme
-                ? cn(TIERED_NEUTRAL_BG, theme.accentBorder, `ring-2 ${theme.ring}`)
+                ? cn(TIERED_NEUTRAL_BG, theme.accentBorder, `ring-1 ${theme.ring}`)
                 : headerVariant === "aces"
-                  ? "bg-gradient-to-r from-fuchsia-600 to-indigo-600 border-b ring-2 ring-fuchsia-500/20"
-                  : "bg-gradient-to-r from-emerald-400 to-teal-500 border-b ring-2 ring-emerald-500/20"
+                  ? "bg-gradient-to-r from-fuchsia-600 to-indigo-600 border-b ring-1 ring-fuchsia-500/20"
+                  : "bg-gradient-to-r from-emerald-400 to-teal-500 border-b ring-1 ring-emerald-500/20"
             )}
           >
             {theme && <div className="pointer-events-none absolute inset-0 z-0 bg-slate-950/35" />}
             {theme && (
               <div
                 className={cn(
-                  "pointer-events-none absolute left-0 top-0 z-[1] h-full w-[6px] rounded-l-2xl",
+                  "pointer-events-none absolute left-0 top-0 z-[1] h-full w-[5px] rounded-l-2xl",
                   theme.accentBg
                 )}
               />
@@ -183,17 +193,17 @@ export function AchievementSection({
             <button
               type="button"
               onClick={onToggle}
-              className="relative z-10 flex w-full items-center justify-between rounded-2xl p-4 transition-transform duration-100 active:scale-[0.99] active:opacity-95"
+              className="relative z-10 flex w-full items-center justify-between rounded-2xl px-3 py-1.5 transition-transform duration-100 active:scale-[0.99] active:opacity-95"
               style={{ outline: "none", border: "none", background: "none" }}
               aria-expanded={isOpen}
             >
               <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 min-w-0">
-                  <h2 className="text-2xl font-bold text-white">{title}</h2>
+                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                  <h2 className="text-lg font-bold text-white sm:text-xl">{title}</h2>
                   {tierInfo && (
                     <span
                       className={cn(
-                        "inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap",
+                        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap",
                         theme?.badge ?? "bg-black/15 ring-1 ring-white/25 text-white"
                       )}
                     >
@@ -205,10 +215,10 @@ export function AchievementSection({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex shrink-0 items-center gap-2.5">
                 <span
                   className={cn(
-                    "px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap",
+                    "rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
                     theme?.pill ?? "bg-black/20 text-white"
                   )}
                 >
@@ -216,19 +226,72 @@ export function AchievementSection({
                 </span>
                 <ChevronDown
                   className={cn(
-                    "h-6 w-6 text-white shrink-0 transition-transform",
+                    "h-5 w-5 text-white shrink-0 transition-transform",
                     isOpen ? "rotate-180" : "rotate-0"
                   )}
                 />
               </div>
             </button>
+
+            {tierInfo && typeof activeTierIndex === "number" && typeof viewedTierIndex === "number" && onSelectTier && (
+              <div className="px-3 pb-1.5">
+                <div className="grid grid-cols-4 gap-1">
+                  {TIER_LABELS.map((label, idx) => {
+                    const isCurrent = idx === activeTierIndex;
+                    const isSelected = idx === viewedTierIndex;
+                    const isFuture = idx > activeTierIndex;
+                    const isPast = idx < activeTierIndex;
+
+                    return (
+                      <button
+                        key={label}
+                        type="button"
+                        disabled={isFuture}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isFuture) onSelectTier(idx);
+                        }}
+                        className={cn(
+                          "relative min-w-0 overflow-hidden rounded-full px-1.5 py-1 text-[9px] font-semibold transition-all",
+                          "ring-1",
+                          isSelected && isCurrent && "bg-white text-slate-900 ring-white shadow-[0_2px_10px_rgba(255,255,255,0.18)]",
+                          isSelected && !isCurrent && "bg-white/20 text-white ring-white/30 shadow-[0_2px_10px_rgba(0,0,0,0.16)]",
+                          !isSelected && isPast && "bg-black/15 text-white/85 ring-white/20 hover:bg-black/20",
+                          isFuture && "bg-black/10 text-white/35 ring-white/10 cursor-not-allowed"
+                        )}
+                        aria-pressed={isSelected}
+                        aria-label={isFuture ? `${label} locked` : label}
+                      >
+                        <span className="relative z-10 inline-flex w-full items-center justify-center gap-1 truncate">
+                          {isFuture && <Lock className="h-3 w-3 shrink-0" />}
+                          <span className="truncate leading-none">{label}</span>
+                        </span>
+
+                        {isFuture && (
+                          <>
+                            <span
+                              aria-hidden="true"
+                              className="pointer-events-none absolute inset-y-[-6px] left-1/2 w-[1px] -translate-x-1/2 rotate-[28deg] bg-white/25"
+                            />
+                            <span
+                              aria-hidden="true"
+                              className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"
+                            />
+                          </>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Content (now inside the same card) */}
         <CollapsibleContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
-          <div className="p-3 pt-3 overflow-hidden">
-            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+          <div className={cn("overflow-hidden p-2 pt-1.5", isTierViewOnly && "opacity-95")}>
+            <div className="grid gap-1.5 md:grid-cols-2 lg:grid-cols-3">
               {achievements.map((achievement) => {
                 if (!isGatedVisible(achievement as any, effectiveById as any)) return null;
                 const unlocked = isUnlocked(achievement, effectiveById);
@@ -265,14 +328,14 @@ export function AchievementSection({
                     celebratePhase={
                       isAceCelebrating ? (aceCelebrationPhase ?? "idle") : "idle"
                     }
-                    onToggle={() => onToggleAchievement(achievement.id)}
+                    onToggle={isTierViewOnly ? () => {} : () => onToggleAchievement(achievement.id)}
                     onIncrement={
-                      isCounter && onIncrementAchievement
+                      !isTierViewOnly && isCounter && onIncrementAchievement
                         ? () => onIncrementAchievement(achievement.id, 1)
                         : undefined
                     }
                     onDecrement={
-                      isCounter && onIncrementAchievement
+                      !isTierViewOnly && isCounter && onIncrementAchievement
                         ? () => onIncrementAchievement(achievement.id, -1)
                         : undefined
                     }
@@ -280,6 +343,7 @@ export function AchievementSection({
                 );
               })}
             </div>
+
           </div>
         </CollapsibleContent>
       </div>

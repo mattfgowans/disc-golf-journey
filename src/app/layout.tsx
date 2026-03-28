@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import "./globals.css";
 import { AuthDebugHud } from "@/components/AuthDebugHud";
+import { BetaBanner } from "@/components/layout/beta-banner";
 import { HeaderProvider } from "@/components/layout/header-context";
 import { Navbar } from "@/components/layout/navbar";
 import { BottomNav } from "@/components/layout/bottom-nav";
@@ -27,6 +28,7 @@ export default function RootLayout({
         <AuthProvider>
           <HeaderProvider>
             <Navbar />
+            <BetaBanner />
             <main className="mx-auto w-full max-w-4xl px-4 pt-4 pb-[calc(88px+env(safe-area-inset-bottom))] md:px-6 md:pt-6 md:pb-8">
               <div className="rounded-2xl bg-background shadow-sm ring-1 ring-black/5 p-4 md:p-6">
                 {children}

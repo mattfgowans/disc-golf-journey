@@ -13,6 +13,19 @@ import { isAchievementDisabled } from "./disabledAchievements";
 
 // Schema version for achievements - increment when template structure changes
 const ACHIEVEMENTS_SCHEMA_VERSION = 1;
+const ROUND_COUNTER_ID = "round_counter_lifetime";
+const ROUND_WEEKLY_CAP = 3;
+
+function countsTowardTierProgress(categoryId: string, achievementId: string): boolean {
+  return !(categoryId === "round-milestones" && achievementId === ROUND_COUNTER_ID);
+}
+
+export type RoundScoring = {
+  allTimeEarnedRounds: number;
+  weekly: Record<string, number>;
+  monthly: Record<string, number>;
+  yearly: Record<string, number>;
+};
 
 export type AchievementBase = {
   id: string;
@@ -46,6 +59,7 @@ export type CounterAchievement = AchievementBase & {
   kind: "counter";
   target: number;
   progress: number;
+  roundScoring?: RoundScoring;
 };
 
 export type Achievement = ToggleAchievement | CounterAchievement;
@@ -133,6 +147,10 @@ function mergeAchievementsWithTemplate(saved: Achievements, template: Achievemen
 
       if (isCounter && (mergedAchievement as any).kind === "counter") {
         (mergedAchievement as any).progress = effective.progress;
+        const savedRoundScoring = (savedAchievement as any)?.roundScoring;
+        if (savedRoundScoring && typeof savedRoundScoring === "object") {
+          (mergedAchievement as any).roundScoring = savedRoundScoring;
+        }
       }
 
       // Preserve/derive year anchors for yearly achievements so normal saves don't erase history.
@@ -883,9 +901,68 @@ export function useAchievements(initialAchievements?: Achievements) {
     const nextProgress = Math.max(0, Math.min(target, currentProgress + delta));
     const wasCompleted = currentProgress >= target;
     const isNowCompleted = nextProgress >= target;
+    const actualDelta = nextProgress - currentProgress;
 
     const nextCompletedDate =
       isNowCompleted && !wasCompleted ? Timestamp.now() : wasCompleted ? ach.completedDate : undefined;
+
+    let nextRoundScoring = (ach as CounterAchievement).roundScoring;
+    if (id === ROUND_COUNTER_ID) {
+      const periodKeys = getPeriodKeys();
+      const existingRoundScoring = (ach as CounterAchievement).roundScoring;
+      const updatedRoundScoring: RoundScoring = {
+        allTimeEarnedRounds: existingRoundScoring?.allTimeEarnedRounds ?? 0,
+        weekly: { ...(existingRoundScoring?.weekly ?? {}) },
+        monthly: { ...(existingRoundScoring?.monthly ?? {}) },
+        yearly: { ...(existingRoundScoring?.yearly ?? {}) },
+      };
+
+      if (actualDelta > 0) {
+        const currentWeeklyScoredRounds = updatedRoundScoring.weekly[periodKeys.weeklyKey] ?? 0;
+        const remainingWeeklyScoredRounds = Math.max(0, ROUND_WEEKLY_CAP - currentWeeklyScoredRounds);
+        const scoredDelta = Math.min(actualDelta, remainingWeeklyScoredRounds);
+
+        if (scoredDelta > 0) {
+          updatedRoundScoring.allTimeEarnedRounds += scoredDelta;
+          updatedRoundScoring.weekly[periodKeys.weeklyKey] = currentWeeklyScoredRounds + scoredDelta;
+          updatedRoundScoring.monthly[periodKeys.monthlyKey] =
+            (updatedRoundScoring.monthly[periodKeys.monthlyKey] ?? 0) + scoredDelta;
+          updatedRoundScoring.yearly[periodKeys.yearlyKey] =
+            (updatedRoundScoring.yearly[periodKeys.yearlyKey] ?? 0) + scoredDelta;
+        }
+      } else if (actualDelta < 0) {
+        const removeRequested = Math.abs(actualDelta);
+        const removable = Math.min(
+          removeRequested,
+          updatedRoundScoring.allTimeEarnedRounds,
+          updatedRoundScoring.weekly[periodKeys.weeklyKey] ?? 0,
+          updatedRoundScoring.monthly[periodKeys.monthlyKey] ?? 0,
+          updatedRoundScoring.yearly[periodKeys.yearlyKey] ?? 0
+        );
+
+        if (removable > 0) {
+          updatedRoundScoring.allTimeEarnedRounds -= removable;
+          updatedRoundScoring.weekly[periodKeys.weeklyKey] =
+            (updatedRoundScoring.weekly[periodKeys.weeklyKey] ?? 0) - removable;
+          updatedRoundScoring.monthly[periodKeys.monthlyKey] =
+            (updatedRoundScoring.monthly[periodKeys.monthlyKey] ?? 0) - removable;
+          updatedRoundScoring.yearly[periodKeys.yearlyKey] =
+            (updatedRoundScoring.yearly[periodKeys.yearlyKey] ?? 0) - removable;
+        }
+
+        if ((updatedRoundScoring.weekly[periodKeys.weeklyKey] ?? 0) <= 0) {
+          delete updatedRoundScoring.weekly[periodKeys.weeklyKey];
+        }
+        if ((updatedRoundScoring.monthly[periodKeys.monthlyKey] ?? 0) <= 0) {
+          delete updatedRoundScoring.monthly[periodKeys.monthlyKey];
+        }
+        if ((updatedRoundScoring.yearly[periodKeys.yearlyKey] ?? 0) <= 0) {
+          delete updatedRoundScoring.yearly[periodKeys.yearlyKey];
+        }
+      }
+
+      nextRoundScoring = updatedRoundScoring;
+    }
 
     const updatedAchievements: Achievements = {
       ...achievements,
@@ -896,6 +973,7 @@ export function useAchievements(initialAchievements?: Achievements) {
           progress: nextProgress,
           isCompleted: isNowCompleted,
           completedDate: nextCompletedDate,
+          ...(id === ROUND_COUNTER_ID ? { roundScoring: nextRoundScoring } : {}),
         } as Achievement;
       }),
     };
@@ -912,7 +990,11 @@ export function useAchievements(initialAchievements?: Achievements) {
         const activeTierDefs = getActiveTierAchievements(categoryId, currentTierIndex);
         const currentYear = getCurrentYear();
         const byId = effectiveById(updatedAchievements);
-        const visibleTierDefs = activeTierDefs.filter((def) => isGatedVisible(def as any, byId as any));
+        const visibleTierDefs = activeTierDefs.filter(
+          (def) =>
+            isGatedVisible(def as any, byId as any) &&
+            countsTowardTierProgress(categoryId, def.id)
+        );
         const allComplete =
           visibleTierDefs.length > 0 &&
           visibleTierDefs.every((def) => isAchievementCompleted(def as any, byId[def.id] as any, currentYear));
@@ -1044,7 +1126,11 @@ export function useAchievements(initialAchievements?: Achievements) {
         const currentYear = getCurrentYear();
         const byId = effectiveById(updatedAchievements);
 
-        const visibleTierDefs = activeTierDefs.filter((def) => isGatedVisible(def as any, byId as any));
+        const visibleTierDefs = activeTierDefs.filter(
+          (def) =>
+            isGatedVisible(def as any, byId as any) &&
+            countsTowardTierProgress(categoryId, def.id)
+        );
         const allComplete =
           visibleTierDefs.length > 0 &&
           visibleTierDefs.every((def) => isAchievementCompleted(def as any, byId[def.id] as any, currentYear));

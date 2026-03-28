@@ -102,9 +102,9 @@ export function LeaderboardTab({
 
   if (loading) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2.5 rounded-xl bg-muted/20 p-1">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="h-12 bg-muted rounded-lg animate-pulse" />
+          <div key={i} className="h-12 rounded-lg bg-muted/70 animate-pulse" />
         ))}
       </div>
     );
@@ -127,12 +127,16 @@ export function LeaderboardTab({
 
   if (entries.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-semibold mb-2">No entries yet</h3>
-        <p className="text-muted-foreground">
+      <div className="py-10 text-center">
+        <div className="mx-auto flex max-w-sm flex-col items-center space-y-3 rounded-xl bg-muted/20 px-6 py-8">
+          <Trophy className="h-11 w-11 text-muted-foreground" />
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold">No entries yet</h3>
+            <p className="text-sm text-muted-foreground">
           Be the first to earn XP and claim the top spot!
-        </p>
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -140,15 +144,19 @@ export function LeaderboardTab({
   // Special empty state for friends-only view
   if (friendsOnly && renderedEntries.length <= 1) {
     return (
-      <div className="text-center py-12">
-        <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-semibold mb-2">No friends ranked yet</h3>
-        <p className="text-muted-foreground mb-6">
-          Add friends to see how you stack up each week.
-        </p>
-        <Button asChild>
-          <Link href="/friends">Add friends</Link>
-        </Button>
+      <div className="py-10 text-center">
+        <div className="mx-auto flex max-w-sm flex-col items-center space-y-4 rounded-xl bg-muted/20 px-6 py-8">
+          <Trophy className="h-11 w-11 text-muted-foreground" />
+          <div className="space-y-1.5">
+            <h3 className="text-lg font-semibold">No friends ranked yet</h3>
+            <p className="text-sm text-muted-foreground">
+              Add friends to see how you stack up each week.
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/friends">Add friends</Link>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -156,12 +164,12 @@ export function LeaderboardTab({
   return (
     <>
       {error && (
-        <div className="p-4 mb-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+        <div className="mb-4 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3">
           <p className="text-sm font-medium text-destructive">Leaderboard failed to load</p>
-          <p className="text-xs text-muted-foreground mt-1">{error}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{error}</p>
         </div>
       )}
-      <div className={`${maxHeightClass} overflow-y-auto pr-2 space-y-2`}>
+      <div className={`${maxHeightClass} space-y-2 overflow-y-auto pr-2`}>
         {(maxRows ? renderedEntries.slice(0, maxRows) : renderedEntries).map((entry, index) => (
           <LeaderboardRow
             key={entry.uid}
@@ -172,9 +180,9 @@ export function LeaderboardTab({
         ))}
       </div>
       {showYourRank && (
-        <div className="pt-4 border-t">
-          <div className="text-xs text-muted-foreground mb-2 px-3">Your rank</div>
-          <div className="bg-muted/40 rounded-lg p-2">
+        <div className="border-t pt-4">
+          <div className="mb-2 px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground/90">Your rank</div>
+          <div className="rounded-xl bg-muted/30 p-2">
             <LeaderboardRow
               entry={renderedEntries[currentIndex]}
               rank={currentIndex + 1}
@@ -184,7 +192,7 @@ export function LeaderboardTab({
         </div>
       )}
       {hasMore && (
-        <div className="pt-3 text-center">
+        <div className="pt-4 text-center">
           <Button onClick={loadMore} disabled={loadingMore} variant="outline">
             {loadingMore ? "Loading..." : "Load more"}
           </Button>

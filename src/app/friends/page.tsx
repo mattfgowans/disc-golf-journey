@@ -43,6 +43,7 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
     (r) => (r.fromUsername ?? "").replace(/^@/, "").trim().toLowerCase() === typed
   );
   const disableSend = isSending || !typed || outgoingMatch || friendMatch || incomingMatch;
+  const hasNoFriends = friends.length === 0;
 
   const handleSendRequest = async () => {
     if (!friendUid.trim()) return;
@@ -178,239 +179,251 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Friends
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {hookError && (
-          <p className="text-sm text-destructive">{hookError}</p>
-        )}
-        {/* Send Friend Request */}
-        <div className="space-y-2">
-          <Label htmlFor="friend-uid">Send Friend Request</Label>
-          <div className="flex gap-2">
-            <Input
-              id="friend-uid"
-              placeholder="Enter username (e.g. johndoe or @johndoe)"
-              value={friendUid}
-              onChange={(e) => setFriendUid(e.target.value)}
-              disabled={isSending}
-            />
-            <Button onClick={handleSendRequest} size="sm" disabled={disableSend}>
-              {isSending ? "Sending..." : <UserPlus className="h-4 w-4" />}
-            </Button>
-          </div>
-          {friendMatch && typed && (
-            <p className="text-sm text-muted-foreground">You&apos;re already friends with this user.</p>
-          )}
-          {outgoingMatch && typed && !friendMatch && (
-            <p className="text-sm text-muted-foreground">Friend request already sent.</p>
-          )}
-          {incomingMatch && typed && !friendMatch && !outgoingMatch && (
-            <p className="text-sm text-muted-foreground">This user already sent you a request — accept it below.</p>
-          )}
-          {errorMessage && (
-            <p className="text-sm text-destructive">{errorMessage}</p>
-          )}
-          {successMessage && (
-            <p className="text-sm text-green-600">{successMessage}</p>
-          )}
+    <>
+      {hasNoFriends && (
+        <div className="flex flex-col items-center text-center py-6">
+          <Users className="h-8 w-8 text-muted-foreground mb-2" />
+          <h2 className="text-lg font-semibold">No friends yet</h2>
+          <p className="text-sm text-muted-foreground max-w-md mt-1">
+            Start building your disc golf community by sending your first friend request.
+          </p>
         </div>
+      )}
 
-        {/* Incoming Requests */}
-        {incomingRequests.length > 0 && (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Friends
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {hookError && (
+            <p className="text-sm text-destructive">{hookError}</p>
+          )}
+          {/* Send Friend Request */}
           <div className="space-y-2">
-            <Label>Incoming Requests</Label>
-            <div className="space-y-2">
-              {incomingRequests.map((request) => {
-                const label = request.fromUsername ? `@${request.fromUsername}` : request.fromUid;
-                const username = (request.fromUsername ?? "").replace(/^@/, "").trim() || null;
-                const leftContent = (
-                  <>
-                    <Avatar className="h-6 w-6 shrink-0">
-                      <AvatarImage src={request.fromPhotoURL} />
-                      <AvatarFallback className="text-xs">
-                        {label.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                      <span className="block truncate text-sm font-medium">{label}</span>
-                    </div>
-                  </>
-                );
+            <Label htmlFor="friend-uid">Send Friend Request</Label>
+            <div className="flex gap-2">
+              <Input
+                id="friend-uid"
+                placeholder="Enter username (e.g. johndoe or @johndoe)"
+                value={friendUid}
+                onChange={(e) => setFriendUid(e.target.value)}
+                disabled={isSending}
+              />
+              <Button onClick={handleSendRequest} size="sm" disabled={disableSend}>
+                {isSending ? "Sending..." : <UserPlus className="h-4 w-4" />}
+              </Button>
+            </div>
+            {friendMatch && typed && (
+              <p className="text-sm text-muted-foreground">You&apos;re already friends with this user.</p>
+            )}
+            {outgoingMatch && typed && !friendMatch && (
+              <p className="text-sm text-muted-foreground">Friend request already sent.</p>
+            )}
+            {incomingMatch && typed && !friendMatch && !outgoingMatch && (
+              <p className="text-sm text-muted-foreground">This user already sent you a request — accept it below.</p>
+            )}
+            {errorMessage && (
+              <p className="text-sm text-destructive">{errorMessage}</p>
+            )}
+            {successMessage && (
+              <p className="text-sm text-green-600">{successMessage}</p>
+            )}
+          </div>
 
-                return (
-                  <div
-                    key={request.fromUid}
-                    className="flex items-center justify-between gap-3 p-2 border rounded"
-                  >
-                    {username ? (
-                      <Link
-                        href={`/u?username=${encodeURIComponent(username)}`}
-                        className="flex min-w-0 flex-1 items-center gap-2"
-                      >
-                        {leftContent}
-                      </Link>
-                    ) : (
-                      <div className="flex min-w-0 flex-1 items-center gap-2">
-                        {leftContent}
+          {/* Incoming Requests */}
+          {incomingRequests.length > 0 && (
+            <div className="space-y-2">
+              <Label>Incoming Requests</Label>
+              <div className="space-y-2">
+                {incomingRequests.map((request) => {
+                  const label = request.fromUsername ? `@${request.fromUsername}` : request.fromUid;
+                  const username = (request.fromUsername ?? "").replace(/^@/, "").trim() || null;
+                  const leftContent = (
+                    <>
+                      <Avatar className="h-6 w-6 shrink-0">
+                        <AvatarImage src={request.fromPhotoURL} />
+                        <AvatarFallback className="text-xs">
+                          {label.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <span className="block truncate text-sm font-medium">{label}</span>
                       </div>
-                    )}
-                    <div className="flex shrink-0 gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleAcceptRequest(request.fromUid)}
-                        disabled={busyRequestId === `incoming:${request.fromUid}`}
-                      >
-                        Accept
-                      </Button>
+                    </>
+                  );
+
+                  return (
+                    <div
+                      key={request.fromUid}
+                      className="flex items-center justify-between gap-3 p-2 border rounded"
+                    >
+                      {username ? (
+                        <Link
+                          href={`/u?username=${encodeURIComponent(username)}`}
+                          className="flex min-w-0 flex-1 items-center gap-2"
+                        >
+                          {leftContent}
+                        </Link>
+                      ) : (
+                        <div className="flex min-w-0 flex-1 items-center gap-2">
+                          {leftContent}
+                        </div>
+                      )}
+                      <div className="flex shrink-0 gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleAcceptRequest(request.fromUid)}
+                          disabled={busyRequestId === `incoming:${request.fromUid}`}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRejectRequest(request)}
+                          disabled={busyRequestId === `incoming:${request.fromUid}`}
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Outgoing Requests */}
+          <div className="space-y-2">
+            <Label>Outgoing Requests</Label>
+            {outgoingRequests.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No pending outgoing requests.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {outgoingRequests.map((request) => {
+                  const rawUsername = request.toUsername ?? "";
+                  const username = rawUsername.replace(/^@/, "").trim() || null;
+                  const primaryLabel = username ? `@${username}` : request.toUid;
+
+                  return (
+                    <div
+                      key={request.toUid}
+                      className="flex items-center justify-between gap-3 p-2 border rounded"
+                    >
+                      {username ? (
+                        <Link
+                          href={`/u?username=${encodeURIComponent(username)}`}
+                          className="flex min-w-0 flex-1 items-center gap-3"
+                        >
+                          <Avatar className="h-6 w-6 shrink-0">
+                            <AvatarFallback className="text-xs">
+                              {primaryLabel.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium text-primary">
+                              {primaryLabel}
+                            </span>
+                          </div>
+                        </Link>
+                      ) : (
+                        <div className="flex min-w-0 flex-1 items-center gap-3">
+                          <Avatar className="h-6 w-6 shrink-0">
+                            <AvatarFallback className="text-xs">
+                              {primaryLabel.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium">{primaryLabel}</span>
+                          </div>
+                        </div>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleRejectRequest(request)}
-                        disabled={busyRequestId === `incoming:${request.fromUid}`}
+                        className="flex-shrink-0"
+                        onClick={() => handleCancelRequest(request)}
+                        disabled={busyRequestId === `outgoing:${request.toUid}`}
                       >
-                        Reject
+                        Cancel
                       </Button>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        )}
 
-        {/* Outgoing Requests */}
-        <div className="space-y-2">
-          <Label>Outgoing Requests</Label>
-          {outgoingRequests.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No pending outgoing requests.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {outgoingRequests.map((request) => {
-                const rawUsername = request.toUsername ?? "";
-                const username = rawUsername.replace(/^@/, "").trim() || null;
-                const primaryLabel = username ? `@${username}` : request.toUid;
+          {/* Friends List */}
+          <div className="space-y-2">
+            <Label>Your Friends ({friends.length})</Label>
+            {friends.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No friends added yet.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {friends.map((friend) => {
+                  const un = (friend.username ?? "").replace(/^@/, "").trim().toLowerCase();
+                  const dn = (friend.displayName ?? "").trim().toLowerCase();
+                  const redundant = un && dn && (dn === un || dn === `@${un}`);
+                  const showMutedUsername = friend.username && !redundant;
 
-                return (
-                  <div
-                    key={request.toUid}
-                    className="flex items-center justify-between gap-3 p-2 border rounded"
-                  >
-                    {username ? (
-                      <Link
-                        href={`/u?username=${encodeURIComponent(username)}`}
-                        className="flex min-w-0 flex-1 items-center gap-3"
+                  return (
+                    <div
+                      key={friend.uid}
+                      className="flex items-center justify-between gap-3 p-2 border rounded"
+                    >
+                      <div className="flex min-w-0 flex-1 items-center space-x-2">
+                        <Avatar className="h-8 w-8 shrink-0">
+                          <AvatarImage src={friend.photoURL} />
+                          <AvatarFallback className="text-xs">
+                            {(friend.displayName || `@${friend.username}` || "F").charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0 flex-1">
+                          {friend.username ? (
+                            <Link
+                              href={`/u?username=${encodeURIComponent((friend.username ?? "").replace(/^@/, "").trim())}`}
+                              className="block truncate text-sm font-medium text-primary hover:underline"
+                            >
+                              {friend.displayName || `@${friend.username}` || "Friend"}
+                            </Link>
+                          ) : (
+                            <p className="truncate text-sm font-medium">
+                              {friend.displayName || "Friend"}
+                            </p>
+                          )}
+                          {showMutedUsername && (
+                            <p className="truncate text-xs text-muted-foreground">
+                              @{(friend.username ?? "").replace(/^@/, "").trim()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-shrink-0"
+                        onClick={() => handleUnfriend(friend)}
+                        disabled={unfriendingFriend === friend.uid}
                       >
-                        <Avatar className="h-6 w-6 shrink-0">
-                          <AvatarFallback className="text-xs">
-                            {primaryLabel.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-medium text-primary">
-                            {primaryLabel}
-                          </span>
-                        </div>
-                      </Link>
-                    ) : (
-                      <div className="flex min-w-0 flex-1 items-center gap-3">
-                        <Avatar className="h-6 w-6 shrink-0">
-                          <AvatarFallback className="text-xs">
-                            {primaryLabel.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-medium">{primaryLabel}</span>
-                        </div>
-                      </div>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-shrink-0"
-                      onClick={() => handleCancelRequest(request)}
-                      disabled={busyRequestId === `outgoing:${request.toUid}`}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Friends List */}
-        <div className="space-y-2">
-          <Label>Your Friends ({friends.length})</Label>
-          {friends.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No friends yet. Send some friend requests!
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {friends.map((friend) => {
-                const un = (friend.username ?? "").replace(/^@/, "").trim().toLowerCase();
-                const dn = (friend.displayName ?? "").trim().toLowerCase();
-                const redundant = un && dn && (dn === un || dn === `@${un}`);
-                const showMutedUsername = friend.username && !redundant;
-
-                return (
-                  <div
-                    key={friend.uid}
-                    className="flex items-center justify-between gap-3 p-2 border rounded"
-                  >
-                    <div className="flex min-w-0 flex-1 items-center space-x-2">
-                      <Avatar className="h-8 w-8 shrink-0">
-                        <AvatarImage src={friend.photoURL} />
-                        <AvatarFallback className="text-xs">
-                          {(friend.displayName || `@${friend.username}` || "F").charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0 flex-1">
-                        {friend.username ? (
-                          <Link
-                            href={`/u?username=${encodeURIComponent((friend.username ?? "").replace(/^@/, "").trim())}`}
-                            className="block truncate text-sm font-medium text-primary hover:underline"
-                          >
-                            {friend.displayName || `@${friend.username}` || "Friend"}
-                          </Link>
-                        ) : (
-                          <p className="truncate text-sm font-medium">
-                            {friend.displayName || "Friend"}
-                          </p>
-                        )}
-                        {showMutedUsername && (
-                          <p className="truncate text-xs text-muted-foreground">
-                            @{(friend.username ?? "").replace(/^@/, "").trim()}
-                          </p>
-                        )}
-                      </div>
+                        {unfriendingFriend === friend.uid ? "Removing..." : "Unfriend"}
+                      </Button>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-shrink-0"
-                      onClick={() => handleUnfriend(friend)}
-                      disabled={unfriendingFriend === friend.uid}
-                    >
-                      {unfriendingFriend === friend.uid ? "Removing..." : "Unfriend"}
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </>
   );
 }
 

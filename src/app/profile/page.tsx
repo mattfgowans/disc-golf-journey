@@ -240,15 +240,15 @@ function ProfileContent({
       .toUpperCase();
 
   return (
-    <div className="container mx-auto py-8 max-w-2xl">
-      <div className="space-y-8">
+    <div className="container mx-auto py-6 max-w-2xl md:py-8">
+      <div className="space-y-6">
         {/* Profile Header */}
         <div className="text-center">
-          <Avatar className="w-24 h-24 mx-auto mb-4">
+          <Avatar className="w-20 h-20 mx-auto mb-3">
             <AvatarImage src={profile.photoURL} alt={profile.displayName} />
             <AvatarFallback className="text-lg">{initials}</AvatarFallback>
           </Avatar>
-          <h1 className="text-3xl font-bold">{profile.displayName}</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">{profile.displayName}</h1>
         </div>
 
         {/* Rank + Prestige */}
@@ -274,108 +274,128 @@ function ProfileContent({
         </div>
 
         {/* Profile Information */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">Profile Information</h2>
-            {!isEditing ? (
-              <Button onClick={() => setIsEditing(true)} variant="outline">
-                <Edit2 className="w-4 h-4 mr-2" />
-                Edit Profile
-              </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button onClick={handleSave} disabled={isSaving}>
-                  {isSaving ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4 mr-2" />
-                  )}
-                  Save
+        <div className="rounded-xl border border-border bg-muted/30 p-4">
+          <div className="space-y-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="text-xl font-semibold md:text-2xl">Profile Information</h2>
+              {!isEditing ? (
+                <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
+                  <Edit2 className="w-4 h-4 mr-2" />
+                  Edit Profile
                 </Button>
-                <Button onClick={handleCancel} variant="outline">
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button onClick={handleSave} disabled={isSaving} size="sm">
+                    {isSaving ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    Save
+                  </Button>
+                  <Button onClick={handleCancel} variant="outline" size="sm">
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              {/* Bio */}
+              <div>
+                <Label htmlFor="bio">Bio</Label>
+                {isEditing ? (
+                  <textarea
+                    id="bio"
+                    value={editForm.bio || ""}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setEditForm(prev => ({ ...prev, bio: e.target.value }))
+                    }
+                    placeholder="Tell us about your disc golf journey..."
+                    rows={3}
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                ) : (
+                  <p className="mt-1 text-sm">{profile.bio || "No bio yet"}</p>
+                )}
               </div>
-            )}
-          </div>
 
-          <div className="space-y-4">
-            {/* Bio */}
-            <div>
-              <Label htmlFor="bio">Bio</Label>
-              {isEditing ? (
-                <textarea
-                  id="bio"
-                  value={editForm.bio || ""}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setEditForm(prev => ({ ...prev, bio: e.target.value }))
-                  }
-                  placeholder="Tell us about your disc golf journey..."
-                  rows={3}
-                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              ) : (
-                <p className="mt-1 text-sm">{profile.bio || "No bio yet"}</p>
-              )}
-            </div>
+              {/* Home Course */}
+              <div>
+                <Label htmlFor="homeCourse">Home Course</Label>
+                {isEditing ? (
+                  <Input
+                    id="homeCourse"
+                    value={editForm.homeCourse || ""}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, homeCourse: e.target.value }))}
+                    placeholder="Your favorite course"
+                  />
+                ) : (
+                  <p className="mt-1 text-sm">{profile.homeCourse || "Not set"}</p>
+                )}
+              </div>
 
-            {/* Home Course */}
-            <div>
-              <Label htmlFor="homeCourse">Home Course</Label>
-              {isEditing ? (
-                <Input
-                  id="homeCourse"
-                  value={editForm.homeCourse || ""}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, homeCourse: e.target.value }))}
-                  placeholder="Your favorite course"
-                />
-              ) : (
-                <p className="mt-1 text-sm">{profile.homeCourse || "Not set"}</p>
-              )}
-            </div>
-
-            {/* Username */}
-            <div>
-              <Label htmlFor="username">Username</Label>
-              <p className="text-xs text-muted-foreground mb-1">
-                This is how friends can find you. Letters/numbers only.
-              </p>
-              {isEditing ? (
-                <Input
-                  id="username"
-                  value={editForm.username || ""}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                  placeholder="@yourname"
-                />
-              ) : (
-                <p className="mt-1 text-sm">{profile.username ? `@${profile.username}` : "Not set"}</p>
-              )}
-            </div>
-
-            {/* Handedness */}
-            <div>
-              <Label htmlFor="handedness">Handedness</Label>
-              {isEditing ? (
-                <select
-                  id="handedness"
-                  value={editForm.handedness ?? ""}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                    setEditForm(prev => ({ ...prev, handedness: e.target.value }))
-                  }
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="" disabled>Select handedness…</option>
-                  {HANDEDNESS_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>{HANDEDNESS_LABELS[opt]}</option>
-                  ))}
-                </select>
-              ) : (
-                <p className="mt-1 text-sm">
-                  {isHandedness(profile.handedness) ? HANDEDNESS_LABELS[profile.handedness] : "Not set"}
+              {/* Username */}
+              <div>
+                <Label htmlFor="username">Username</Label>
+                <p className="text-xs text-muted-foreground mb-1">
+                  This is how friends can find you. Letters/numbers only.
                 </p>
-              )}
+                {isEditing ? (
+                  <Input
+                    id="username"
+                    value={editForm.username || ""}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
+                    placeholder="@yourname"
+                  />
+                ) : (
+                  <p className="mt-1 text-sm">{profile.username ? `@${profile.username}` : "Not set"}</p>
+                )}
+              </div>
+
+              {/* Handedness */}
+              <div>
+                <Label htmlFor="handedness">Handedness</Label>
+                {isEditing ? (
+                  <select
+                    id="handedness"
+                    value={editForm.handedness ?? ""}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setEditForm(prev => ({ ...prev, handedness: e.target.value }))
+                    }
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="" disabled>Select handedness…</option>
+                    {HANDEDNESS_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{HANDEDNESS_LABELS[opt]}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <p className="mt-1 text-sm">
+                    {isHandedness(profile.handedness) ? HANDEDNESS_LABELS[profile.handedness] : "Not set"}
+                  </p>
+                )}
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Beta Feedback */}
+        <div className="rounded-xl border border-border bg-muted/30 p-4">
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-muted-foreground">Beta Feedback</h3>
+            <p className="text-sm text-muted-foreground">
+              Help improve Disc Golf Journey by reporting bugs, confusing spots, or feature ideas.
+            </p>
+            <a
+              href="https://forms.gle/usGuEsyy5LZJA7Wy6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">Send Feedback</Button>
+            </a>
           </div>
         </div>
 

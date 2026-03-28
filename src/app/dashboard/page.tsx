@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAchievements, type Achievement, type Achievements } from "@/lib/useAchievements";
@@ -174,6 +174,7 @@ function DashboardInner() {
   const router = useRouter();
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
+  const [viewedTierByCategoryId, setViewedTierByCategoryId] = useState<Record<string, number>>({});
   const [userStats, setUserStats] = useState<{ allTime: number } | null>(null);
   const [patchCtaDismissed, setPatchCtaDismissed] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
@@ -187,39 +188,6 @@ function DashboardInner() {
   const [revealPulseParentIds, setRevealPulseParentIds] = useState<Set<string>>(new Set());
   const [secretModalOpen, setSecretModalOpen] = useState(false);
   const [celebratingParentId, setCelebratingParentId] = useState<string | null>(null);
-
-  const tabsListRef = useRef<HTMLDivElement | null>(null);
-  const [indicator, setIndicator] = useState<{ x: number; w: number; h: number } | null>(null);
-
-  useLayoutEffect(() => {
-    const el = tabsListRef.current;
-    if (!el) return;
-
-    const measure = () => {
-      const active = el.querySelector<HTMLElement>('[data-state="active"]');
-      if (!active) return;
-
-      const list = active.parentElement;
-      if (!list) return;
-
-      const x = list.offsetLeft + active.offsetLeft;
-      const w = active.offsetWidth;
-      const h = el.clientHeight;
-
-      setIndicator({ x, w, h });
-    };
-
-    measure();
-    window.addEventListener("resize", measure);
-    const t1 = window.setTimeout(measure, 50);
-    const t2 = window.setTimeout(measure, 250);
-
-    return () => {
-      window.removeEventListener("resize", measure);
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-    };
-  }, [activeTab]);
 
   const devToolsEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
   const devUid = process.env.NEXT_PUBLIC_DEV_UID;
@@ -397,11 +365,15 @@ function DashboardInner() {
     return a.isCompleted;
   };
 
+  const getAchievementsForCompletion = (achievements: Achievement[]) =>
+    achievements.filter((achievement) => achievement.id !== "ace_counter_lifetime");
+
   // Calculate completion percentage for a specific set of achievements
   const getCategoryCompletion = (achievements: Achievement[]) => {
-    const total = achievements.length;
+    const completionAchievements = getAchievementsForCompletion(achievements);
+    const total = completionAchievements.length;
     if (total === 0) return 0;
-    const totalFraction = achievements.reduce((sum, a) => sum + getAchievementCompletionFraction(a), 0);
+    const totalFraction = completionAchievements.reduce((sum, a) => sum + getAchievementCompletionFraction(a), 0);
     return (totalFraction / total) * 100;
   };
 
@@ -419,7 +391,11 @@ function DashboardInner() {
     const tierIds = tierDefs.map((d) => d.id);
     const currentYear = getCurrentYear();
 
-    const visibleTierDefs = tierDefs.filter((def) => isGatedVisible(def as any, effectiveById as any));
+    const visibleTierDefs = tierDefs.filter(
+      (def) =>
+        isGatedVisible(def as any, effectiveById as any) &&
+        !(categoryId === "round-milestones" && def.id === "round_counter_lifetime")
+    );
     const completedCount = visibleTierDefs.filter((def) =>
       isAchievementCompleted(def as any, effectiveById[def.id] as any, currentYear)
     ).length;
@@ -432,6 +408,7 @@ function DashboardInner() {
       `Tier ${tierIndex}`;
 
     return {
+      categoryId,
       tierIndex,
       tierKey:
         tierIndex === 0 ? "beginner" :
@@ -445,7 +422,11 @@ function DashboardInner() {
   };
 
   // Get achievements for a specific category and subcategory
-  const getCategoryAchievements = (category: keyof Achievements, subcategory: string) => {
+  const getCategoryAchievements = (
+    category: keyof Achievements,
+    subcategory: string,
+    selectedTierIndex?: number
+  ) => {
     // Filter by subcategory for all categories
     const filtered = currentAchievements[category].filter(
       (achievement) => achievement.subcategory === subcategory
@@ -456,7 +437,9 @@ function DashboardInner() {
       | string
       | undefined;
     if (categoryId && isTieredCategoryId(categoryId)) {
-      const tierIndex = getUserCategoryTierIndex(categoryId);
+      const activeTierIndex = getUserCategoryTierIndex(categoryId);
+      const tierIndex =
+        typeof selectedTierIndex === "number" ? selectedTierIndex : activeTierIndex;
       const tierDefs = getActiveTierAchievements(categoryId, tierIndex);
       const tierIds = tierDefs.map((d) => d.id);
       if (tierIds.length > 0) {
@@ -498,7 +481,7 @@ function DashboardInner() {
 
   // Calculate completion percentages for each category (excludes disabled)
   const getCompletionPercentage = (category: keyof Achievements) => {
-    const achievements = achievementsForUI[category];
+    const achievements = getAchievementsForCompletion(achievementsForUI[category]);
     const totalAchievements = achievements.length;
     if (totalAchievements === 0) return 0;
     const totalFraction = achievements.reduce((sum, a) => sum + getAchievementCompletionFraction(a), 0);
@@ -576,7 +559,7 @@ function DashboardInner() {
   // Single source of truth for sticky section header position.
   // If dashboard chrome spacing changes (navbar, tabs, progress row, patch promo/mask),
   // retune this number here only.
-  const sectionStickyTop = 182;
+  const sectionStickyTop = 168;
   const handlePatchCtaDismiss = () => {
     localStorage.setItem("dgjauth_patch_cta_dismissed_" + activeTab, "1");
     setPatchCtaDismissed((prev) => new Set(prev).add(activeTab));
@@ -615,48 +598,37 @@ function DashboardInner() {
         <div className="mx-auto w-full max-w-4xl">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-0">
             {/* Header: tabs + progress bar (does not scroll) */}
-            <div className="sticky top-[61px] z-50 isolate overflow-hidden bg-background border-b border-border/60 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+            <div className="sticky top-[61px] z-50 isolate overflow-hidden border-b border-border/60 bg-background shadow-[0_1px_0_rgba(0,0,0,0.06)]">
               <div className="absolute inset-0 bg-background" aria-hidden="true" />
               <div className="relative z-10">
-                <div id="dg-top-chrome" className="pt-2 pb-2 min-w-0">
-                <div ref={tabsListRef} className="relative w-full">
-              {indicator && (
-                <div
-                  aria-hidden="true"
-                  className="absolute top-1 bottom-1 rounded-full bg-background shadow-[0_8px_20px_rgba(0,0,0,0.08)] ring-1 ring-black/5 transition-[transform,width] duration-300 ease-out will-change-transform"
-                  style={{
-                    left: 0,
-                    width: indicator.w,
-                    transform: `translateX(${indicator.x}px)`,
-                  }}
-                />
-              )}
-            <TabsList className="relative grid w-full grid-cols-3 gap-1 rounded-full bg-muted/60 p-1 h-12 shadow-sm ring-1 ring-black/5">
+                <div id="dg-top-chrome" className="min-w-0 py-1.5">
+                <div className="relative w-full">
+            <TabsList className="relative grid h-11 w-full grid-cols-3 gap-1 rounded-full bg-muted/60 p-1 shadow-sm ring-1 ring-black/5">
               <TabsTrigger
               value="skill"
-              className="relative z-10 h-full flex items-center justify-center rounded-full px-3 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground data-[state=active]:text-foreground border-0 focus-visible:ring-0 focus-visible:outline-none"
+              className="relative z-10 flex h-full items-center justify-center rounded-full border-0 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background focus-visible:outline-none focus-visible:ring-0"
             >
               Skill
             </TabsTrigger>
             <TabsTrigger
               value="social"
-              className="relative z-10 h-full flex items-center justify-center rounded-full px-3 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground data-[state=active]:text-foreground border-0 focus-visible:ring-0 focus-visible:outline-none"
+              className="relative z-10 flex h-full items-center justify-center rounded-full border-0 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background focus-visible:outline-none focus-visible:ring-0"
             >
               Social
             </TabsTrigger>
             <TabsTrigger
               value="collection"
-              className="relative z-10 h-full flex items-center justify-center rounded-full px-3 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground data-[state=active]:text-foreground border-0 focus-visible:ring-0 focus-visible:outline-none"
+              className="relative z-10 flex h-full items-center justify-center rounded-full border-0 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background focus-visible:outline-none focus-visible:ring-0"
             >
               Collection
             </TabsTrigger>
             </TabsList>
           </div>
-          <div className="mt-2 w-full">
+          <div className="mt-1.5 w-full">
             {(() => {
               const { label, pct } = getActiveTabCompletion(activeTab, skillCompletion, socialCompletion, collectionCompletion);
               return (
-                <div className="flex items-center gap-3 rounded-xl bg-muted px-3 py-2 ring-1 ring-black/5">
+                <div className="flex items-center gap-3 rounded-xl bg-muted/70 px-3 py-2 ring-1 ring-black/5">
                   <span className="w-16 text-xs font-medium text-foreground/80">{label}</span>
                   <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/10">
                     <div
@@ -673,7 +645,7 @@ function DashboardInner() {
             })()}
           </div>
           {showPatchPromo && (
-            <div className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-muted/50 px-3 py-2">
+            <div className="mt-1.5 flex items-center justify-between gap-2 rounded-xl bg-muted/60 px-3 py-2 ring-1 ring-black/5">
               <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-medium text-foreground/80">
                 Patch unlocked
               </span>
@@ -692,7 +664,7 @@ function DashboardInner() {
                 <button
                   type="button"
                   onClick={handlePatchCtaDismiss}
-                  className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                   aria-label="Dismiss"
                 >
                   <X className="h-4 w-4" />
@@ -701,11 +673,11 @@ function DashboardInner() {
             </div>
           )}
                 </div>
-                <div className="h-4 bg-background" aria-hidden="true" />
+                <div className="h-3 bg-background" aria-hidden="true" />
               </div>
             </div>
 
-            <div className="mt-2 pb-6">
+            <div className="mt-1.5 pb-6">
               <StatsHeader
                 completionPercentage={activeCompletion}
                 totalPoints={allTimePoints}
@@ -720,7 +692,7 @@ function DashboardInner() {
               />
 
               {showDevTools && (
-                <div className="mt-3">
+                <div className="mt-4 border-t border-border/50 pt-3">
                   <div className="flex flex-wrap gap-2">
                     <Button
                       size="sm"
@@ -754,8 +726,8 @@ function DashboardInner() {
                 </div>
               )}
 
-              <TabsContent value="skill">
-          <div className="mt-6 space-y-4">
+              <TabsContent value="skill" className="mt-0">
+          <div className="mt-5 space-y-4">
               {(() => {
                 const withTierInfo = SECTIONS.skill.map((s) => ({
                   section: s,
@@ -766,7 +738,20 @@ function DashboardInner() {
                 const ordered = [...nonTiered, ...tiered];
                 return ordered.map(({ section, tierInfo }) => {
                   const sectionKey = section.key as SectionKey;
-                  const achievements = getCategoryAchievements("skill", section.key);
+                  const categoryId = tierInfo?.categoryId;
+                  const activeTierIndex = tierInfo?.tierIndex ?? 0;
+                  const viewedTierIndex =
+                    categoryId && typeof viewedTierByCategoryId[categoryId] === "number"
+                      ? viewedTierByCategoryId[categoryId]
+                      : activeTierIndex;
+
+                  const selectedTierIndex = viewedTierIndex;
+                  const isTierViewOnly = selectedTierIndex !== activeTierIndex;
+
+                  const canViewPreviousTier = selectedTierIndex > 0;
+                  const canViewNextTier = selectedTierIndex < activeTierIndex;
+                  const canJumpToCurrentTier = selectedTierIndex !== activeTierIndex;
+                  const achievements = getCategoryAchievements("skill", section.key, selectedTierIndex);
                   const completion = getCategoryCompletion(achievements);
                   return (
                     <AchievementSection
@@ -777,6 +762,18 @@ function DashboardInner() {
                       sectionKey={sectionKey}
                       achievements={achievements}
                       stickyTop={sectionStickyTop}
+                      viewedTierIndex={selectedTierIndex}
+                      activeTierIndex={activeTierIndex}
+                      isTierViewOnly={!!isTierViewOnly}
+                      onSelectTier={
+                        categoryId
+                          ? (nextTier: number) =>
+                              setViewedTierByCategoryId((prev) => ({
+                                ...prev,
+                                [categoryId]: nextTier,
+                              }))
+                          : undefined
+                      }
                       tierInfo={tierInfo}
                       headerVariant={section.key === "aces" ? "aces" : undefined}
                       aceCelebratingId={aceCelebratingId}
@@ -798,8 +795,8 @@ function DashboardInner() {
               })()}
           </div>
         </TabsContent>
-        <TabsContent value="social">
-          <div className="mt-6 space-y-4">
+        <TabsContent value="social" className="mt-0">
+          <div className="mt-5 space-y-4">
               {(() => {
                 const withTierInfo = SECTIONS.social.map((s) => ({
                   section: s,
@@ -810,7 +807,20 @@ function DashboardInner() {
                 const ordered = [...nonTiered, ...tiered];
                 return ordered.map(({ section, tierInfo }) => {
                   const sectionKey = section.key as SectionKey;
-                  const achievements = getCategoryAchievements("social", section.key);
+                  const categoryId = tierInfo?.categoryId;
+                  const activeTierIndex = tierInfo?.tierIndex ?? 0;
+                  const viewedTierIndex =
+                    categoryId && typeof viewedTierByCategoryId[categoryId] === "number"
+                      ? viewedTierByCategoryId[categoryId]
+                      : activeTierIndex;
+
+                  const selectedTierIndex = viewedTierIndex;
+                  const isTierViewOnly = selectedTierIndex !== activeTierIndex;
+
+                  const canViewPreviousTier = selectedTierIndex > 0;
+                  const canViewNextTier = selectedTierIndex < activeTierIndex;
+                  const canJumpToCurrentTier = selectedTierIndex !== activeTierIndex;
+                  const achievements = getCategoryAchievements("social", section.key, selectedTierIndex);
                   const completion = getCategoryCompletion(achievements);
                   return (
                     <AchievementSection
@@ -821,6 +831,18 @@ function DashboardInner() {
                       sectionKey={sectionKey}
                       achievements={achievements}
                       stickyTop={sectionStickyTop}
+                      viewedTierIndex={selectedTierIndex}
+                      activeTierIndex={activeTierIndex}
+                      isTierViewOnly={!!isTierViewOnly}
+                      onSelectTier={
+                        categoryId
+                          ? (nextTier: number) =>
+                              setViewedTierByCategoryId((prev) => ({
+                                ...prev,
+                                [categoryId]: nextTier,
+                              }))
+                          : undefined
+                      }
                       tierInfo={tierInfo}
                       aceCelebratingId={aceCelebratingId}
                       aceCelebrationPhase={aceCelebrationPhase}
@@ -841,8 +863,8 @@ function DashboardInner() {
               })()}
           </div>
         </TabsContent>
-        <TabsContent value="collection">
-          <div className="mt-6 space-y-4">
+        <TabsContent value="collection" className="mt-0">
+          <div className="mt-5 space-y-4">
               {(() => {
                 const withTierInfo = SECTIONS.collection.map((s) => ({
                   section: s,
@@ -853,7 +875,20 @@ function DashboardInner() {
                 const ordered = [...nonTiered, ...tiered];
                 return ordered.map(({ section, tierInfo }) => {
                   const sectionKey = section.key as SectionKey;
-                  const achievements = getCategoryAchievements("collection", section.key);
+                  const categoryId = tierInfo?.categoryId;
+                  const activeTierIndex = tierInfo?.tierIndex ?? 0;
+                  const viewedTierIndex =
+                    categoryId && typeof viewedTierByCategoryId[categoryId] === "number"
+                      ? viewedTierByCategoryId[categoryId]
+                      : activeTierIndex;
+
+                  const selectedTierIndex = viewedTierIndex;
+                  const isTierViewOnly = selectedTierIndex !== activeTierIndex;
+
+                  const canViewPreviousTier = selectedTierIndex > 0;
+                  const canViewNextTier = selectedTierIndex < activeTierIndex;
+                  const canJumpToCurrentTier = selectedTierIndex !== activeTierIndex;
+                  const achievements = getCategoryAchievements("collection", section.key, selectedTierIndex);
                   const completion = getCategoryCompletion(achievements);
                   return (
                     <AchievementSection
@@ -864,6 +899,18 @@ function DashboardInner() {
                       sectionKey={sectionKey}
                       achievements={achievements}
                       stickyTop={sectionStickyTop}
+                      viewedTierIndex={selectedTierIndex}
+                      activeTierIndex={activeTierIndex}
+                      isTierViewOnly={!!isTierViewOnly}
+                      onSelectTier={
+                        categoryId
+                          ? (nextTier: number) =>
+                              setViewedTierByCategoryId((prev) => ({
+                                ...prev,
+                                [categoryId]: nextTier,
+                              }))
+                          : undefined
+                      }
                       tierInfo={tierInfo}
                       effectiveById={effectiveById}
                       allAchievements={allAchievements}

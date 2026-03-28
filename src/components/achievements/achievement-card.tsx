@@ -83,6 +83,8 @@ export function AchievementCard({
       : "";
 
   const isCounter = kind === "counter";
+  const isAceCounter = id === "ace_counter_lifetime";
+  const isRoundCounter = id === "round_counter_lifetime";
   const counterCompleted = isCounter && progress >= target;
 
   const handleToggle = () => {
@@ -110,7 +112,9 @@ export function AchievementCard({
     <>
       <Card
         className={cn(
-          (isCompleted || counterCompleted) ? "bg-green-50" : "",
+          (isCompleted || counterCompleted)
+            ? "bg-amber-50 border-amber-200 shadow-[0_0_0_1px_rgba(251,191,36,0.18)]"
+            : "",
           locked ? "opacity-75" : "",
           isNewlyRevealed
             ? "ring-2 ring-yellow-400/40 shadow-[0_0_0_6px_rgba(250,204,21,0.12)] animate-pulse"
@@ -124,8 +128,8 @@ export function AchievementCard({
         )}
       >
         <CardHeader className="flex flex-row items-center gap-1.5 px-3 pt-2 pb-1">
-          <div className={`p-0.5 rounded-full ${locked ? 'bg-gray-200' : (isCompleted || counterCompleted) ? 'bg-green-100' : 'bg-gray-100'}`}>
-            <Icon className={`w-4 h-4 ${(isCompleted || counterCompleted) ? 'text-green-600' : 'text-gray-500'}`} />
+          <div className={`p-0.5 rounded-full ${locked ? 'bg-gray-200' : (isCompleted || counterCompleted) ? 'bg-amber-100' : 'bg-gray-100'}`}>
+            <Icon className={`w-4 h-4 ${(isCompleted || counterCompleted) ? 'text-amber-800' : 'text-gray-500'}`} />
           </div>
           <div className="flex-1">
             <div className="flex items-start justify-between gap-2">
@@ -144,7 +148,7 @@ export function AchievementCard({
                 )}
               </div>
               {points && (
-                <span className="inline-flex items-center rounded-full bg-yellow-100 text-yellow-800 font-medium text-[11px] px-2 py-[1px] shrink-0 whitespace-nowrap">
+                <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 text-amber-900 font-medium text-[11px] px-2 py-[1px] shrink-0 whitespace-nowrap">
                   🏆 {points} pts
                 </span>
               )}
@@ -167,9 +171,13 @@ export function AchievementCard({
             {!locked && isCounter && (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium tabular-nums">
-                    {progress} / {target}
-                  </span>
+                  {isAceCounter ? (
+                    <span className="text-sm font-medium tabular-nums">{progress}</span>
+                  ) : (
+                    <span className="text-sm font-medium tabular-nums">
+                      {progress} / {target}
+                    </span>
+                  )}
                   <div className="flex items-center gap-1">
                     <Button
                       variant="outline"
@@ -192,6 +200,11 @@ export function AchievementCard({
                   </div>
                 </div>
                 <Progress value={target > 0 ? (progress / target) * 100 : 0} className="h-2" />
+                {isRoundCounter && (
+                  <p className="text-[10px] text-muted-foreground leading-snug">
+                    Only your first 3 rounds each week earn points.
+                  </p>
+                )}
                 {counterCompleted && completedDate && (
                   <span className="text-[10px] text-muted-foreground whitespace-nowrap leading-none">
                     Completed {completedDate.toDate().toLocaleDateString('en-US', {

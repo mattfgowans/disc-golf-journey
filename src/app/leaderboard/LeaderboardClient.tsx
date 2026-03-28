@@ -126,69 +126,68 @@ export function LeaderboardClient() {
   return (
     <RequireAuth>
       <div className="w-full">
-        <div className="text-left mb-4 mt-[-4px]">
-          <h1 className="text-2xl sm:text-2xl font-bold mb-2">
+        <div className="mt-[-2px] mb-2.5 text-left space-y-0.5">
+          <h1 className="text-2xl font-bold">
             <span className="hidden sm:inline">🏆 </span>Leaderboard
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground leading-snug">
+          <p className="text-sm leading-snug text-muted-foreground sm:text-base">
             Compete with players worldwide and connect with friends
           </p>
         </div>
 
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <div>
+        <div className="space-y-5">
+          <div className="space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-0.5">
                 <CardTitle>Rankings</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {scope === "friends" && "Friends (Top only)"}
-                    {scope === "global" && (
-                      <>
-                        Global
-                        <span className="sm:hidden"> · </span>
-                        <span className="hidden sm:inline"> • </span>
-                        {(() => {
-                          switch (safePeriodTab) {
-                            case "weekly":
-                              return "Week";
-                            case "monthly":
-                              return "Month";
-                            case "yearly":
-                              return "Year";
-                            case "allTime":
-                              return "All Time";
-                            default:
-                              return "Week";
-                          }
-                        })()}
-                      </>
-                    )}
-                    {scope === "club" && (
-                      <>
-                        Club · All Time
-                        {clubMemberCount !== null && (
-                          <> · Members: {clubMemberCount}</>
-                        )}
-                      </>
-                    )}
-                  </p>
-                </div>
-                {isClubScope && clubId && (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/club">View club</Link>
-                  </Button>
-                )}
+                <p className="text-sm leading-snug text-muted-foreground">
+                  {scope === "friends" && "Friends (Top only)"}
+                  {scope === "global" && (
+                    <>
+                      Global
+                      <span className="sm:hidden"> · </span>
+                      <span className="hidden sm:inline"> • </span>
+                      {(() => {
+                        switch (safePeriodTab) {
+                          case "weekly":
+                            return "Week";
+                          case "monthly":
+                            return "Month";
+                          case "yearly":
+                            return "Year";
+                          case "allTime":
+                            return "All Time";
+                          default:
+                            return "Week";
+                        }
+                      })()}
+                    </>
+                  )}
+                  {scope === "club" && (
+                    <>
+                      Club · All Time
+                      {clubMemberCount !== null && (
+                        <> · Members: {clubMemberCount}</>
+                      )}
+                    </>
+                  )}
+                </p>
               </div>
-            <div className="overflow-visible space-y-4">
-              <div className="space-y-2">
+              {isClubScope && clubId && (
+                <Button variant="outline" size="sm" asChild className="mt-0.5 shrink-0">
+                  <Link href="/club">View club</Link>
+                </Button>
+              )}
+            </div>
+            <div className="overflow-visible space-y-2.5">
               {/* Scope Toggle */}
-              <div className="sticky top-0 z-10 -mx-4 px-4 md:-mx-6 md:px-6 py-2 pb-3 bg-background/95 backdrop-blur">
-                <div className="flex gap-2">
+              <div className="sticky top-0 z-10 -mx-4 border-y bg-background/95 px-4 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:-mx-6 md:px-6">
+                <div className="grid grid-cols-3 gap-2">
                   <Button
                     variant={scope === "global" ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleScopeChange("global")}
-                    className="flex-1"
+                    className="h-9 rounded-full"
                   >
                     Global
                   </Button>
@@ -196,7 +195,7 @@ export function LeaderboardClient() {
                     variant={scope === "friends" ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleScopeChange("friends")}
-                    className="flex-1"
+                    className="h-9 rounded-full"
                   >
                     Friends (Top)
                   </Button>
@@ -204,7 +203,7 @@ export function LeaderboardClient() {
                     variant={scope === "club" ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleScopeChange("club")}
-                    className="flex-1 flex items-center justify-center gap-2"
+                    className="h-9 justify-center gap-2 rounded-full"
                   >
                     {clubId ? (
                       <>
@@ -217,14 +216,14 @@ export function LeaderboardClient() {
                   </Button>
                 </div>
                 {scope === "friends" && (
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="mt-1.5 text-xs text-muted-foreground">
                     Shows friends who appear in this leaderboard page.
                   </p>
                 )}
               </div>
 
               {isClubScope ? (
-                <div className="mt-4 sm:mt-6">
+                <div className="pt-1">
                   {!userLoading && clubId ? (
                     <ClubLeaderboardContent clubId={clubId} currentUserId={user?.uid || ""} />
                   ) : !userLoading ? (
@@ -241,16 +240,16 @@ export function LeaderboardClient() {
                 <Tabs
                   value={safePeriodTab}
                   onValueChange={(v) => setPeriodTab(v as LeaderboardPeriod)}
-                  className="w-full"
+                  className="w-full space-y-2.5"
                 >
-                  <TabsList className="grid w-full grid-cols-4 rounded-full bg-muted p-1 h-9">
-                    <TabsTrigger value="weekly" className="rounded-full h-7 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-medium">Week</TabsTrigger>
-                    <TabsTrigger value="monthly" className="rounded-full h-7 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-medium">Month</TabsTrigger>
-                    <TabsTrigger value="yearly" className="rounded-full h-7 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-medium">Year</TabsTrigger>
-                    <TabsTrigger value="allTime" className="rounded-full h-7 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-medium">All Time</TabsTrigger>
+                  <TabsList className="grid h-9 w-full grid-cols-4 rounded-full bg-muted/70 p-1">
+                    <TabsTrigger value="weekly" className="h-7 rounded-full text-sm text-muted-foreground hover:bg-muted/60 data-[state=active]:bg-foreground data-[state=active]:font-medium data-[state=active]:text-background data-[state=active]:shadow-sm">Week</TabsTrigger>
+                    <TabsTrigger value="monthly" className="h-7 rounded-full text-sm text-muted-foreground hover:bg-muted/60 data-[state=active]:bg-foreground data-[state=active]:font-medium data-[state=active]:text-background data-[state=active]:shadow-sm">Month</TabsTrigger>
+                    <TabsTrigger value="yearly" className="h-7 rounded-full text-sm text-muted-foreground hover:bg-muted/60 data-[state=active]:bg-foreground data-[state=active]:font-medium data-[state=active]:text-background data-[state=active]:shadow-sm">Year</TabsTrigger>
+                    <TabsTrigger value="allTime" className="h-7 rounded-full text-sm text-muted-foreground hover:bg-muted/60 data-[state=active]:bg-foreground data-[state=active]:font-medium data-[state=active]:text-background data-[state=active]:shadow-sm">All Time</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="weekly">
+                  <TabsContent value="weekly" className="mt-0">
                     <LeaderboardTab
                       period="weekly"
                       currentUserId={user?.uid || ""}
@@ -262,7 +261,7 @@ export function LeaderboardClient() {
                     />
                   </TabsContent>
 
-                  <TabsContent value="monthly">
+                  <TabsContent value="monthly" className="mt-0">
                     <LeaderboardTab
                       period="monthly"
                       currentUserId={user?.uid || ""}
@@ -274,7 +273,7 @@ export function LeaderboardClient() {
                     />
                   </TabsContent>
 
-                  <TabsContent value="yearly">
+                  <TabsContent value="yearly" className="mt-0">
                     <LeaderboardTab
                       period="yearly"
                       currentUserId={user?.uid || ""}
@@ -286,7 +285,7 @@ export function LeaderboardClient() {
                     />
                   </TabsContent>
 
-                  <TabsContent value="allTime">
+                  <TabsContent value="allTime" className="mt-0">
                     <LeaderboardTab
                       period="allTime"
                       currentUserId={user?.uid || ""}
@@ -298,7 +297,7 @@ export function LeaderboardClient() {
                     />
                   </TabsContent>
 
-                  <div className="pt-4 text-center border-t">
+                  <div className="border-t pt-2.5 text-center">
                     <Link
                       href="/leaderboard/all"
                       className="text-sm font-medium text-primary hover:underline"
@@ -308,14 +307,13 @@ export function LeaderboardClient() {
                   </div>
                 </Tabs>
               )}
-              </div>
             </div>
           </div>
 
-          <div className="text-center">
+          <div className="border-t pt-2.5 text-center">
             <Link
               href="/friends"
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              className="text-sm text-muted-foreground/90 transition-colors hover:text-primary"
             >
               Connect with friends →
             </Link>
