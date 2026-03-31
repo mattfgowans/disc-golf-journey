@@ -2,8 +2,7 @@
 
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { HeaderProvider } from "@/components/layout/header-context";
-import { AuthProvider } from "@/lib/firebase-auth";
+import Providers from "@/components/providers";
 
 export const metadata: Metadata = {
   title: "Disc Golf Journey",
@@ -44,11 +43,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          <HeaderProvider>
-            {children}
-          </HeaderProvider>
-        </AuthProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
