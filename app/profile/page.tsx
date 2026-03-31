@@ -45,7 +45,15 @@ import { useAuth } from "@/lib/firebase-auth";
 import { getUserStats } from "@/lib/leaderboard";
 import { getRankAndPrestige, PRESTIGE_STEP_POINTS } from "@/lib/ranks";
 
-export default function ProfilePage() {
+export default function Page() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return <ProfileClient />;
+}
+
+function ProfileClient() {
   const headerConfig = useMemo(() => ({ title: "You" }), []);
   usePageHeader(headerConfig);
   const { user, signOut } = useAuth();
