@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 "use client";
 
 import { useAuth } from "@/lib/firebase-auth";
@@ -10,6 +12,7 @@ export default function Home() {
 
   useEffect(() => {
     if (loading) return;
+
     if (user) {
       router.replace("/dashboard");
     } else {
@@ -19,8 +22,8 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] text-center">
-        <p className="text-gray-600">Loading...</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
       </div>
     );
   }
