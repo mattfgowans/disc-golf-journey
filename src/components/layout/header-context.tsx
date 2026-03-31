@@ -44,9 +44,21 @@ export function HeaderProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useHeader() {
-  const ctx = React.useContext(HeaderContext);
-  if (!ctx) throw new Error("useHeader must be used within HeaderProvider");
-  return ctx;
+  const context = React.useContext(HeaderContext);
+
+  if (!context) {
+    // Prevent build-time crashes (Vercel prerender)
+    if (typeof window === "undefined") {
+      return {
+        title: "",
+        setTitle: () => {},
+      };
+    }
+
+    throw new Error("useHeader must be used within HeaderProvider");
+  }
+
+  return context;
 }
 
 /**
