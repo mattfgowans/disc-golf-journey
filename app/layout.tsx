@@ -1,8 +1,13 @@
-'use client'
-
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import "./globals.css";
+// import InstallPrompt from "@/components/install-prompt";
+// import PWARegister from "@/components/pwa-register";
+import { AuthDebugHud } from "@/components/AuthDebugHud";
+import { BetaBanner } from "@/components/layout/beta-banner";
 import { HeaderProvider } from "@/components/layout/header-context";
+import { Navbar } from "@/components/layout/navbar";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { AuthProvider } from "@/lib/firebase-auth";
 
 export const metadata: Metadata = {
@@ -45,9 +50,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          <HeaderProvider>
-            {children}
-          </HeaderProvider>
+          {children}
         </AuthProvider>
       </body>
     </html>

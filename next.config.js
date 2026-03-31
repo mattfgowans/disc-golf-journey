@@ -2,10 +2,9 @@
 const isGithub = process.env.DEPLOY_TARGET === "github";
 
 const nextConfig = {
-  output: "export",
   basePath: isGithub ? "/disc-golf-journey" : "",
   assetPrefix: isGithub ? "/disc-golf-journey/" : "",
-  trailingSlash: true,
+  trailingSlash: false,
   images: { unoptimized: true },
   experimental: { serverComponentsExternalPackages: [] },
   typescript: { ignoreBuildErrors: false },

@@ -1,5 +1,7 @@
 "use client";
 
+'use client'
+
 import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import {
   User,
@@ -13,7 +15,7 @@ import {
   browserLocalPersistence,
   AuthError,
 } from "firebase/auth";
-import { auth, db } from "./firebase";
+import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const DEBUG_AUTH = true;
@@ -35,114 +37,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authInitialized, setAuthInitialized] = useState(false);
-  const [redirectError, setRedirectError] = useState<string | null>(null);
-  const [redirectSettling, setRedirectSettling] = useState(false);
-  const [lastSignInAttempt, setLastSignInAttempt] = useState<string | null>(null);
-  const [userDocReady, setUserDocReady] = useState(false);
-  const initRanRef = useRef(false);
+  const authInitialized = !loading;
+  const redirectError = null;
+  const redirectSettling = false;
+  const lastSignInAttempt = null;
+  const userDocReady = true;
   const redirectConsumerRanRef = useRef(false);
 
   useEffect(() => {
-    if (initRanRef.current) return;
-    initRanRef.current = true;
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("[AUTH] resolved:", user);
 
-    async function ensureUserDoc(u: User): Promise<void> {
-      const userRef = doc(db, "users", u.uid);
-      const snap = await getDoc(userRef);
-
-      const existing = snap.exists() ? snap.data() : null;
-      const rawUsername =
-        (existing?.username ?? (existing as any)?.profile?.username ?? null) as unknown;
-      const existingUsername =
-        typeof rawUsername === "string"
-          ? rawUsername.trim().toLowerCase().replace(/^@/, "")
-          : null;
-
-      if (!snap.exists()) {
-        await setDoc(userRef, {
-          uid: u.uid,
-          email: u.email ?? null,
-          displayName: u.displayName ?? null,
-          photoURL: u.photoURL ?? null,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-      } else {
-        await setDoc(userRef, { updatedAt: serverTimestamp() }, { merge: true });
-      }
-
-      try {
-        const payload: Record<string, any> = {
-          uid: u.uid,
-          displayName: u.displayName ?? null,
-          photoURL: u.photoURL ?? null,
-          updatedAt: serverTimestamp(),
-        };
-        if (existingUsername) payload.username = existingUsername;
-
-        await setDoc(doc(db, "publicProfiles", u.uid), payload, { merge: true });
-      } catch (e) {
-        if (DEBUG_AUTH) console.error("AUTH: ensurePublicProfile failed", e);
-      }
-    }
-
-    const init = async () => {
-      if (DEBUG_AUTH) console.error("AUTH: init");
-      try {
-        await setPersistence(auth, browserLocalPersistence);
-        if (DEBUG_AUTH) console.error("AUTH: persistence=local");
-      } catch (e) {
-        if (DEBUG_AUTH) console.error("AUTH: persistence failed", String(e));
-      }
-
-      const unsubscribe = onAuthStateChanged(auth, (u) => {
-        if (DEBUG_AUTH) {
-          if (u) {
-            console.log("AUTH: onAuthStateChanged -> user", { uid: u.uid, email: u.email ?? null });
-          } else {
-            console.log("AUTH: onAuthStateChanged -> null");
-          }
-        }
-        setUser(u ?? null);
-        if (u) {
-          setRedirectError(null);
-          setRedirectSettling(false);
-          setUserDocReady(false);
-
-          // If auth state resolved to a user, we are no longer "processing" a redirect.
-          try {
-            sessionStorage.removeItem("dgjauth_processing");
-            sessionStorage.removeItem("dgjauth_return_to");
-          } catch {}
-
-          (async () => {
-            try {
-              await ensureUserDoc(u);
-            } catch (e) {
-              if (DEBUG_AUTH) console.error("AUTH: ensureUserDoc failed", e);
-            } finally {
-              setUserDocReady(true);
-            }
-          })();
-        } else {
-          setUserDocReady(true);
-        }
-        setAuthInitialized(true);
-        setLoading(false);
-      });
-
-      return unsubscribe;
-    };
-
-    let unsubscribe: (() => void) | undefined;
-    init().then((unsub) => {
-      unsubscribe = unsub ?? undefined;
+      setUser(user);
+      setLoading(false);
     });
 
-    return () => {
-      if (typeof unsubscribe === "function") unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -156,7 +66,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const hasApiKey = new URLSearchParams(window.location.search).has("apiKey");
       if (!processing && !hasApiKey) return;
 
-      setRedirectSettling(true);
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
@@ -167,9 +76,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           sessionStorage.removeItem("dgjauth_processing");
           sessionStorage.removeItem("dgjauth_return_to");
-          setRedirectError(
-            "Sign-in didn't complete. Please try again. If on mobile/in-app browser, open in Safari or Chrome."
-          );
         }
         if (result === null && DEBUG_AUTH) {
           console.log("AUTH: getRedirectResult null (popup may have been used, or no redirect)");
@@ -181,13 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           code === "auth/missing-initial-state" ||
           msg.toLowerCase().includes("storage")
         ) {
-          setRedirectError(
-            "Login failed: browser storage may be blocked. Try Safari if on iPhone."
-          );
         }
         if (DEBUG_AUTH) console.error("AUTH: getRedirectResult error", err);
-      } finally {
-        setRedirectSettling(false);
       }
     };
 
@@ -196,9 +97,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     if (typeof window === "undefined") return;
-
-    setRedirectError(null);
-    setRedirectSettling(true);
 
     try {
       await setPersistence(auth, browserLocalPersistence);
@@ -228,13 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionStorage.setItem("dgjauth_redirect_started_at", String(Date.now()));
         await signInWithRedirect(auth, provider);
       } else {
-        setRedirectSettling(false);
         const msg = String((err as { message?: string })?.message ?? "");
-        const readable =
-          code === "auth/missing-initial-state" || msg.toLowerCase().includes("storage")
-            ? "Login failed: browser storage may be blocked. Try Safari if on iPhone."
-            : "Sign-in failed. Please try again.";
-        setRedirectError(readable);
         throw err;
       }
     }

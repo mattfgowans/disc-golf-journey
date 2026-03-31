@@ -66,7 +66,25 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const path = normalizePath(pathname);
 
-  const { user, loading: authLoading, authInitialized, redirectSettling, signOut, userDocReady } = useAuth();
+  let missingAuthContext = false;
+  let authState: ReturnType<typeof useAuth>;
+  try {
+    authState = useAuth();
+  } catch {
+    missingAuthContext = true;
+    authState = {
+      user: null,
+      loading: true,
+      authInitialized: false,
+      redirectSettling: false,
+      signOut: async () => {},
+      userDocReady: false,
+      signInWithGoogle: async () => {},
+      redirectError: null,
+      lastSignInAttempt: null,
+    };
+  }
+  const { user, loading: authLoading, authInitialized, redirectSettling, signOut, userDocReady } = authState;
   const [stuck, setStuck] = useState(false);
   const inApp = isInAppBrowser();
   const userRef = useRef(user);
@@ -109,7 +127,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   // Collapse all profile/username conditions into a single explicit status.
   const usernameStatus: UsernameStatus = useMemo(() => {
     if (authLoading) return "loading";
-    if (!user) return "loading"; // auth settled but no user -> handled by redirect; treat as "not ready to render"
+    if (!user) return "missing";
     if (profileError) return "error";
     if (profileLoading) return "loading";
     if (exists === null) return "loading";
@@ -294,7 +312,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     </div>
   );
 
-  if (authLoading || !authInitialized || redirectSettling || redirectProcessing || (user && !userDocReady)) {
+  if (missingAuthContext || authLoading || !authInitialized || redirectSettling || redirectProcessing || (user && !userDocReady)) {
     return stuck ? LoadingRecoveryPanel : LoadingSplash;
   }
 

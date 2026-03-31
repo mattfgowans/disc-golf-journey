@@ -8,7 +8,7 @@
   "start": "next start",
   "lint": "next lint",
   "backfill:leaderboardIdentity": "ts-node scripts/backfill-leaderboard-identity.ts",
-  "build:prod": "rm -rf out .next && next build",
+  "build:prod": "rm -rf .next && next build",
   "deploy": "npm run build:prod && firebase deploy --only hosting"
 },
   "dependencies": {
