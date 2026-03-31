@@ -14,6 +14,12 @@ type HeaderContextValue = {
   resetHeader: () => void;
 };
 
+const defaultHeaderContext: HeaderContextValue = {
+  header: null,
+  setHeader: () => {},
+  resetHeader: () => {},
+};
+
 function shallowEqualHeader(a: HeaderConfig | null, b: HeaderConfig | null) {
   return (
     (a?.left ?? null) === (b?.left ?? null) &&
@@ -43,17 +49,12 @@ export function HeaderProvider({ children }: { children: React.ReactNode }) {
   return <HeaderContext.Provider value={value}>{children}</HeaderContext.Provider>;
 }
 
-export function useHeader() {
+export function useHeader(): HeaderContextValue {
   const context = React.useContext(HeaderContext);
 
   if (!context) {
     if (typeof window === "undefined") {
-      return {
-        title: "",
-        setTitle: () => {},
-        setHeader: () => {},
-        resetHeader: () => {},
-      };
+      return defaultHeaderContext;
     }
 
     throw new Error("useHeader must be used within HeaderProvider");
