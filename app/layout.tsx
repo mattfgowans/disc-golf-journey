@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+"use client";
+
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import "./globals.css";
