@@ -47,11 +47,12 @@ export function useHeader() {
   const context = React.useContext(HeaderContext);
 
   if (!context) {
-    // Prevent build-time crashes (Vercel prerender)
     if (typeof window === "undefined") {
       return {
         title: "",
         setTitle: () => {},
+        setHeader: () => {},
+        resetHeader: () => {},
       };
     }
 
