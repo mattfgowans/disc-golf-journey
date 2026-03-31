@@ -15,6 +15,13 @@
         "source": "**",
         "destination": "/index.html"
       }
+    ],
+    "redirects": [
+      {
+        "source": "**",
+        "destination": "https://disc-golf-journey.vercel.app",
+        "type": 301
+      }
     ]
   }
 }
