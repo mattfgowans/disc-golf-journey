@@ -512,6 +512,7 @@ function DashboardInner() {
 
   // Rank + Prestige from Firestore allTime
   const allTimePoints = userStats?.allTime ?? 0;
+  const isNewUser = allTimePoints === 0;
   const rp = getRankAndPrestige(allTimePoints);
   const currentRankTier = {
     name: rp.rank.name,
@@ -690,6 +691,23 @@ function DashboardInner() {
                 nextRankName={rp.progress.nextRank?.name}
                 pointsInPrestige={rp.pointsInPrestige}
               />
+
+              {isNewUser && (
+                <div className="mt-4 rounded-2xl border border-border/60 bg-muted/40 p-4 shadow-sm">
+                  <h2 className="text-base font-semibold text-foreground mb-1">
+                    Start Your Journey
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Track your first round to start earning points and climb the leaderboard.
+                  </p>
+                  <button
+                    onClick={() => router.push("/rounds/new")}
+                    className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition hover:opacity-90"
+                  >
+                    Track First Round
+                  </button>
+                </div>
+              )}
 
               {showDevTools && (
                 <div className="mt-4 border-t border-border/50 pt-3">
