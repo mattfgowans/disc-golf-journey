@@ -698,13 +698,13 @@ function DashboardInner() {
                     Start Your Journey
                   </h2>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Track your first round to start earning points and climb the leaderboard.
+                    Complete your first achievement to start earning points and climb the leaderboard.
                   </p>
                   <button
-                    onClick={() => router.push("/rounds/new")}
+                    onClick={() => router.push("/dashboard?tab=skill")}
                     className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition hover:opacity-90"
                   >
-                    Track First Round
+                    Complete First Achievement
                   </button>
                 </div>
               )}
