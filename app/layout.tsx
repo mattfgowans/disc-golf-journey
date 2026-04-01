@@ -23,7 +23,9 @@ export default function RootLayout({
         <AuthProvider>
           <HeaderProvider>
             <Navbar />
-            {children}
+            <div className="px-4 pb-24 max-w-screen-md mx-auto w-full">
+              {children}
+            </div>
             <BottomNav />
           </HeaderProvider>
         </AuthProvider>

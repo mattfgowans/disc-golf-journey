@@ -598,7 +598,7 @@ function DashboardInner() {
         <div className="mx-auto w-full max-w-4xl">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-0">
             {/* Header: tabs + progress bar (does not scroll) */}
-            <div className="sticky top-[61px] z-50 isolate overflow-hidden border-b border-border/60 bg-background shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+            <div className="sticky top-[61px] z-50 isolate border-b border-border/60 bg-background shadow-[0_1px_0_rgba(0,0,0,0.06)]">
               <div className="absolute inset-0 bg-background" aria-hidden="true" />
               <div className="relative z-10">
                 <div id="dg-top-chrome" className="min-w-0 py-1.5">

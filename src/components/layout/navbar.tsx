@@ -57,7 +57,7 @@ export function Navbar() {
             <div className="flex min-w-0 shrink-0 items-center justify-start" />
 
             {/* Center title */}
-            <div className="min-w-0 justify-self-center overflow-hidden">
+            <div className="min-w-0 justify-self-center">
               <Link href="/" className="block min-w-0 truncate text-center">
                 <h1 className="truncate text-base font-semibold sm:text-lg">
                   Disc Golf Journey
@@ -132,7 +132,7 @@ export function Navbar() {
           </div>
 
           {/* Center title: takes remaining space, truncates if needed */}
-          <div className="min-w-0 justify-self-center overflow-hidden">
+          <div className="min-w-0 justify-self-center">
             <div className="min-w-0 truncate text-center">
               {typeof center === "string" ? (
                 <span className="block truncate font-semibold">{center}</span>

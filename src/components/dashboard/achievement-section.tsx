@@ -167,7 +167,7 @@ export function AchievementSection({
       >
         {/* Sticky offset is controlled by dashboard/page.tsx via the stickyTop prop. */}
         <div
-          className={cn("sticky z-40 rounded-2xl overflow-hidden")}
+          className={cn("sticky z-40 rounded-2xl")}
           style={{ top: `${stickyTop}px` }}
         >
           <div
