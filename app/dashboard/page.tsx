@@ -973,14 +973,15 @@ function DashboardInner() {
         </div>
 
         {showOnboardingGuide && (
-          <div
-            className="fixed inset-0 z-[200] bg-black/40 flex items-center justify-center"
-            onClick={() => setShowOnboardingGuide(false)}
-          >
-            <div className="bg-white text-black rounded-xl p-4 max-w-xs text-center shadow-lg">
-              <p className="text-sm font-medium">
-                Tap any achievement to complete your first one.
-              </p>
+          <div className="fixed inset-0 z-[200] pointer-events-none">
+            <div className="absolute inset-0 bg-black/30" />
+
+            <div className="absolute top-[140px] left-1/2 -translate-x-1/2 pointer-events-auto">
+              <div className="bg-white text-black rounded-xl px-4 py-3 max-w-xs text-center shadow-lg">
+                <p className="text-sm font-medium">
+                  Tap any achievement to complete your first one.
+                </p>
+              </div>
             </div>
           </div>
         )}
