@@ -723,7 +723,7 @@ function DashboardInner() {
                         setShowOnboardingGuide(true);
                       }, 300);
                     }}
-                    className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition hover:opacity-90"
+                    className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition hover:opacity-90 animate-pulse"
                   >
                     Complete First Achievement
                   </button>
