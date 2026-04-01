@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAchievements, type Achievement, type Achievements } from "@/lib/useAchievements";
 import { Button } from "@/components/ui/button";
@@ -172,8 +172,18 @@ function DashboardInner() {
   const uid = auth.currentUser?.uid ?? "(no user)";
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
+
+  useEffect(() => {
+    const tabFromUrl = searchParams.get("tab");
+
+    if (tabFromUrl && ["skill", "social", "collection"].includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
   const [viewedTierByCategoryId, setViewedTierByCategoryId] = useState<Record<string, number>>({});
   const [userStats, setUserStats] = useState<{ allTime: number } | null>(null);
   const [patchCtaDismissed, setPatchCtaDismissed] = useState<Set<string>>(() => {
