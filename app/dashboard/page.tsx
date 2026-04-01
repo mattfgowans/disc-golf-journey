@@ -693,7 +693,7 @@ function DashboardInner() {
               />
 
               {isNewUser && (
-                <div className="mt-4 rounded-2xl border border-border/60 bg-muted/40 p-4 shadow-sm">
+                <div className="mt-4 relative z-10 rounded-2xl border border-border/60 bg-muted/40 p-4 shadow-sm">
                   <h2 className="text-base font-semibold text-foreground mb-1">
                     Start Your Journey
                   </h2>
