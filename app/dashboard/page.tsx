@@ -825,7 +825,12 @@ function DashboardInner() {
                       completion={completion}
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
-                      onToggleAchievement={(id) => toggleAchievementWithCelebration("skill", id)}
+                      onToggleAchievement={(id) => {
+                        if (showOnboardingGuide) {
+                          setShowOnboardingGuide(false);
+                        }
+                        toggleAchievementWithCelebration("skill", id);
+                      }}
                       onIncrementAchievement={(id, delta) => incrementAchievement("skill", id, delta)}
                       getCompletionColor={getCompletionColor}
                     />
@@ -893,7 +898,12 @@ function DashboardInner() {
                       completion={completion}
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
-                      onToggleAchievement={(id) => toggleAchievementWithCelebration("social", id)}
+                      onToggleAchievement={(id) => {
+                        if (showOnboardingGuide) {
+                          setShowOnboardingGuide(false);
+                        }
+                        toggleAchievementWithCelebration("social", id);
+                      }}
                       onIncrementAchievement={(id, delta) => incrementAchievement("social", id, delta)}
                       getCompletionColor={getCompletionColor}
                     />
@@ -959,7 +969,12 @@ function DashboardInner() {
                       completion={completion}
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
-                      onToggleAchievement={(id) => toggleAchievementWithCelebration("collection", id)}
+                      onToggleAchievement={(id) => {
+                        if (showOnboardingGuide) {
+                          setShowOnboardingGuide(false);
+                        }
+                        toggleAchievementWithCelebration("collection", id);
+                      }}
                       onIncrementAchievement={(id, delta) => incrementAchievement("collection", id, delta)}
                       getCompletionColor={getCompletionColor}
                     />
@@ -974,10 +989,8 @@ function DashboardInner() {
 
         {showOnboardingGuide && (
           <div className="fixed inset-0 z-[200] pointer-events-none">
-            <div className="absolute inset-0 bg-black/30" />
-
-            <div className="absolute top-[140px] left-1/2 -translate-x-1/2 pointer-events-auto">
-              <div className="bg-white text-black rounded-xl px-4 py-3 max-w-xs text-center shadow-lg">
+            <div className="absolute top-[180px] left-1/2 -translate-x-1/2 pointer-events-auto">
+              <div className="bg-white text-black rounded-xl px-4 py-3 max-w-xs text-center shadow-lg border border-black/10">
                 <p className="text-sm font-medium">
                   Tap any achievement to complete your first one.
                 </p>
