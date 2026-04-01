@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import "./globals.css";
 import type { Metadata } from "next";
 import { HeaderProvider } from "@/components/layout/header-context";
 import { AuthProvider } from "@/lib/firebase-auth";
