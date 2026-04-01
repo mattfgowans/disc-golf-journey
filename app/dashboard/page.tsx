@@ -198,6 +198,7 @@ function DashboardInner() {
   const [revealPulseParentIds, setRevealPulseParentIds] = useState<Set<string>>(new Set());
   const [secretModalOpen, setSecretModalOpen] = useState(false);
   const [celebratingParentId, setCelebratingParentId] = useState<string | null>(null);
+  const [showOnboardingGuide, setShowOnboardingGuide] = useState(false);
 
   const devToolsEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
   const devUid = process.env.NEXT_PUBLIC_DEV_UID;
@@ -711,7 +712,17 @@ function DashboardInner() {
                     Complete your first achievement to start earning points and climb the leaderboard.
                   </p>
                   <button
-                    onClick={() => router.push("/dashboard?tab=skill")}
+                    onClick={() => {
+                      setActiveTab("skill");
+
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem("achievementActiveTab", "skill");
+                      }
+
+                      setTimeout(() => {
+                        setShowOnboardingGuide(true);
+                      }, 300);
+                    }}
                     className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition hover:opacity-90"
                   >
                     Complete First Achievement
@@ -960,6 +971,19 @@ function DashboardInner() {
             </div>
           </Tabs>
         </div>
+
+        {showOnboardingGuide && (
+          <div
+            className="fixed inset-0 z-[200] bg-black/40 flex items-center justify-center"
+            onClick={() => setShowOnboardingGuide(false)}
+          >
+            <div className="bg-white text-black rounded-xl p-4 max-w-xs text-center shadow-lg">
+              <p className="text-sm font-medium">
+                Tap any achievement to complete your first one.
+              </p>
+            </div>
+          </div>
+        )}
       </main>
       {tierUpMessage && (
         <div
