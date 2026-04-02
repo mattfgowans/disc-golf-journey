@@ -709,7 +709,7 @@ function DashboardInner() {
                     Start Your Journey
                   </h2>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Complete your first achievement to start earning points and climb the leaderboard.
+                    Complete your first achievement below to start your journey.
                   </p>
                   <button
                     onClick={() => {
@@ -723,7 +723,7 @@ function DashboardInner() {
                         setShowOnboardingGuide(true);
                       }, 300);
                     }}
-                    className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition hover:opacity-90 animate-pulse"
+                    className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition hover:opacity-90 shadow-[0_0_0_0_rgba(0,0,0,0.4)] animate-[pulseGlow_2.5s_infinite]"
                   >
                     Complete First Achievement
                   </button>
