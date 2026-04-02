@@ -199,6 +199,8 @@ function DashboardInner() {
   const [secretModalOpen, setSecretModalOpen] = useState(false);
   const [celebratingParentId, setCelebratingParentId] = useState<string | null>(null);
   const [showOnboardingGuide, setShowOnboardingGuide] = useState(false);
+  const [hasCompletedFirstAchievement, setHasCompletedFirstAchievement] = useState(false);
+  const [showFirstBonus, setShowFirstBonus] = useState(false);
 
   const devToolsEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
   const devUid = process.env.NEXT_PUBLIC_DEV_UID;
@@ -273,6 +275,14 @@ function DashboardInner() {
     );
     return () => unsub?.();
   }, [auth.currentUser?.uid]);
+
+  const allTimePoints = userStats?.allTime ?? 0;
+
+  useEffect(() => {
+    if (allTimePoints > 0) {
+      setHasCompletedFirstAchievement(true);
+    }
+  }, [allTimePoints]);
 
   // Use achievements from Firebase, or fallback to catalog if not loaded yet
   // Only fallback if achievements is null/undefined, not if arrays are empty
@@ -522,7 +532,6 @@ function DashboardInner() {
   });
 
   // Rank + Prestige from Firestore allTime
-  const allTimePoints = userStats?.allTime ?? 0;
   const isNewUser = allTimePoints === 0;
   const rp = getRankAndPrestige(allTimePoints);
   const currentRankTier = {
@@ -829,6 +838,18 @@ function DashboardInner() {
                         if (showOnboardingGuide) {
                           setShowOnboardingGuide(false);
                         }
+
+                        // FIRST ACHIEVEMENT BONUS
+                        if (!hasCompletedFirstAchievement) {
+                          setHasCompletedFirstAchievement(true);
+
+                          setShowFirstBonus(true);
+
+                          setTimeout(() => {
+                            setShowFirstBonus(false);
+                          }, 2000);
+                        }
+
                         toggleAchievementWithCelebration("skill", id);
                       }}
                       onIncrementAchievement={(id, delta) => incrementAchievement("skill", id, delta)}
@@ -902,6 +923,18 @@ function DashboardInner() {
                         if (showOnboardingGuide) {
                           setShowOnboardingGuide(false);
                         }
+
+                        // FIRST ACHIEVEMENT BONUS
+                        if (!hasCompletedFirstAchievement) {
+                          setHasCompletedFirstAchievement(true);
+
+                          setShowFirstBonus(true);
+
+                          setTimeout(() => {
+                            setShowFirstBonus(false);
+                          }, 2000);
+                        }
+
                         toggleAchievementWithCelebration("social", id);
                       }}
                       onIncrementAchievement={(id, delta) => incrementAchievement("social", id, delta)}
@@ -973,6 +1006,18 @@ function DashboardInner() {
                         if (showOnboardingGuide) {
                           setShowOnboardingGuide(false);
                         }
+
+                        // FIRST ACHIEVEMENT BONUS
+                        if (!hasCompletedFirstAchievement) {
+                          setHasCompletedFirstAchievement(true);
+
+                          setShowFirstBonus(true);
+
+                          setTimeout(() => {
+                            setShowFirstBonus(false);
+                          }, 2000);
+                        }
+
                         toggleAchievementWithCelebration("collection", id);
                       }}
                       onIncrementAchievement={(id, delta) => incrementAchievement("collection", id, delta)}
@@ -1006,6 +1051,13 @@ function DashboardInner() {
           aria-live="polite"
         >
           {tierUpMessage}
+        </div>
+      )}
+      {showFirstBonus && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center pointer-events-none">
+          <div className="bg-white text-black px-6 py-3 rounded-xl shadow-xl border border-black/10 text-base font-semibold animate-[bonusPop_0.5s_ease-out]">
+            +100 First Achievement Bonus
+          </div>
         </div>
       )}
     </div>
