@@ -33,6 +33,7 @@ interface AchievementCardProps {
   celebrateParent?: boolean;
   celebratePhase?: "idle" | "shake" | "pop";
   requiresId?: string;
+  isOnboardingTarget?: boolean;
   onToggle: () => void;
   onIncrement?: () => void;
   onDecrement?: () => void;
@@ -65,6 +66,7 @@ export function AchievementCard({
   celebrateParent = false,
   celebratePhase = "idle",
   requiresId,
+  isOnboardingTarget = false,
   onToggle,
   onIncrement,
   onDecrement,
@@ -124,6 +126,9 @@ export function AchievementCard({
             : "",
           animClass,
           goldRing,
+          id === "onboarding_start" && !isCompleted
+            ? "ring-2 ring-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)] animate-[onboardingPulse_2s_infinite]"
+            : "",
           "transform-gpu will-change-transform transition-colors rounded-xl overflow-hidden leading-tight py-1"
         )}
       >

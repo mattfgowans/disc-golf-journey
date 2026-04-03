@@ -110,13 +110,7 @@ export function AchievementSection({
   activeTierIndex,
   isTierViewOnly = false,
   onSelectTier,
-  aceCelebratingId,
-  aceCelebrationPhase = "idle",
   effectiveById: effectiveByIdProp,
-  allAchievements,
-  newlyRevealedIds,
-  revealPulseParentIds,
-  celebratingParentId,
   completion,
   isOpen,
   onToggle,
@@ -131,19 +125,6 @@ export function AchievementSection({
   }, [achievements]);
 
   const effectiveById = effectiveByIdProp ?? localById;
-
-  const childrenByParentId = useMemo(() => {
-    const map = new Map<string, Achievement[]>();
-    const list = allAchievements ?? [];
-    for (const a of list) {
-      if (a.requiresId) {
-        const arr = map.get(a.requiresId) ?? [];
-        arr.push(a);
-        map.set(a.requiresId, arr);
-      }
-    }
-    return map;
-  }, [allAchievements]);
 
   const tierKey =
     tierInfo?.tierKey ??
@@ -163,6 +144,7 @@ export function AchievementSection({
   return (
     <Collapsible open={isOpen}>
       <div
+        id={sectionKey}
         className={cn("w-full rounded-2xl", headerClassName)}
       >
         {/* Sticky offset is controlled by dashboard/page.tsx via the stickyTop prop. */}
@@ -294,48 +276,24 @@ export function AchievementSection({
             <div className="grid gap-1.5 md:grid-cols-2 lg:grid-cols-3">
               {achievements.map((achievement) => {
                 if (!isGatedVisible(achievement as any, effectiveById as any)) return null;
+
                 const unlocked = isUnlocked(achievement, effectiveById);
                 if (achievement.requiresId && !unlocked) return null;
-
-                const isAceCelebrating = achievement.id === aceCelebratingId;
-                if (process.env.NODE_ENV !== "production" && (achievement.id === "skill-35" || achievement.id === "social-0")) {
-                  console.log("[GATE][CELEBRATE] render", { id: achievement.id, isCelebrating: isAceCelebrating, phase: aceCelebrationPhase });
-                }
-
-                const children = childrenByParentId.get(achievement.id) ?? [];
-                const totalChildrenCount = children.length;
-                const lockedChildCount = children.filter((c) => !isUnlocked(c, effectiveById)).length;
-                const hasSecrets = totalChildrenCount > 0;
-
-                const isCounter = achievement.kind === "counter";
-                const progress = typeof (achievement as any).progress === "number" ? (achievement as any).progress : 0;
-                const target = typeof (achievement as any).target === "number" ? (achievement as any).target : 1;
 
                 return (
                   <AchievementCard
                     key={achievement.id}
                     {...achievement}
                     category={category}
-                    progress={progress}
-                    target={target}
                     locked={!unlocked}
-                    hasSecrets={hasSecrets}
-                    lockedChildCount={hasSecrets ? lockedChildCount : undefined}
-                    totalChildrenCount={hasSecrets ? totalChildrenCount : undefined}
-                    isNewlyRevealed={newlyRevealedIds?.has(achievement.id) ?? false}
-                    revealPulse={revealPulseParentIds?.has(achievement.id) ?? false}
-                    celebrateParent={celebratingParentId === achievement.id}
-                    celebratePhase={
-                      isAceCelebrating ? (aceCelebrationPhase ?? "idle") : "idle"
-                    }
                     onToggle={isTierViewOnly ? () => {} : () => onToggleAchievement(achievement.id)}
                     onIncrement={
-                      !isTierViewOnly && isCounter && onIncrementAchievement
+                      !isTierViewOnly && achievement.kind === "counter" && onIncrementAchievement
                         ? () => onIncrementAchievement(achievement.id, 1)
                         : undefined
                     }
                     onDecrement={
-                      !isTierViewOnly && isCounter && onIncrementAchievement
+                      !isTierViewOnly && achievement.kind === "counter" && onIncrementAchievement
                         ? () => onIncrementAchievement(achievement.id, -1)
                         : undefined
                     }

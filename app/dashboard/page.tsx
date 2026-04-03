@@ -198,9 +198,9 @@ function DashboardInner() {
   const [revealPulseParentIds, setRevealPulseParentIds] = useState<Set<string>>(new Set());
   const [secretModalOpen, setSecretModalOpen] = useState(false);
   const [celebratingParentId, setCelebratingParentId] = useState<string | null>(null);
-  const [showOnboardingGuide, setShowOnboardingGuide] = useState(false);
   const [hasCompletedFirstAchievement, setHasCompletedFirstAchievement] = useState(false);
   const [showFirstBonus, setShowFirstBonus] = useState(false);
+  const [showLeaderboardPrompt, setShowLeaderboardPrompt] = useState(false);
 
   const devToolsEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
   const devUid = process.env.NEXT_PUBLIC_DEV_UID;
@@ -722,15 +722,29 @@ function DashboardInner() {
                   </p>
                   <button
                     onClick={() => {
-                      setActiveTab("skill");
+                      setActiveTab("social");
+
+                      setOpenSections((prev) => ({
+                        ...prev,
+                        communityEngagement: true,
+                      }));
+
+                      setTimeout(() => {
+                        const el = document.getElementById("communityEngagement");
+                        if (el) {
+                          const yOffset = -180; // adjust for sticky header + spacing
+                          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+                          window.scrollTo({
+                            top: y,
+                            behavior: "smooth",
+                          });
+                        }
+                      }, 350);
 
                       if (typeof window !== "undefined") {
                         localStorage.setItem("achievementActiveTab", "skill");
                       }
-
-                      setTimeout(() => {
-                        setShowOnboardingGuide(true);
-                      }, 300);
                     }}
                     className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition hover:opacity-90 shadow-[0_0_0_0_rgba(0,0,0,0.4)] animate-[pulseGlow_2.5s_infinite]"
                   >
@@ -835,10 +849,6 @@ function DashboardInner() {
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
                       onToggleAchievement={(id) => {
-                        if (showOnboardingGuide) {
-                          setShowOnboardingGuide(false);
-                        }
-
                         // FIRST ACHIEVEMENT BONUS
                         if (!hasCompletedFirstAchievement) {
                           setHasCompletedFirstAchievement(true);
@@ -920,10 +930,6 @@ function DashboardInner() {
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
                       onToggleAchievement={(id) => {
-                        if (showOnboardingGuide) {
-                          setShowOnboardingGuide(false);
-                        }
-
                         // FIRST ACHIEVEMENT BONUS
                         if (!hasCompletedFirstAchievement) {
                           setHasCompletedFirstAchievement(true);
@@ -935,7 +941,20 @@ function DashboardInner() {
                           }, 2000);
                         }
 
+                        const completingOnboardingStart =
+                          id === "onboarding_start" &&
+                          (() => {
+                            const ach = currentAchievements.social.find((a) => a.id === id);
+                            return !!ach && ach.kind !== "counter" && !ach.isCompleted;
+                          })();
+
                         toggleAchievementWithCelebration("social", id);
+
+                        if (completingOnboardingStart) {
+                          setTimeout(() => {
+                            setShowLeaderboardPrompt(true);
+                          }, 800);
+                        }
                       }}
                       onIncrementAchievement={(id, delta) => incrementAchievement("social", id, delta)}
                       getCompletionColor={getCompletionColor}
@@ -1003,10 +1022,6 @@ function DashboardInner() {
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
                       onToggleAchievement={(id) => {
-                        if (showOnboardingGuide) {
-                          setShowOnboardingGuide(false);
-                        }
-
                         // FIRST ACHIEVEMENT BONUS
                         if (!hasCompletedFirstAchievement) {
                           setHasCompletedFirstAchievement(true);
@@ -1032,17 +1047,6 @@ function DashboardInner() {
           </Tabs>
         </div>
 
-        {showOnboardingGuide && (
-          <div className="fixed inset-0 z-[200] pointer-events-none">
-            <div className="absolute top-[180px] left-1/2 -translate-x-1/2 pointer-events-auto">
-              <div className="bg-white text-black rounded-xl px-4 py-3 max-w-xs text-center shadow-lg border border-black/10">
-                <p className="text-sm font-medium">
-                  Tap any achievement to complete your first one.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </main>
       {tierUpMessage && (
         <div
@@ -1057,6 +1061,25 @@ function DashboardInner() {
         <div className="fixed inset-0 z-[300] flex items-center justify-center pointer-events-none">
           <div className="bg-white text-black px-6 py-3 rounded-xl shadow-xl border border-black/10 text-base font-semibold animate-[bonusPop_0.5s_ease-out]">
             +100 First Achievement Bonus
+          </div>
+        </div>
+      )}
+      {showLeaderboardPrompt && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center pointer-events-none">
+          <div className="pointer-events-auto bg-white text-black px-6 py-4 rounded-xl shadow-xl border border-black/10 text-center max-w-xs">
+            <p className="text-sm font-medium mb-3">
+              You&apos;re now on the leaderboard, take a look! 👀
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowLeaderboardPrompt(false);
+                router.push("/leaderboard");
+              }}
+              className="w-full rounded-lg bg-black text-white py-2 text-sm font-medium"
+            >
+              View Leaderboard
+            </button>
           </div>
         </div>
       )}

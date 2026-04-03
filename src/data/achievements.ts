@@ -1206,6 +1206,18 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       kind: "toggle",
     },
     {
+      id: "onboarding_start",
+      title: "Start Your Journey",
+      description: "Complete your first achievement in Disc Golf Journey!",
+      category: "social",
+      subcategory: "communityEngagement",
+      kind: "toggle",
+      isCompleted: false,
+      progress: 0,
+      target: 1,
+      points: 100,
+    } as Achievement,
+    {
       id: "social-1",
       title: "Club Member",
       description: "Join your local disc golf club",
