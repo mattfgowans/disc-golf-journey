@@ -209,7 +209,7 @@ export function AchievementSection({
                 <ChevronDown
                   className={cn(
                     "h-5 w-5 text-white shrink-0 transition-transform",
-                    isOpen ? "rotate-180" : "rotate-0"
+                    isOpen ? "rotate-100" : "rotate-0"
                   )}
                 />
               </div>
@@ -271,7 +271,7 @@ export function AchievementSection({
         </div>
 
         {/* Content (now inside the same card) */}
-        <CollapsibleContent className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
+        <CollapsibleContent className="overflow-hidden transition-all duration-300 ease-in-out data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
           <div className={cn("overflow-hidden p-2 pt-1.5", isTierViewOnly && "opacity-95")}>
             <div className="grid gap-1.5 md:grid-cols-2 lg:grid-cols-3">
               {achievements.map((achievement) => {

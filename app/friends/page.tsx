@@ -14,6 +14,7 @@ import type { Friend, FriendRequest } from "@/lib/friends";
 import { useFriends } from "@/lib/useFriends";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { useAuth } from "@/lib/firebase-auth";
+import PageWrapper from "@/components/layout/page-wrapper";
 
 function FriendsSection({ currentUserId }: { currentUserId: string }) {
   const { friends, incomingRequests, outgoingRequests, isLoading, error: hookError, actions } = useFriends(
@@ -434,16 +435,18 @@ export default function FriendsPage() {
 
   return (
     <RequireAuth>
-      <div className="w-full max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">👥 Friends</h1>
-          <p className="text-muted-foreground">
-            Connect with other players and build your disc golf community
-          </p>
-        </div>
+      <PageWrapper>
+        <div className="w-full max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold mb-2">👥 Friends</h1>
+            <p className="text-muted-foreground">
+              Connect with other players and build your disc golf community
+            </p>
+          </div>
 
-        <FriendsSection currentUserId={user?.uid || ""} />
-      </div>
+          <FriendsSection currentUserId={user?.uid || ""} />
+        </div>
+      </PageWrapper>
     </RequireAuth>
   );
 }

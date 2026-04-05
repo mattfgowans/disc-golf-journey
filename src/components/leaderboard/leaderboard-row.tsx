@@ -29,19 +29,25 @@ export function LeaderboardRow({
 
   return (
     <div
-      className={`min-w-0 flex items-center gap-2 sm:gap-3 px-3 py-2 sm:p-4 rounded-lg border ${
-        isCurrentUser ? "bg-primary/5 border-primary/20" : "bg-card"
-      } hover:bg-accent/50 transition-colors`}
+      className={`min-w-0 flex items-center gap-2 sm:gap-3 px-3 py-2 sm:p-4 rounded-lg ${
+        isCurrentUser
+          ? "bg-emerald-100 text-emerald-900 font-semibold rounded-lg border border-emerald-200"
+          : "border bg-card hover:bg-accent/50 transition-colors"
+      }`}
     >
-      <div className="w-6 flex items-center justify-center text-muted-foreground">
+      <div
+        className={`w-6 flex items-center justify-center ${
+          isCurrentUser ? "text-emerald-800/80" : "text-muted-foreground"
+        }`}
+      >
         {rank === 1 ? (
-          <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+          <Trophy className={`h-4 w-4 sm:h-5 sm:w-5 ${isCurrentUser ? "text-yellow-600" : "text-yellow-500"}`} />
         ) : rank === 2 ? (
-          <Medal className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+          <Medal className={`h-4 w-4 sm:h-5 sm:w-5 ${isCurrentUser ? "text-emerald-700" : "text-gray-400"}`} />
         ) : rank === 3 ? (
-          <Award className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+          <Award className={`h-4 w-4 sm:h-5 sm:w-5 ${isCurrentUser ? "text-amber-700" : "text-amber-600"}`} />
         ) : (
-          <span className="text-xs sm:text-sm font-bold text-muted-foreground">
+          <span className="text-xs sm:text-sm font-bold">
             #{rank}
           </span>
         )}
@@ -55,24 +61,39 @@ export function LeaderboardRow({
           {entry.username ? (
             <Link
               href={`/u?username=${encodeURIComponent(entry.username)}`}
-              className="text-sm sm:text-base font-semibold truncate text-primary hover:underline"
+              className={
+                isCurrentUser
+                  ? "text-sm sm:text-base font-semibold truncate text-emerald-900 hover:text-emerald-800 hover:underline"
+                  : "text-sm sm:text-base font-semibold truncate text-primary hover:underline"
+              }
             >
               {primaryLabel}
             </Link>
           ) : (
-            <p className="text-sm sm:text-base font-semibold truncate">
+            <p
+              className={
+                isCurrentUser
+                  ? "text-sm sm:text-base font-semibold truncate text-emerald-900"
+                  : "text-sm sm:text-base font-semibold truncate"
+              }
+            >
               {primaryLabel}
             </p>
           )}
           {isCurrentUser && (
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 shrink-0">
+            <span className="ml-2 text-[10px] text-emerald-700 font-medium">
               You
-            </Badge>
+            </span>
           )}
         </div>
       </div>
       <div className="shrink-0">
-        <Badge variant="outline" className="text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 font-bold whitespace-nowrap">
+        <Badge
+          variant="outline"
+          className={`text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 font-bold whitespace-nowrap ${
+            isCurrentUser ? "border-emerald-300 text-emerald-900 bg-transparent" : ""
+          }`}
+        >
           {entry.points.toLocaleString()} XP
         </Badge>
       </div>

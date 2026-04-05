@@ -118,6 +118,7 @@ export function LeaderboardTab({
   // Compute displayed entries and current user position
   const displayed = maxRows ? renderedEntries.slice(0, maxRows) : renderedEntries;
   const currentIndex = renderedEntries.findIndex(e => e.uid === currentUserId);
+  const userRank = currentIndex !== -1 ? currentIndex + 1 : null;
 
   // Show "Your rank" if user is not in top list but exists in loaded entries
   const showYourRank = maxRows &&
@@ -168,6 +169,11 @@ export function LeaderboardTab({
           <p className="text-sm font-medium text-destructive">Leaderboard failed to load</p>
           <p className="mt-1 text-xs text-muted-foreground">{error}</p>
         </div>
+      )}
+      {currentUserId && userRank !== null && (
+        <p className="text-sm text-muted-foreground mb-3">
+          You are currently ranked #{userRank}
+        </p>
       )}
       <div className={`${maxHeightClass} space-y-2 overflow-y-auto pr-2`}>
         {(maxRows ? renderedEntries.slice(0, maxRows) : renderedEntries).map((entry, index) => (

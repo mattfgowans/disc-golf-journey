@@ -113,6 +113,7 @@ export function AchievementCard({
   return (
     <>
       <Card
+        id={id === "onboarding_start" ? "onboarding-start-card" : undefined}
         className={cn(
           (isCompleted || counterCompleted)
             ? "bg-amber-50 border-amber-200 shadow-[0_0_0_1px_rgba(251,191,36,0.18)]"
@@ -129,6 +130,8 @@ export function AchievementCard({
           id === "onboarding_start" && !isCompleted
             ? "ring-2 ring-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)] animate-[onboardingPulse_2s_infinite]"
             : "",
+          "transition-all duration-200 hover:scale-[1.01] hover:shadow-md",
+          "active:scale-[0.99]",
           "transform-gpu will-change-transform transition-colors rounded-xl overflow-hidden leading-tight py-1"
         )}
       >

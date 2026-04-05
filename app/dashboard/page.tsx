@@ -19,6 +19,7 @@ import confetti from "canvas-confetti";
 import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import PageWrapper from "@/components/layout/page-wrapper";
 
 // TODO: Add achievement badges (rarity-based and achievement-specific)
 
@@ -587,6 +588,7 @@ function DashboardInner() {
   };
 
   return (
+    <PageWrapper>
     <div className="w-full" data-gramm="false">
       <Dialog
         open={secretModalOpen}
@@ -713,16 +715,21 @@ function DashboardInner() {
               />
 
               {isNewUser && (
-                <div className="mt-4 relative z-10 rounded-2xl border border-border/60 bg-muted/40 p-4 shadow-sm">
-                  <h2 className="text-base font-semibold text-foreground mb-1">
-                    Start Your Journey
+                <div className="mt-4 rounded-2xl border border-border/60 bg-muted/30 p-5 shadow-sm transition-all">
+                  <h2 className="text-lg font-semibold text-foreground mb-1">
+                    Welcome to Disc Golf Journey
                   </h2>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Complete your first achievement below to start your journey.
+
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                    Start your progress by completing your first achievement.
                   </p>
+
                   <button
                     onClick={() => {
                       setActiveTab("social");
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem("achievementActiveTab", "social");
+                      }
 
                       setOpenSections((prev) => ({
                         ...prev,
@@ -730,9 +737,9 @@ function DashboardInner() {
                       }));
 
                       setTimeout(() => {
-                        const el = document.getElementById("communityEngagement");
+                        const el = document.getElementById("onboarding-start-card");
                         if (el) {
-                          const yOffset = -180; // adjust for sticky header + spacing
+                          const yOffset = -240;
                           const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
                           window.scrollTo({
@@ -740,15 +747,11 @@ function DashboardInner() {
                             behavior: "smooth",
                           });
                         }
-                      }, 350);
-
-                      if (typeof window !== "undefined") {
-                        localStorage.setItem("achievementActiveTab", "skill");
-                      }
+                      }, 500);
                     }}
-                    className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition hover:opacity-90 shadow-[0_0_0_0_rgba(0,0,0,0.4)] animate-[pulseGlow_2.5s_infinite]"
+                    className="w-full rounded-xl bg-foreground text-background py-2.5 text-sm font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
                   >
-                    Complete First Achievement
+                    Start Your Journey
                   </button>
                 </div>
               )}
@@ -1084,5 +1087,6 @@ function DashboardInner() {
         </div>
       )}
     </div>
+    </PageWrapper>
   );
 }

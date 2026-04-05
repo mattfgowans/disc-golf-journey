@@ -5,6 +5,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import { PATCHES } from "@/lib/patches/patchCatalog";
 import { usePatchEligibility } from "@/lib/patches/usePatchEligibility";
 import { PatchCard } from "@/components/patches/PatchCard";
+import PageWrapper from "@/components/layout/page-wrapper";
 
 function PatchesPageInner() {
   const { completion, eligibleBySlug } = usePatchEligibility();
@@ -45,9 +46,11 @@ function PatchesPageInner() {
 export default function PatchesPage() {
   return (
     <RequireAuth>
-      <Suspense fallback={<div className="p-6 text-muted-foreground text-sm">Loading…</div>}>
-        <PatchesPageInner />
-      </Suspense>
+      <PageWrapper>
+        <Suspense fallback={<div className="p-6 text-muted-foreground text-sm">Loading…</div>}>
+          <PatchesPageInner />
+        </Suspense>
+      </PageWrapper>
     </RequireAuth>
   );
 }

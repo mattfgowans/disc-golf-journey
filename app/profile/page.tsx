@@ -37,6 +37,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePageHeader } from "@/components/layout/header-context";
 import { useUserDoc } from "@/lib/useUserDoc";
 import { RequireAuth } from "@/components/auth/require-auth";
+import PageWrapper from "@/components/layout/page-wrapper";
 import { Loader2, Edit2, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { doc, setDoc, getDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
@@ -140,6 +141,7 @@ export default function Page() {
 
   return (
     <RequireAuth>
+      <PageWrapper>
       {/* Handle profile loading and error states inside RequireAuth */}
       {profileLoading ? (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -166,6 +168,7 @@ export default function Page() {
           prestigeStep={PRESTIGE_STEP_POINTS}
         />
       )}
+      </PageWrapper>
     </RequireAuth>
   );
 }
