@@ -20,6 +20,7 @@ import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import PageWrapper from "@/components/layout/page-wrapper";
+import { handleInvite } from "@/lib/inviteFriends";
 
 // TODO: Add achievement badges (rarity-based and achievement-specific)
 
@@ -701,6 +702,25 @@ function DashboardInner() {
             </div>
 
             <div className="mt-1.5 pb-6">
+              <div className="mt-6 rounded-2xl border-none bg-transparent py-4 shadow-none">
+                <p className="text-base font-semibold text-foreground mb-2">
+                  Compete with friends
+                </p>
+
+                <p className="text-sm text-muted-foreground mb-3">
+                  See how you stack up — invite friends and compete on the leaderboard
+                </p>
+
+                <button
+                  onClick={handleInvite}
+                  className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                >
+                  Invite Friends
+                </button>
+
+                <div className="mt-5 border-t border-border/50" />
+              </div>
+
               <StatsHeader
                 completionPercentage={activeCompletion}
                 totalPoints={allTimePoints}

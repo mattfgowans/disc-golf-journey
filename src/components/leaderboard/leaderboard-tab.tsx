@@ -10,6 +10,21 @@ import type { DocumentSnapshot } from "firebase/firestore";
 import { getFriends } from "@/lib/friends";
 import { LeaderboardRow } from "./leaderboard-row";
 
+function getRankTimeframeSuffix(period: LeaderboardPeriod): string {
+  switch (period) {
+    case "weekly":
+      return "this week";
+    case "monthly":
+      return "this month";
+    case "yearly":
+      return "this year";
+    case "allTime":
+      return "all time";
+    default:
+      return "this week";
+  }
+}
+
 export function LeaderboardTab({
   period,
   currentUserId,
@@ -120,6 +135,12 @@ export function LeaderboardTab({
   const currentIndex = renderedEntries.findIndex(e => e.uid === currentUserId);
   const userRank = currentIndex !== -1 ? currentIndex + 1 : null;
 
+  const totalPlayers = renderedEntries.length;
+  const percentile =
+    userRank && totalPlayers
+      ? Math.round((1 - userRank / totalPlayers) * 100)
+      : null;
+
   // Show "Your rank" if user is not in top list but exists in loaded entries
   const showYourRank = maxRows &&
     currentIndex >= maxRows &&
@@ -171,8 +192,20 @@ export function LeaderboardTab({
         </div>
       )}
       {currentUserId && userRank !== null && (
+        <>
+          <p className="text-sm text-muted-foreground mb-3">
+            {`You're #${userRank} ${getRankTimeframeSuffix(period)}`}
+          </p>
+          {percentile !== null && (
+            <p className="text-xs text-muted-foreground mt-1">
+              You're ahead of {percentile}% of players
+            </p>
+          )}
+        </>
+      )}
+      {userRank === null && (
         <p className="text-sm text-muted-foreground mb-3">
-          You are currently ranked #{userRank}
+          You're outside the top 10 — you're closer than you think 👀
         </p>
       )}
       <div className={`${maxHeightClass} space-y-2 overflow-y-auto pr-2`}>

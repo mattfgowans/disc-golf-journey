@@ -45,6 +45,7 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/firebase-auth";
 import { getUserStats } from "@/lib/leaderboard";
 import { getRankAndPrestige, PRESTIGE_STEP_POINTS } from "@/lib/ranks";
+import { handleInvite } from "@/lib/inviteFriends";
 
 export default function Page() {
   const headerConfig = useMemo(() => ({ title: "You" }), []);
@@ -403,6 +404,13 @@ function ProfileContent({
             </a>
           </div>
         </div>
+
+        <button
+          onClick={handleInvite}
+          className="w-full mt-4 rounded-xl bg-foreground text-background py-2.5 text-sm font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+        >
+          Invite Friends
+        </button>
 
         {/* Account */}
         <div className="rounded-xl border border-border bg-muted/30 p-4">
