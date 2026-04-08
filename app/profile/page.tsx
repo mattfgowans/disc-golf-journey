@@ -46,6 +46,8 @@ import { useAuth } from "@/lib/firebase-auth";
 import { getUserStats } from "@/lib/leaderboard";
 import { getRankAndPrestige, PRESTIGE_STEP_POINTS } from "@/lib/ranks";
 import { handleInvite } from "@/lib/inviteFriends";
+import { useAchievements } from "@/lib/useAchievements";
+import { ACHIEVEMENTS_CATALOG } from "@/data/achievements";
 
 export default function Page() {
   const headerConfig = useMemo(() => ({ title: "You" }), []);
@@ -199,6 +201,11 @@ function ProfileContent({
 }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  const { toggleAchievement, achievements: profileAchievements } = useAchievements(ACHIEVEMENTS_CATALOG);
+  const [showInviteSuccess, setShowInviteSuccess] = useState(false);
+  const inviteFriendCompleted =
+    (profileAchievements ?? ACHIEVEMENTS_CATALOG).social.find((a) => a.id === "invite_friend")
+      ?.isCompleted ?? false;
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -406,7 +413,18 @@ function ProfileContent({
         </div>
 
         <button
-          onClick={handleInvite}
+          onClick={() =>
+            void handleInvite({
+              isInviteFriendCompleted: inviteFriendCompleted,
+              onToggleAchievement: (id) => void toggleAchievement("social", id),
+              onInviteSuccess: () => {
+                setShowInviteSuccess(true);
+                setTimeout(() => {
+                  setShowInviteSuccess(false);
+                }, 2000);
+              },
+            })
+          }
           className="w-full mt-4 rounded-xl bg-foreground text-background py-2.5 text-sm font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
         >
           Invite Friends
@@ -435,6 +453,14 @@ function ProfileContent({
           </div>
         </div>
       </div>
+
+      {showInviteSuccess && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[300]">
+          <div className="bg-black text-white px-4 py-2 rounded-xl text-sm shadow-lg">
+            Achievement unlocked: Spread the Word 🎉
+          </div>
+        </div>
+      )}
     </div>
   );
 }

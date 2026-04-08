@@ -1218,6 +1218,18 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       points: 100,
     } as Achievement,
     {
+      id: "invite_friend",
+      title: "Spread the Word",
+      description: "Invite a friend to Disc Golf Journey",
+      category: "social",
+      subcategory: "communityEngagement",
+      kind: "toggle",
+      progress: 0,
+      target: 1,
+      points: 100,
+      isCompleted: false,
+    } as Achievement,
+    {
       id: "social-1",
       title: "Club Member",
       description: "Join your local disc golf club",

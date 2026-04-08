@@ -203,6 +203,7 @@ function DashboardInner() {
   const [hasCompletedFirstAchievement, setHasCompletedFirstAchievement] = useState(false);
   const [showFirstBonus, setShowFirstBonus] = useState(false);
   const [showLeaderboardPrompt, setShowLeaderboardPrompt] = useState(false);
+  const [showInviteSuccess, setShowInviteSuccess] = useState(false);
 
   const devToolsEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
   const devUid = process.env.NEXT_PUBLIC_DEV_UID;
@@ -289,6 +290,9 @@ function DashboardInner() {
   // Use achievements from Firebase, or fallback to catalog if not loaded yet
   // Only fallback if achievements is null/undefined, not if arrays are empty
   const currentAchievements: Achievements = achievements ?? ACHIEVEMENTS_CATALOG;
+
+  const inviteFriendCompleted =
+    currentAchievements.social.find((a) => a.id === "invite_friend")?.isCompleted ?? false;
 
   const achievementsForUI = useMemo(
     () => ({
@@ -712,7 +716,27 @@ function DashboardInner() {
                 </p>
 
                 <button
-                  onClick={handleInvite}
+                  onClick={() =>
+                    void handleInvite({
+                      isInviteFriendCompleted: inviteFriendCompleted,
+                      onToggleAchievement: (id) => {
+                        if (!hasCompletedFirstAchievement) {
+                          setHasCompletedFirstAchievement(true);
+                          setShowFirstBonus(true);
+                          setTimeout(() => {
+                            setShowFirstBonus(false);
+                          }, 2000);
+                        }
+                        toggleAchievementWithCelebration("social", id);
+                      },
+                      onInviteSuccess: () => {
+                        setShowInviteSuccess(true);
+                        setTimeout(() => {
+                          setShowInviteSuccess(false);
+                        }, 2000);
+                      },
+                    })
+                  }
                   className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
                 >
                   Invite Friends
@@ -1103,6 +1127,13 @@ function DashboardInner() {
             >
               View Leaderboard
             </button>
+          </div>
+        </div>
+      )}
+      {showInviteSuccess && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[300]">
+          <div className="bg-black text-white px-4 py-2 rounded-xl text-sm shadow-lg">
+            Achievement unlocked: Spread the Word 🎉
           </div>
         </div>
       )}

@@ -130,6 +130,9 @@ export function AchievementCard({
           id === "onboarding_start" && !isCompleted
             ? "ring-2 ring-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)] animate-[onboardingPulse_2s_infinite]"
             : "",
+          id === "invite_friend" && !isCompleted
+            ? "border border-border/60 bg-muted/30"
+            : "",
           "transition-all duration-200 hover:scale-[1.01] hover:shadow-md",
           "active:scale-[0.99]",
           "transform-gpu will-change-transform transition-colors rounded-xl overflow-hidden leading-tight py-1"
