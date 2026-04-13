@@ -181,10 +181,13 @@ function ProfileContent({
   const [isDragging, setIsDragging] = useState(false);
   const startYRef = useRef<number | null>(null);
   const dragYRef = useRef(0);
+  const lastMoveTime = useRef(0);
+  const lastMoveY = useRef(0);
   const [editUsername, setEditUsername] = useState(username || "");
   const [editHomeCourse, setEditHomeCourse] = useState(homeCourse || "");
   const [editHandedness, setEditHandedness] = useState(handedness || "");
   const [editBio, setEditBio] = useState(bio || "");
+  const [showToast, setShowToast] = useState(false);
 
   const openEditModal = () => {
     setEditUsername(username || "");
@@ -218,7 +221,8 @@ function ProfileContent({
       if (isHandedness(editHandedness)) payload.handedness = editHandedness;
 
       await updateProfile(payload as Record<string, any>);
-      alert("Profile updated");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
       setIsEditOpen(false);
     } catch (error: any) {
       console.error("Failed to update profile:", error);
@@ -365,7 +369,10 @@ function ProfileContent({
 
       {isEditOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 pb-4"
+          className="fixed inset-0 z-50 flex items-end justify-center pb-4"
+          style={{
+            backgroundColor: `rgba(0, 0, 0, ${0.4 - Math.min(dragY / 300, 0.3)})`,
+          }}
           onClick={() => setIsEditOpen(false)}
         >
           <div
@@ -386,17 +393,26 @@ function ProfileContent({
 
               e.preventDefault();
 
+              const now = Date.now();
               const delta = e.clientY - startYRef.current;
 
               if (delta > 0) {
                 dragYRef.current = delta;
                 setDragY(delta);
+
+                lastMoveTime.current = now;
+                lastMoveY.current = e.clientY;
               }
             }}
-            onPointerUp={() => {
+            onPointerUp={(e) => {
               setIsDragging(false);
 
-              if (dragYRef.current > 120) {
+              const timeDiff = Date.now() - lastMoveTime.current;
+              const distance = e.clientY - lastMoveY.current;
+
+              const velocity = distance / (timeDiff || 1);
+
+              if (dragYRef.current > 120 || velocity > 0.5) {
                 setIsEditOpen(false);
               }
 
@@ -471,6 +487,14 @@ function ProfileContent({
                 </Button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showToast && (
+        <div className="fixed bottom-24 left-1/2 z-[100] -translate-x-1/2">
+          <div className="rounded-xl bg-black px-4 py-2 text-sm text-white shadow-lg">
+            Profile updated
           </div>
         </div>
       )}

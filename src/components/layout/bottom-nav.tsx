@@ -56,8 +56,13 @@ export function BottomNav() {
   if (loading || redirectSettling || !user) return null;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden touch-pan-y select-none">
-      <div className="mx-auto flex min-h-16 max-w-4xl items-center justify-around px-2">
+    <div
+      className="fixed left-0 right-0 z-50 border-t bg-background md:hidden touch-pan-y select-none"
+      style={{
+        bottom: "calc(env(safe-area-inset-bottom) + 8px)",
+      }}
+    >
+      <div className="mx-auto flex min-h-16 max-w-4xl items-center justify-around px-2 py-2">
         {NAV_ITEMS.map(({ href, label, icon: Icon, color, isActive }) => {
           const active = isActive(path);
 
@@ -79,6 +84,6 @@ export function BottomNav() {
           );
         })}
       </div>
-    </nav>
+    </div>
   );
 }
