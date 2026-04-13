@@ -7,6 +7,7 @@ import { BackButton } from "@/components/navigation/BackButton";
 import { useHeader } from "@/components/layout/header-context";
 import { PendingRequestsBell } from "@/components/notifications/pending-requests-bell";
 import { useAuth } from "@/lib/firebase-auth";
+import { HeaderBar } from "@/components/layout/header";
 
 function normalizePath(pathname: string) {
   return pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
@@ -51,22 +52,13 @@ export function Navbar() {
         id="dg-navbar"
         className="sticky top-0 z-50 border-b bg-background shadow-sm"
       >
-        <div className="mx-auto flex h-[60px] w-full max-w-4xl items-center px-4 sm:px-6">
-          <div className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
-            {/* Left (empty while loading) */}
-            <div className="flex min-w-0 shrink-0 items-center justify-start" />
-
-            {/* Center title */}
-            <div className="min-w-0 justify-self-center">
-              <Link href="/" className="block min-w-0 truncate text-center">
-                <h1 className="truncate text-base font-semibold sm:text-lg">
-                  Disc Golf Journey
-                </h1>
-              </Link>
-            </div>
-
-            {/* Right (empty while loading) */}
-            <div className="flex min-w-0 shrink-0 items-center justify-end" />
+        <div className="relative mx-auto flex h-[60px] w-full max-w-4xl items-center justify-center px-4 sm:px-6">
+          <div className="min-w-0 max-w-[min(100%,20rem)] px-8 text-center">
+            <Link href="/" className="block min-w-0 truncate text-center">
+              <h1 className="truncate text-base font-semibold sm:text-lg">
+                Disc Golf Journey
+              </h1>
+            </Link>
           </div>
         </div>
       </nav>
@@ -107,47 +99,36 @@ export function Navbar() {
     </Link>
   );
 
+  const leftSlot =
+    !isRootTabPath(normalizedPath) &&
+    (header?.left
+      ? header.left
+      : backConfig
+        ? (
+          <BackButton
+            fallbackHref={backConfig.fallbackHref}
+            label="Back"
+            className="-ml-1 h-8 px-2"
+          />
+          )
+        : null);
+
+  const leftOffsetForInvite = Boolean(
+    user && !isRootTabPath(normalizedPath) && (header?.left || backConfig)
+  );
+
   return (
     <nav
       id="dg-navbar"
       className="sticky top-0 z-50 border-b bg-background shadow-sm"
     >
-      <div className="mx-auto flex h-[60px] w-full max-w-4xl items-center px-4 sm:px-6">
-        <div className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
-          {/* Left slot */}
-          <div className="flex min-w-0 shrink-0 items-center justify-start">
-            {isRootTabPath(normalizedPath)
-              ? null
-              : header?.left
-                ? header.left
-                : backConfig
-                  ? (
-                    <BackButton
-                      fallbackHref={backConfig.fallbackHref}
-                      label="Back"
-                      className="-ml-1 h-8 px-2"
-                    />
-                    )
-                  : null}
-          </div>
-
-          {/* Center title: takes remaining space, truncates if needed */}
-          <div className="min-w-0 justify-self-center">
-            <div className="min-w-0 truncate text-center">
-              {typeof center === "string" ? (
-                <span className="block truncate font-semibold">{center}</span>
-              ) : (
-                center
-              )}
-            </div>
-          </div>
-
-          {/* Right slot: content-sized, never shrinks so icons/labels stay visible */}
-          <div className="flex min-w-0 shrink-0 items-center justify-end gap-1">
-            {header?.right ?? rightDefault}
-          </div>
-        </div>
-      </div>
+      <HeaderBar
+        center={center}
+        right={header?.right ?? rightDefault}
+        left={leftSlot}
+        user={Boolean(user)}
+        leftOffsetForInvite={leftOffsetForInvite}
+      />
     </nav>
   );
 }

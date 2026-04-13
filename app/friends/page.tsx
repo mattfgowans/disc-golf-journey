@@ -204,19 +204,24 @@ function FriendsSection({ currentUserId }: { currentUserId: string }) {
           {hookError && (
             <p className="text-sm text-destructive">{hookError}</p>
           )}
-          {/* Send Friend Request */}
+          {/* Add Friend */}
           <div className="space-y-2">
-            <Label htmlFor="friend-uid">Send Friend Request</Label>
+            <Label htmlFor="friend-uid">Add Friend</Label>
             <div className="flex gap-2">
               <Input
                 id="friend-uid"
-                placeholder="Enter username (e.g. johndoe or @johndoe)"
+                placeholder="Search username"
                 value={friendUid}
                 onChange={(e) => setFriendUid(e.target.value)}
                 disabled={isSending}
               />
-              <Button onClick={handleSendRequest} size="sm" disabled={disableSend}>
-                {isSending ? "Sending..." : <UserPlus className="h-4 w-4" />}
+              <Button
+                type="button"
+                onClick={handleSendRequest}
+                disabled={disableSend}
+                className="ml-2 p-2 rounded-lg border border-border bg-muted hover:bg-muted/70 transition text-muted-foreground hover:text-foreground"
+              >
+                {isSending ? "Sending..." : <UserPlus className="w-4 h-4" />}
               </Button>
             </div>
             {friendMatch && typed && (

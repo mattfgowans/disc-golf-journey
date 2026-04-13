@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LeaderboardTab } from "@/components/leaderboard/leaderboard-tab";
 import { ClubBadge } from "@/components/club/club-badge";
@@ -12,7 +11,7 @@ import { ClubEmptyState } from "@/components/leaderboard/club-empty-state";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { useAuth } from "@/lib/firebase-auth";
 import { useUserDoc } from "@/lib/useUserDoc";
-import { createClub, joinClubByCode, getClubMemberCount, getUserClub } from "@/lib/clubs";
+import { createClub, joinClubByCode, getUserClub } from "@/lib/clubs";
 import type { LeaderboardPeriod } from "@/lib/leaderboard";
 
 const SCOPE_STORAGE_KEY = "leaderboardScope";
@@ -40,8 +39,6 @@ export function LeaderboardClient() {
     const stored = localStorage.getItem(PERIOD_STORAGE_KEY) as LeaderboardPeriod | null;
     return stored && ["weekly", "monthly", "yearly", "allTime"].includes(stored) ? stored : "weekly";
   });
-  const [clubMemberCount, setClubMemberCount] = useState<number | null>(null);
-
   useEffect(() => {
     if (!clubId) {
       setClubName(null);
@@ -55,24 +52,6 @@ export function LeaderboardClient() {
       cancelled = true;
     };
   }, [clubId]);
-
-  useEffect(() => {
-    if (scope !== "club" || !clubId) {
-      setClubMemberCount(null);
-      return;
-    }
-    let cancelled = false;
-    getClubMemberCount(clubId)
-      .then((n) => {
-        if (!cancelled) setClubMemberCount(n);
-      })
-      .catch(() => {
-        if (!cancelled) setClubMemberCount(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [scope, clubId]);
 
   useEffect(() => {
     localStorage.setItem(SCOPE_STORAGE_KEY, scope);
@@ -126,59 +105,25 @@ export function LeaderboardClient() {
   return (
     <RequireAuth>
       <div className="w-full">
-        <div className="mt-[-2px] mb-2.5 text-left space-y-0.5">
-          <h1 className="text-2xl font-bold">
-            <span className="hidden sm:inline">🏆 </span>Leaderboard
+        <div className="mb-4 text-center mt-2">
+          <h1 className="text-3xl font-bold tracking-tight">
+            🏆 Leaderboard
           </h1>
-          <p className="text-sm leading-snug text-muted-foreground sm:text-base">
+
+          <p className="text-muted-foreground mt-1">
             Compete with players worldwide and connect with friends
           </p>
         </div>
 
         <div className="space-y-5">
           <div className="space-y-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-0.5">
-                <CardTitle>Rankings</CardTitle>
-                <p className="text-sm leading-snug text-muted-foreground">
-                  {scope === "friends" && "Friends (Top only)"}
-                  {scope === "global" && (
-                    <>
-                      Global
-                      <span className="sm:hidden"> · </span>
-                      <span className="hidden sm:inline"> • </span>
-                      {(() => {
-                        switch (safePeriodTab) {
-                          case "weekly":
-                            return "Week";
-                          case "monthly":
-                            return "Month";
-                          case "yearly":
-                            return "Year";
-                          case "allTime":
-                            return "All Time";
-                          default:
-                            return "Week";
-                        }
-                      })()}
-                    </>
-                  )}
-                  {scope === "club" && (
-                    <>
-                      Club · All Time
-                      {clubMemberCount !== null && (
-                        <> · Members: {clubMemberCount}</>
-                      )}
-                    </>
-                  )}
-                </p>
-              </div>
-              {isClubScope && clubId && (
+            {isClubScope && clubId && (
+              <div className="flex justify-end">
                 <Button variant="outline" size="sm" asChild className="mt-0.5 shrink-0">
                   <Link href="/club">View club</Link>
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
             <div className="overflow-visible space-y-2.5">
               {/* Scope Toggle */}
               <div className="sticky top-0 z-10 -mx-4 border-y bg-background/95 px-4 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:-mx-6 md:px-6">

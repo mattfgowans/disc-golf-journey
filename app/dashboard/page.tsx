@@ -20,7 +20,6 @@ import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import PageWrapper from "@/components/layout/page-wrapper";
-import { handleInvite } from "@/lib/inviteFriends";
 
 // TODO: Add achievement badges (rarity-based and achievement-specific)
 
@@ -203,7 +202,6 @@ function DashboardInner() {
   const [hasCompletedFirstAchievement, setHasCompletedFirstAchievement] = useState(false);
   const [showFirstBonus, setShowFirstBonus] = useState(false);
   const [showLeaderboardPrompt, setShowLeaderboardPrompt] = useState(false);
-  const [showInviteSuccess, setShowInviteSuccess] = useState(false);
 
   const devToolsEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
   const devUid = process.env.NEXT_PUBLIC_DEV_UID;
@@ -290,9 +288,6 @@ function DashboardInner() {
   // Use achievements from Firebase, or fallback to catalog if not loaded yet
   // Only fallback if achievements is null/undefined, not if arrays are empty
   const currentAchievements: Achievements = achievements ?? ACHIEVEMENTS_CATALOG;
-
-  const inviteFriendCompleted =
-    currentAchievements.social.find((a) => a.id === "invite_friend")?.isCompleted ?? false;
 
   const achievementsForUI = useMemo(
     () => ({
@@ -706,45 +701,6 @@ function DashboardInner() {
             </div>
 
             <div className="mt-1.5 pb-6">
-              <div className="mt-6 rounded-2xl border-none bg-transparent py-4 shadow-none">
-                <p className="text-base font-semibold text-foreground mb-2">
-                  Compete with friends
-                </p>
-
-                <p className="text-sm text-muted-foreground mb-3">
-                  See how you stack up — invite friends and compete on the leaderboard
-                </p>
-
-                <button
-                  onClick={() =>
-                    void handleInvite({
-                      isInviteFriendCompleted: inviteFriendCompleted,
-                      onToggleAchievement: (id) => {
-                        if (!hasCompletedFirstAchievement) {
-                          setHasCompletedFirstAchievement(true);
-                          setShowFirstBonus(true);
-                          setTimeout(() => {
-                            setShowFirstBonus(false);
-                          }, 2000);
-                        }
-                        toggleAchievementWithCelebration("social", id);
-                      },
-                      onInviteSuccess: () => {
-                        setShowInviteSuccess(true);
-                        setTimeout(() => {
-                          setShowInviteSuccess(false);
-                        }, 2000);
-                      },
-                    })
-                  }
-                  className="w-full rounded-xl bg-foreground text-background py-2 text-sm font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-                >
-                  Invite Friends
-                </button>
-
-                <div className="mt-5 border-t border-border/50" />
-              </div>
-
               <StatsHeader
                 completionPercentage={activeCompletion}
                 totalPoints={allTimePoints}
@@ -1127,13 +1083,6 @@ function DashboardInner() {
             >
               View Leaderboard
             </button>
-          </div>
-        </div>
-      )}
-      {showInviteSuccess && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[300]">
-          <div className="bg-black text-white px-4 py-2 rounded-xl text-sm shadow-lg">
-            Achievement unlocked: Spread the Word 🎉
           </div>
         </div>
       )}

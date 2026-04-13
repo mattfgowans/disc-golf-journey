@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 type Handedness = "RHBH" | "RHFH" | "LHBH" | "LHFH";
 const HANDEDNESS_LABELS: Record<Handedness, string> = {
@@ -31,31 +31,22 @@ function deepClean<T extends Record<string, unknown>>(obj: T): Record<string, un
   return out;
 }
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePageHeader } from "@/components/layout/header-context";
 import { useUserDoc } from "@/lib/useUserDoc";
 import { RequireAuth } from "@/components/auth/require-auth";
 import PageWrapper from "@/components/layout/page-wrapper";
-import { Loader2, Edit2, Save, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { doc, setDoc, getDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/firebase-auth";
 import { getUserStats } from "@/lib/leaderboard";
 import { getRankAndPrestige, PRESTIGE_STEP_POINTS } from "@/lib/ranks";
-import { handleInvite } from "@/lib/inviteFriends";
-import { useAchievements } from "@/lib/useAchievements";
-import { ACHIEVEMENTS_CATALOG } from "@/data/achievements";
-
 export default function Page() {
   const headerConfig = useMemo(() => ({ title: "You" }), []);
   usePageHeader(headerConfig);
   const { user, signOut } = useAuth();
   const { userData: profile, loading: profileLoading } = useUserDoc();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<Record<string, any>>({});
   const [stats, setStats] = useState<{ allTime: number } | null>(null);
 
   const updateProfile = async (updates: Record<string, any>) => {
@@ -110,17 +101,6 @@ export default function Page() {
     }
   };
 
-  // Initialize edit form when profile loads
-  useEffect(() => {
-    if (profile) {
-      setEditForm({
-        ...profile,
-        username: profile.username ?? "",
-        handedness: isHandedness(profile.handedness) ? profile.handedness : "",
-      });
-    }
-  }, [profile]);
-
   // Fetch Firestore stats for rank/prestige display
   useEffect(() => {
     const uid = user?.uid;
@@ -162,10 +142,6 @@ export default function Page() {
           profile={profile}
           user={user}
           signOut={signOut}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-          editForm={editForm}
-          setEditForm={setEditForm}
           updateProfile={updateProfile}
           rankPrestige={rp}
           prestigeStep={PRESTIGE_STEP_POINTS}
@@ -180,10 +156,6 @@ function ProfileContent({
   profile,
   user,
   signOut,
-  isEditing,
-  setIsEditing,
-  editForm,
-  setEditForm,
   updateProfile,
   rankPrestige,
   prestigeStep,
@@ -191,37 +163,63 @@ function ProfileContent({
   profile: Record<string, any>;
   user: { displayName?: string | null; email?: string | null } | null;
   signOut: () => Promise<void>;
-  isEditing: boolean;
-  setIsEditing: (editing: boolean) => void;
-  editForm: Record<string, any>;
-  setEditForm: (form: Record<string, any> | ((prev: Record<string, any>) => Record<string, any>)) => void;
   updateProfile: (updates: Record<string, any>) => Promise<void>;
   rankPrestige: ReturnType<typeof getRankAndPrestige>;
   prestigeStep: number;
 }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
-  const { toggleAchievement, achievements: profileAchievements } = useAchievements(ACHIEVEMENTS_CATALOG);
-  const [showInviteSuccess, setShowInviteSuccess] = useState(false);
-  const inviteFriendCompleted =
-    (profileAchievements ?? ACHIEVEMENTS_CATALOG).social.find((a) => a.id === "invite_friend")
-      ?.isCompleted ?? false;
+
+  const username = profile.username ?? "";
+  const homeCourse = profile.homeCourse ?? "";
+  const handedness = isHandedness(profile.handedness) ? profile.handedness : "";
+  const bio = profile.bio ?? "";
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editSheetEntered, setEditSheetEntered] = useState(false);
+  const [dragY, setDragY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const startYRef = useRef<number | null>(null);
+  const dragYRef = useRef(0);
+  const [editUsername, setEditUsername] = useState(username || "");
+  const [editHomeCourse, setEditHomeCourse] = useState(homeCourse || "");
+  const [editHandedness, setEditHandedness] = useState(handedness || "");
+  const [editBio, setEditBio] = useState(bio || "");
+
+  const openEditModal = () => {
+    setEditUsername(username || "");
+    setEditHomeCourse(homeCourse || "");
+    setEditHandedness(handedness || "");
+    setEditBio(bio || "");
+    setIsEditOpen(true);
+  };
+
+  useEffect(() => {
+    if (!isEditOpen) {
+      setEditSheetEntered(false);
+      return;
+    }
+    setEditSheetEntered(false);
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setEditSheetEntered(true));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [isEditOpen]);
 
   const handleSave = async () => {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      const displayNameVal = (editForm.displayName ?? profile.displayName ?? "").toString().trim();
       const payload: Record<string, unknown> = {
-        bio: (editForm.bio ?? "").toString(),
-        homeCourse: (editForm.homeCourse ?? "").toString(),
-        username: (editForm.username ?? "").toString(),
+        bio: (editBio ?? "").toString(),
+        homeCourse: (editHomeCourse ?? "").toString(),
+        username: (editUsername ?? "").toString(),
       };
-      if (displayNameVal) payload.displayName = displayNameVal;
-      if (isHandedness(editForm.handedness)) payload.handedness = editForm.handedness;
+      if (isHandedness(editHandedness)) payload.handedness = editHandedness;
 
       await updateProfile(payload as Record<string, any>);
-      setIsEditing(false);
+      alert("Profile updated");
+      setIsEditOpen(false);
     } catch (error: any) {
       console.error("Failed to update profile:", error);
       if (error.message === "Username already taken") {
@@ -234,15 +232,6 @@ function ProfileContent({
     }
   };
 
-  const handleCancel = () => {
-    setEditForm({
-      ...profile,
-      username: profile.username ?? "",
-      handedness: isHandedness(profile.handedness) ? profile.handedness : "",
-    });
-    setIsEditing(false);
-  };
-
   const initials =
     (profile.displayName || "A")
       .split(" ")
@@ -252,38 +241,42 @@ function ProfileContent({
       .join("")
       .toUpperCase();
 
+  const userInitial = initials[0] ?? "?";
+  const rank = rankPrestige.rank.name;
+  const points = rankPrestige.allTimePoints;
+  const pointsToNextRank = rankPrestige.progress.nextRank
+    ? rankPrestige.progress.pointsToNext
+    : prestigeStep - rankPrestige.pointsInPrestige;
+  const nextRank = rankPrestige.progress.nextRank
+    ? rankPrestige.progress.nextRank.name
+    : "next Prestige";
+
   return (
     <div className="container mx-auto py-6 max-w-2xl md:py-8">
       <div className="space-y-6">
-        {/* Profile Header */}
-        <div className="text-center">
-          <Avatar className="w-20 h-20 mx-auto mb-3">
-            <AvatarImage src={profile.photoURL} alt={profile.displayName} />
-            <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-          </Avatar>
-          <h1 className="text-2xl font-bold md:text-3xl">{profile.displayName}</h1>
+        <div className="mb-4 rounded-2xl border bg-muted/40 p-4 text-center">
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-lg font-semibold">
+              {userInitial}
+            </div>
+
+            <div className="text-lg font-semibold">
+              {username ? `@${username}` : "—"}
+            </div>
+
+            <div className="text-sm text-muted-foreground text-center">
+              {rank} • {points.toLocaleString()} pts
+            </div>
+
+            <div className="text-xs text-muted-foreground">
+              {pointsToNextRank} pts to {nextRank}
+            </div>
+          </div>
         </div>
 
-        {/* Rank + Prestige */}
-        <div className="rounded-xl border border-border bg-muted/30 p-4">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-2">Rank & Prestige</h3>
-          <div className="space-y-1 text-sm">
-            <div>
-              <span className="font-medium">Rank:</span> {rankPrestige.rank.name}
-            </div>
-            <div>
-              <span className="font-medium">Prestige:</span> {rankPrestige.prestige}
-            </div>
-            {rankPrestige.progress.nextRank ? (
-              <div className="text-muted-foreground">
-                {rankPrestige.progress.pointsToNext} pts to {rankPrestige.progress.nextRank.name}
-              </div>
-            ) : (
-              <div className="text-muted-foreground">
-                {prestigeStep - rankPrestige.pointsInPrestige} pts to next Prestige
-              </div>
-            )}
-          </div>
+        {/* Profile Header */}
+        <div className="text-center">
+          <h1 className="text-2xl font-bold md:text-3xl">{profile.displayName}</h1>
         </div>
 
         {/* Profile Information */}
@@ -291,104 +284,38 @@ function ProfileContent({
           <div className="space-y-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-xl font-semibold md:text-2xl">Profile Information</h2>
-              {!isEditing ? (
-                <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
-                  <Edit2 className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </Button>
-              ) : (
-                <div className="flex gap-2">
-                  <Button onClick={handleSave} disabled={isSaving} size="sm">
-                    {isSaving ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Save className="w-4 h-4 mr-2" />
-                    )}
-                    Save
-                  </Button>
-                  <Button onClick={handleCancel} variant="outline" size="sm">
-                    <X className="w-4 h-4 mr-2" />
-                    Cancel
-                  </Button>
-                </div>
-              )}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={openEditModal}
+              >
+                Edit Profile
+              </Button>
             </div>
 
             <div className="space-y-4">
-              {/* Bio */}
-              <div>
-                <Label htmlFor="bio">Bio</Label>
-                {isEditing ? (
-                  <textarea
-                    id="bio"
-                    value={editForm.bio || ""}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setEditForm(prev => ({ ...prev, bio: e.target.value }))
-                    }
-                    placeholder="Tell us about your disc golf journey..."
-                    rows={3}
-                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                ) : (
-                  <p className="mt-1 text-sm">{profile.bio || "No bio yet"}</p>
-                )}
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-muted-foreground">Bio</span>
+                <span className="text-sm font-medium">{profile.bio || "No bio yet"}</span>
               </div>
-
-              {/* Home Course */}
-              <div>
-                <Label htmlFor="homeCourse">Home Course</Label>
-                {isEditing ? (
-                  <Input
-                    id="homeCourse"
-                    value={editForm.homeCourse || ""}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, homeCourse: e.target.value }))}
-                    placeholder="Your favorite course"
-                  />
-                ) : (
-                  <p className="mt-1 text-sm">{profile.homeCourse || "Not set"}</p>
-                )}
+              <div className="border-t my-1" />
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-muted-foreground">Home Course</span>
+                <span className="text-sm font-medium">{profile.homeCourse || "Not set"}</span>
               </div>
-
-              {/* Username */}
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <p className="text-xs text-muted-foreground mb-1">
-                  This is how friends can find you. Letters/numbers only.
-                </p>
-                {isEditing ? (
-                  <Input
-                    id="username"
-                    value={editForm.username || ""}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                    placeholder="@yourname"
-                  />
-                ) : (
-                  <p className="mt-1 text-sm">{profile.username ? `@${profile.username}` : "Not set"}</p>
-                )}
+              <div className="border-t my-1" />
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-muted-foreground">Username</span>
+                <span className="text-sm font-medium">
+                  {profile.username ? `@${profile.username}` : "Not set"}
+                </span>
               </div>
-
-              {/* Handedness */}
-              <div>
-                <Label htmlFor="handedness">Handedness</Label>
-                {isEditing ? (
-                  <select
-                    id="handedness"
-                    value={editForm.handedness ?? ""}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setEditForm(prev => ({ ...prev, handedness: e.target.value }))
-                    }
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="" disabled>Select handedness…</option>
-                    {HANDEDNESS_OPTIONS.map((opt) => (
-                      <option key={opt} value={opt}>{HANDEDNESS_LABELS[opt]}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <p className="mt-1 text-sm">
-                    {isHandedness(profile.handedness) ? HANDEDNESS_LABELS[profile.handedness] : "Not set"}
-                  </p>
-                )}
+              <div className="border-t my-1" />
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-muted-foreground">Handedness</span>
+                <span className="text-sm font-medium">
+                  {isHandedness(profile.handedness) ? HANDEDNESS_LABELS[profile.handedness] : "Not set"}
+                </span>
               </div>
             </div>
           </div>
@@ -411,24 +338,6 @@ function ProfileContent({
             </a>
           </div>
         </div>
-
-        <button
-          onClick={() =>
-            void handleInvite({
-              isInviteFriendCompleted: inviteFriendCompleted,
-              onToggleAchievement: (id) => void toggleAchievement("social", id),
-              onInviteSuccess: () => {
-                setShowInviteSuccess(true);
-                setTimeout(() => {
-                  setShowInviteSuccess(false);
-                }, 2000);
-              },
-            })
-          }
-          className="w-full mt-4 rounded-xl bg-foreground text-background py-2.5 text-sm font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-        >
-          Invite Friends
-        </button>
 
         {/* Account */}
         <div className="rounded-xl border border-border bg-muted/30 p-4">
@@ -454,10 +363,114 @@ function ProfileContent({
         </div>
       </div>
 
-      {showInviteSuccess && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[300]">
-          <div className="bg-black text-white px-4 py-2 rounded-xl text-sm shadow-lg">
-            Achievement unlocked: Spread the Word 🎉
+      {isEditOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 pb-4"
+          onClick={() => setIsEditOpen(false)}
+        >
+          <div
+            className="mb-2 max-h-[85vh] w-full max-w-md touch-pan-y space-y-4 overflow-y-auto rounded-t-2xl bg-white p-4"
+            style={{
+              transform: editSheetEntered
+                ? `translateY(calc(-28px + ${dragY}px))`
+                : "translateY(100%)",
+              transition: isDragging ? "none" : "transform 0.25s ease-out",
+            }}
+            onPointerDown={(e) => {
+              startYRef.current = e.clientY;
+              setIsDragging(true);
+            }}
+            onPointerMove={(e) => {
+              if (!isDragging || startYRef.current === null) return;
+
+              const delta = e.clientY - startYRef.current;
+
+              if (delta > 0) {
+                dragYRef.current = delta;
+                setDragY(delta);
+              } else {
+                dragYRef.current = 0;
+                setDragY(0);
+              }
+            }}
+            onPointerUp={() => {
+              setIsDragging(false);
+
+              if (dragYRef.current > 120) {
+                setIsEditOpen(false);
+              }
+
+              dragYRef.current = 0;
+              setDragY(0);
+              startYRef.current = null;
+            }}
+            onPointerCancel={() => {
+              setIsDragging(false);
+              dragYRef.current = 0;
+              setDragY(0);
+              startYRef.current = null;
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-center pt-1 pb-2">
+              <div className="w-10 h-1.5 bg-gray-300 rounded-full" />
+            </div>
+            <h2 className="text-center text-lg font-semibold">Edit Profile</h2>
+
+            <div className="space-y-3">
+              <input
+                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                placeholder="Username"
+                value={editUsername}
+                onChange={(e) => setEditUsername(e.target.value)}
+              />
+
+              <input
+                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                placeholder="Home Course"
+                value={editHomeCourse}
+                onChange={(e) => setEditHomeCourse(e.target.value)}
+              />
+
+              <input
+                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                placeholder="Handedness"
+                value={editHandedness}
+                onChange={(e) => setEditHandedness(e.target.value)}
+              />
+
+              <textarea
+                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                placeholder="Bio"
+                value={editBio}
+                onChange={(e) => setEditBio(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div className="sticky bottom-0 bg-white pt-2 pb-1">
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  className="flex-1"
+                  onClick={() => setIsEditOpen(false)}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  className="flex-1 transition-transform active:scale-95"
+                  disabled={isSaving}
+                  onClick={() => void handleSave()}
+                >
+                  {isSaving ? (
+                    <Loader2 className="mx-auto h-4 w-4 animate-spin" />
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -73,6 +73,7 @@ export function AchievementCard({
 }: AchievementCardProps) {
   const Icon = categoryIcons[category];
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [justCompleted, setJustCompleted] = useState(false);
   const animClass =
     celebratePhase === "shake"
       ? "animate-ace-shake"
@@ -100,6 +101,10 @@ export function AchievementCard({
       if (!hasSecrets && id !== "skill-35" && id !== "social-0") {
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       }
+      setJustCompleted(true);
+      setTimeout(() => {
+        setJustCompleted(false);
+      }, 300);
       onToggle();
     }
   };
@@ -133,6 +138,7 @@ export function AchievementCard({
           id === "invite_friend" && !isCompleted
             ? "border border-border/60 bg-muted/30"
             : "",
+          justCompleted ? "scale-[1.03] transition-transform duration-200" : "",
           "transition-all duration-200 hover:scale-[1.01] hover:shadow-md",
           "active:scale-[0.99]",
           "transform-gpu will-change-transform transition-colors rounded-xl overflow-hidden leading-tight py-1"

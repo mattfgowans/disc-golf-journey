@@ -175,44 +175,36 @@ export function AchievementSection({
             <button
               type="button"
               onClick={onToggle}
-              className="relative z-10 flex w-full items-center justify-between rounded-2xl px-3 py-1.5 transition-transform duration-100 active:scale-[0.99] active:opacity-95"
+              className="relative z-10 flex w-full flex-col rounded-2xl px-3 py-1.5 transition-transform duration-100 active:scale-[0.99] active:opacity-95"
               style={{ outline: "none", border: "none", background: "none" }}
               aria-expanded={isOpen}
             >
-              <div className="flex-1 min-w-0">
-                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                  <h2 className="text-lg font-bold text-white sm:text-xl">{title}</h2>
-                  {tierInfo && (
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap",
-                        theme?.badge ?? "bg-black/15 ring-1 ring-white/25 text-white"
-                      )}
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
-                      <span>{tierInfo.label}</span>
-                      <span className="opacity-80 tabular-nums">{tierInfo.progressText}</span>
-                    </span>
-                  )}
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="min-w-0 flex-1 text-left text-base font-semibold leading-tight text-white">
+                  {title}
+                </h3>
+
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/80">
+                    {Math.round(completion)}%
+                  </span>
+
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 shrink-0 text-white opacity-70 transition-transform",
+                      isOpen ? "rotate-180" : "rotate-0"
+                    )}
+                  />
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2.5">
-                <span
-                  className={cn(
-                    "rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
-                    theme?.pill ?? "bg-black/20 text-white"
-                  )}
-                >
-                  {Math.round(completion)}%
-                </span>
-                <ChevronDown
-                  className={cn(
-                    "h-5 w-5 text-white shrink-0 transition-transform",
-                    isOpen ? "rotate-100" : "rotate-0"
-                  )}
-                />
-              </div>
+              {tierInfo && (
+                <div className="mt-0.5">
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 text-xs text-white/90">
+                    • {tierInfo.label} {tierInfo.progressText}
+                  </span>
+                </div>
+              )}
             </button>
 
             {tierInfo && typeof activeTierIndex === "number" && typeof viewedTierIndex === "number" && onSelectTier && (

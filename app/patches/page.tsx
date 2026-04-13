@@ -11,24 +11,27 @@ function PatchesPageInner() {
   const { completion, eligibleBySlug } = usePatchEligibility();
   const total = PATCHES.length;
   const readyCount = PATCHES.filter((p) => eligibleBySlug[p.tabKey]).length;
+  const collectionCount = readyCount;
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold">Patches</h1>
-      <div className="mt-1 text-sm text-muted-foreground">
-        {readyCount === total ? (
-          "Full set ready"
-        ) : (
-          <>
-            Your collection: <span className="font-medium text-foreground">{readyCount}</span> / {total} ready
-          </>
-        )}
-      </div>
-      <p className="text-muted-foreground text-sm mb-6 mt-2">
-        Collect premium patches by reaching 80% mastery in each tab.
-      </p>
+      <div className="text-center mt-2 mb-4">
+        <h1 className="text-3xl font-bold tracking-tight">
+          🏅 Patches
+        </h1>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 items-stretch">
+        <p className="text-muted-foreground mt-1">
+          Collect premium patches by reaching 80% mastery in each tab
+        </p>
+
+        <p className="text-sm text-muted-foreground mt-1">
+          {readyCount === total
+            ? "Full set ready"
+            : `${collectionCount} / 3 patches unlocked`}
+        </p>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 items-stretch">
         {PATCHES.map((patch) => (
           <PatchCard
             key={patch.slug}
