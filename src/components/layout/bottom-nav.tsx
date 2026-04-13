@@ -57,32 +57,34 @@ export function BottomNav() {
 
   return (
     <div
-      className="fixed left-0 right-0 z-50 border-t bg-background md:hidden touch-pan-y select-none"
+      className="fixed inset-x-0 bottom-0 z-50 border-t bg-background md:hidden touch-pan-y select-none"
       style={{
-        bottom: "calc(env(safe-area-inset-bottom) + 8px)",
+        paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      <div className="mx-auto flex min-h-16 max-w-4xl items-center justify-around px-2 py-2">
-        {NAV_ITEMS.map(({ href, label, icon: Icon, color, isActive }) => {
-          const active = isActive(path);
+      <div className="translate-y-[-8px]">
+        <div className="mx-auto flex min-h-16 max-w-4xl items-center justify-around px-2 py-2">
+          {NAV_ITEMS.map(({ href, label, icon: Icon, color, isActive }) => {
+            const active = isActive(path);
 
-          return (
-            <Link
-              key={href}
-              href={href}
-              prefetch={false}
-              className={cn(
-                "flex flex-col items-center justify-center gap-1 text-xs transition-colors",
-                active
-                  ? cn("rounded-xl px-2 py-1.5 font-medium shadow-sm", color)
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Icon className={cn("h-5 w-5 shrink-0", active && "scale-[1.05]")} />
-            <span>{label}</span>
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={href}
+                href={href}
+                prefetch={false}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 text-xs transition-colors",
+                  active
+                    ? cn("rounded-xl px-2 py-1.5 font-medium shadow-sm", color)
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Icon className={cn("h-5 w-5 shrink-0", active && "scale-[1.05]")} />
+                <span>{label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
