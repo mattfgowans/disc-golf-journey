@@ -369,8 +369,9 @@ function ProfileContent({
           onClick={() => setIsEditOpen(false)}
         >
           <div
-            className="mb-2 max-h-[85vh] w-full max-w-md touch-pan-y space-y-4 overflow-y-auto rounded-t-2xl bg-white p-4"
+            className="mb-2 max-h-[85vh] w-full max-w-md space-y-4 overflow-y-auto rounded-t-2xl bg-white p-4"
             style={{
+              touchAction: "pan-x",
               transform: editSheetEntered
                 ? `translateY(calc(-28px + ${dragY}px))`
                 : "translateY(100%)",
@@ -383,14 +384,13 @@ function ProfileContent({
             onPointerMove={(e) => {
               if (!isDragging || startYRef.current === null) return;
 
+              e.preventDefault();
+
               const delta = e.clientY - startYRef.current;
 
               if (delta > 0) {
                 dragYRef.current = delta;
                 setDragY(delta);
-              } else {
-                dragYRef.current = 0;
-                setDragY(0);
               }
             }}
             onPointerUp={() => {
