@@ -419,28 +419,28 @@ function ProfileContent({
 
             <div className="space-y-3">
               <input
-                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-black/10"
                 placeholder="Username"
                 value={editUsername}
                 onChange={(e) => setEditUsername(e.target.value)}
               />
 
               <input
-                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-black/10"
                 placeholder="Home Course"
                 value={editHomeCourse}
                 onChange={(e) => setEditHomeCourse(e.target.value)}
               />
 
               <input
-                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-black/10"
                 placeholder="Handedness"
                 value={editHandedness}
                 onChange={(e) => setEditHandedness(e.target.value)}
               />
 
               <textarea
-                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                className="w-full rounded-xl bg-muted/40 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-black/10"
                 placeholder="Bio"
                 value={editBio}
                 onChange={(e) => setEditBio(e.target.value)}
