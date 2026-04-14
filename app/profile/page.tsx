@@ -161,7 +161,7 @@ function ProfileContent({
   prestigeStep,
 }: {
   profile: Record<string, any>;
-  user: { displayName?: string | null; email?: string | null } | null;
+  user: { displayName?: string | null; email?: string | null; photoURL?: string | null } | null;
   signOut: () => Promise<void>;
   updateProfile: (updates: Record<string, any>) => Promise<void>;
   rankPrestige: ReturnType<typeof getRankAndPrestige>;
@@ -188,6 +188,22 @@ function ProfileContent({
   const [editHandedness, setEditHandedness] = useState(handedness || "");
   const [editBio, setEditBio] = useState(bio || "");
   const [showToast, setShowToast] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setImageLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (profileImage) URL.revokeObjectURL(profileImage);
+    };
+  }, [profileImage]);
 
   const openEditModal = () => {
     setEditUsername(username || "");
@@ -236,16 +252,6 @@ function ProfileContent({
     }
   };
 
-  const initials =
-    (profile.displayName || "A")
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((n: string) => n[0])
-      .join("")
-      .toUpperCase();
-
-  const userInitial = initials[0] ?? "?";
   const rank = rankPrestige.rank.name;
   const points = rankPrestige.allTimePoints;
   const pointsToNextRank = rankPrestige.progress.nextRank
@@ -259,10 +265,55 @@ function ProfileContent({
     <div className="container mx-auto py-6 max-w-2xl md:py-8">
       <div className="space-y-6">
         <div className="mb-4 rounded-2xl border bg-muted/40 p-4 text-center">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const imageUrl = URL.createObjectURL(file);
+              setProfileImage(imageUrl);
+            }}
+          />
           <div className="flex flex-col items-center gap-2">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-lg font-semibold">
-              {userInitial}
-            </div>
+            <button
+              type="button"
+              className="relative cursor-pointer border-0 bg-transparent p-0"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-muted text-lg font-semibold transition active:scale-95">
+                {profileImage ? (
+                  <img
+                    ref={imgRef}
+                    src={profileImage}
+                    alt=""
+                    className={`w-full h-full object-cover rounded-full transition-opacity duration-300 ${
+                      imageLoaded ? "opacity-100" : "opacity-0"
+                    }`}
+                    onLoad={() => setImageLoaded(true)}
+                  />
+                ) : user?.photoURL ? (
+                  <img
+                    ref={imgRef}
+                    src={user.photoURL}
+                    alt=""
+                    className={`w-full h-full object-cover rounded-full transition-opacity duration-300 ${
+                      imageLoaded ? "opacity-100" : "opacity-0"
+                    }`}
+                    onLoad={() => setImageLoaded(true)}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-lg font-semibold">
+                    {user?.displayName?.[0] || "A"}
+                  </div>
+                )}
+              </div>
+              <span className="absolute bottom-0 right-0 rounded-full bg-black px-1.5 py-0.5 text-xs text-white">
+                ✎
+              </span>
+            </button>
 
             <div className="text-lg font-semibold">
               {username ? `@${username}` : "—"}
@@ -298,9 +349,11 @@ function ProfileContent({
             </div>
 
             <div className="space-y-4">
-              <div className="flex justify-between items-center py-2">
-                <span className="text-sm text-muted-foreground">Bio</span>
-                <span className="text-sm font-medium">{profile.bio || "No bio yet"}</span>
+              <div className="py-2">
+                <div className="mb-2 text-sm text-muted-foreground">Bio</div>
+                <div className="text-sm font-medium leading-relaxed">
+                  {bio || "No bio yet"}
+                </div>
               </div>
               <div className="border-t my-1" />
               <div className="flex justify-between items-center py-2">
