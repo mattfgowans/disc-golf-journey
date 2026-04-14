@@ -47,7 +47,7 @@ export function HeaderBar({
         <button
           type="button"
           onClick={handleInviteClick}
-          className="absolute left-4 p-2 rounded-full hover:bg-muted transition text-muted-foreground hover:text-foreground"
+          className="absolute left-4 rounded-full p-2 text-muted-foreground transition-all duration-100 hover:bg-muted hover:text-foreground active:scale-95"
           aria-label="Invite friends"
         >
           <UserPlus className="w-5 h-5" />

@@ -269,19 +269,19 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
         </pre>
         <div className="mt-4 flex flex-col gap-2">
           <button
-            className="w-full rounded-md bg-black px-4 py-2 text-white"
+            className="w-full rounded-md bg-black px-4 py-2 text-white transition-all duration-100 active:scale-95"
             onClick={() => window.location.reload()}
           >
             Reload
           </button>
           <button
-            className="w-full rounded-md border px-4 py-2"
+            className="w-full rounded-md border px-4 py-2 transition-all duration-100 active:scale-95"
             onClick={() => router.replace("/login")}
           >
             Go to login
           </button>
           <button
-            className="w-full rounded-md border px-4 py-2"
+            className="w-full rounded-md border px-4 py-2 transition-all duration-100 active:scale-95"
             onClick={async () => {
               await signOut();
               router.replace("/login");
@@ -292,7 +292,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
           {inApp && (
             <>
               <button
-                className="w-full rounded-md border px-4 py-2"
+                className="w-full rounded-md border px-4 py-2 transition-all duration-100 active:scale-95"
                 onClick={() => {
                   window.location.href = window.location.href;
                 }}
@@ -300,7 +300,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
                 Open in Browser (Safari/Chrome)
               </button>
               <button
-                className="w-full rounded-md border px-4 py-2"
+                className="w-full rounded-md border px-4 py-2 transition-all duration-100 active:scale-95"
                 onClick={() => navigator.clipboard.writeText(window.location.href)}
               >
                 Copy link
@@ -340,13 +340,13 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
             </p>
             <div className="mt-4 flex flex-col gap-2">
               <button
-                className="w-full rounded-md bg-black px-4 py-2 text-white"
+                className="w-full rounded-md bg-black px-4 py-2 text-white transition-all duration-100 active:scale-95"
                 onClick={() => { window.location.href = window.location.href; }}
               >
                 Open in Browser (Safari/Chrome)
               </button>
               <button
-                className="w-full rounded-md border px-4 py-2"
+                className="w-full rounded-md border px-4 py-2 transition-all duration-100 active:scale-95"
                 onClick={() => navigator.clipboard.writeText(window.location.href)}
               >
                 Copy link

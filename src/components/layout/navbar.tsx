@@ -54,7 +54,7 @@ export function Navbar() {
       >
         <div className="relative mx-auto flex h-[60px] w-full max-w-4xl items-center justify-center px-4 sm:px-6">
           <div className="min-w-0 max-w-[min(100%,20rem)] px-8 text-center">
-            <Link href="/" className="block min-w-0 truncate text-center">
+            <Link href="/" className="block min-w-0 truncate text-center transition-all duration-100 active:scale-95">
               <h1 className="truncate text-base font-semibold sm:text-lg">
                 Disc Golf Journey
               </h1>
@@ -66,7 +66,7 @@ export function Navbar() {
   }
 
   const center = header?.title ?? (
-    <Link href="/" className="block min-w-0 truncate text-center">
+    <Link href="/" className="block min-w-0 truncate text-center transition-all duration-100 active:scale-95">
       <h1 className="truncate text-base font-semibold sm:text-lg">
         Disc Golf Journey
       </h1>
@@ -92,7 +92,7 @@ export function Navbar() {
   ) : (
     <Link
       href="/notifications"
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-transparent"
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-all duration-100 hover:bg-transparent active:scale-95"
       aria-label="Notifications"
     >
       <PendingRequestsBell />

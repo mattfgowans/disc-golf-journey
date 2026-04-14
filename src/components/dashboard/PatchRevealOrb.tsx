@@ -31,8 +31,8 @@ export function PatchRevealOrb({
       type="button"
       onClick={() => isUnlocked && onUnlockClick?.()}
       disabled={!isUnlocked}
-      className={`flex flex-col items-center gap-0.5 bg-transparent border-0 p-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg transition-opacity ${
-        isUnlocked ? "cursor-pointer" : "cursor-default opacity-60"
+      className={`flex flex-col items-center gap-0.5 rounded-lg border-0 bg-transparent p-0 outline-none transition-opacity transition-transform duration-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+        isUnlocked ? "cursor-pointer active:scale-95" : "cursor-default opacity-60"
       }`}
     >
       <div

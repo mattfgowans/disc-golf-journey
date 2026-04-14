@@ -57,7 +57,7 @@ export default function InstallPrompt() {
         </p>
         <button
           onClick={() => setDismissed(true)}
-          className="mt-3 text-sm font-medium underline"
+          className="mt-3 text-sm font-medium underline transition-all duration-100 active:scale-95"
         >
           Dismiss
         </button>
@@ -80,13 +80,13 @@ export default function InstallPrompt() {
               await deferredPrompt.userChoice
               setDeferredPrompt(null)
             }}
-            className="rounded-xl bg-black px-4 py-2 text-sm text-white"
+            className="rounded-xl bg-black px-4 py-2 text-sm text-white transition-all duration-100 active:scale-95"
           >
             Install
           </button>
           <button
             onClick={() => setDismissed(true)}
-            className="rounded-xl border px-4 py-2 text-sm"
+            className="rounded-xl border px-4 py-2 text-sm transition-all duration-100 active:scale-95"
           >
             Not now
           </button>

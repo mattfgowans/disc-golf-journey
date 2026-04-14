@@ -175,7 +175,7 @@ export function AchievementSection({
             <button
               type="button"
               onClick={onToggle}
-              className="relative z-10 flex w-full flex-col rounded-2xl px-3 py-1.5 transition-transform duration-100 active:scale-[0.99] active:opacity-95"
+              className="relative z-10 flex w-full flex-col rounded-2xl px-3 py-1.5 transition-transform duration-100 active:scale-95 active:opacity-95"
               style={{ outline: "none", border: "none", background: "none" }}
               aria-expanded={isOpen}
             >
@@ -226,7 +226,7 @@ export function AchievementSection({
                           if (!isFuture) onSelectTier(idx);
                         }}
                         className={cn(
-                          "relative min-w-0 overflow-hidden rounded-full px-1.5 py-1 text-[9px] font-semibold transition-all",
+                          "relative min-w-0 overflow-hidden rounded-full px-1.5 py-1 text-[9px] font-semibold transition-all duration-100 active:scale-95",
                           "ring-1",
                           isSelected && isCurrent && "bg-white text-slate-900 ring-white shadow-[0_2px_10px_rgba(255,255,255,0.18)]",
                           isSelected && !isCurrent && "bg-white/20 text-white ring-white/30 shadow-[0_2px_10px_rgba(0,0,0,0.16)]",

@@ -43,8 +43,8 @@ function PatchWedgeButton({
       onClick={onClick}
       aria-label={`${label} patch progress ${Math.round(p)}%`}
       className={cn(
-        "relative p-0 border-0 bg-transparent outline-none select-none",
-        "transition-transform active:scale-[0.98]",
+        "relative border-0 bg-transparent p-0 outline-none select-none",
+        "transition-transform duration-100 active:scale-95",
         eligible && "drop-shadow-[0_0_12px_rgba(59,130,246,0.35)]",
         active && "drop-shadow-[0_0_18px_rgba(59,130,246,0.45)]"
       )}

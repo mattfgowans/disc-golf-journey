@@ -280,10 +280,10 @@ function ProfileContent({
           <div className="flex flex-col items-center gap-2">
             <button
               type="button"
-              className="relative cursor-pointer border-0 bg-transparent p-0"
+              className="relative cursor-pointer border-0 bg-transparent p-0 transition-all duration-100 active:scale-95"
               onClick={() => fileInputRef.current?.click()}
             >
-              <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-muted text-lg font-semibold transition active:scale-95">
+              <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-muted text-lg font-semibold">
                 {profileImage ? (
                   <img
                     ref={imgRef}
@@ -528,7 +528,7 @@ function ProfileContent({
                 </Button>
 
                 <Button
-                  className="flex-1 transition-transform active:scale-95"
+                  className="flex-1"
                   disabled={isSaving}
                   onClick={() => void handleSave()}
                 >

@@ -687,7 +687,7 @@ function DashboardInner() {
                 <button
                   type="button"
                   onClick={handlePatchCtaDismiss}
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-all duration-100 hover:bg-muted hover:text-foreground active:scale-95"
                   aria-label="Dismiss"
                 >
                   <X className="h-4 w-4" />
@@ -749,7 +749,7 @@ function DashboardInner() {
                         }
                       }, 500);
                     }}
-                    className="w-full rounded-xl bg-foreground text-background py-2.5 text-sm font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+                    className="w-full rounded-xl bg-foreground py-2.5 text-sm font-medium text-background transition-all duration-100 hover:opacity-90 active:scale-95"
                   >
                     Start Your Journey
                   </button>
@@ -1079,7 +1079,7 @@ function DashboardInner() {
                 setShowLeaderboardPrompt(false);
                 router.push("/leaderboard");
               }}
-              className="w-full rounded-lg bg-black text-white py-2 text-sm font-medium"
+              className="w-full rounded-lg bg-black py-2 text-sm font-medium text-white transition-all duration-100 active:scale-95"
             >
               View Leaderboard
             </button>

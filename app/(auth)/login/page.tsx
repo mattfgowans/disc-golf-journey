@@ -130,7 +130,7 @@ export default function LoginPage() {
           {isIOS && (
             <button
               type="button"
-              className="mt-2 text-xs text-muted-foreground underline hover:text-foreground"
+              className="mt-2 text-xs text-muted-foreground underline transition-all duration-100 hover:text-foreground active:scale-95"
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(window.location.href);
