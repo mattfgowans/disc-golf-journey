@@ -15,35 +15,40 @@ const NAV_ITEMS = [
     href: "/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
-    color: "text-emerald-600 bg-emerald-500/8",
+    color: "text-emerald-600",
+    bg: "bg-emerald-50",
     isActive: (p: string) => p === "/" || p.startsWith("/dashboard"),
   },
   {
     href: "/leaderboard",
     label: "Leaderboard",
     icon: Trophy,
-    color: "text-amber-600 bg-amber-500/8",
+    color: "text-amber-500",
+    bg: "bg-amber-50",
     isActive: (p: string) => p.startsWith("/leaderboard"),
   },
   {
     href: "/friends",
     label: "Friends",
     icon: Users,
-    color: "text-blue-600 bg-blue-500/8",
+    color: "text-blue-500",
+    bg: "bg-blue-50",
     isActive: (p: string) => p.startsWith("/friends"),
   },
   {
     href: "/patches",
     label: "Patches",
     icon: BadgeCheck,
-    color: "text-orange-600 bg-orange-500/8",
+    color: "text-purple-500",
+    bg: "bg-purple-50",
     isActive: (p: string) => p.startsWith("/patches"),
   },
   {
     href: "/profile",
     label: "Profile",
     icon: User,
-    color: "text-violet-600 bg-violet-500/8",
+    color: "text-pink-500",
+    bg: "bg-pink-50",
     isActive: (p: string) => p.startsWith("/profile"),
   },
 ] as const;
@@ -63,8 +68,8 @@ export function BottomNav() {
       }}
     >
       <div className="translate-y-[-8px]">
-        <div className="mx-auto flex min-h-16 max-w-4xl items-center justify-around px-2 py-2">
-          {NAV_ITEMS.map(({ href, label, icon: Icon, color, isActive }) => {
+        <div className="mx-auto grid min-h-16 max-w-4xl grid-cols-5 items-center px-2 py-2">
+          {NAV_ITEMS.map(({ href, label, icon: Icon, isActive, color, bg }) => {
             const active = isActive(path);
 
             return (
@@ -72,15 +77,21 @@ export function BottomNav() {
                 key={href}
                 href={href}
                 prefetch={false}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-1 text-xs transition-all duration-100 active:scale-95",
-                  active
-                    ? cn("rounded-xl px-2 py-1.5 font-medium shadow-sm", color)
-                    : "text-muted-foreground hover:text-foreground"
-                )}
+                className="flex w-full min-w-0 items-center justify-center transition-opacity duration-100 active:opacity-80"
               >
-                <Icon className={cn("h-5 w-5 shrink-0", active && "scale-[1.05]")} />
-                <span>{label}</span>
+                <div
+                  className={cn(
+                    "flex w-full min-w-0 max-w-full flex-col items-center justify-center rounded-2xl px-4 py-2 font-medium transition-colors duration-150",
+                    active
+                      ? cn(bg, color, "shadow-sm")
+                      : "bg-transparent text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="mt-1 text-center text-[11px] leading-none">
+                    {label}
+                  </span>
+                </div>
               </Link>
             );
           })}
