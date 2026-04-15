@@ -2259,16 +2259,6 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       kind: "toggle",
     },
     {
-      id: "collection-22",
-      title: "Pro Support",
-      description: "Purchase a tour series disc",
-      category: "collection",
-      subcategory: "specialDiscs",
-      isCompleted: false,
-      points: 50,
-      kind: "toggle",
-    },
-    {
       id: "collection-23",
       title: "Custom Art",
       description: "Purchase a disc with a custom stamp",
