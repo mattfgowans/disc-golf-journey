@@ -1189,7 +1189,56 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       isCompleted: false,
       points: 1000,
       kind: "toggle",
-    }
+    },
+    {
+      id: "rating-700",
+      title: "700 Rated",
+      description:
+        "Reach a PDGA rating of 700+. Based on your official PDGA rating.",
+      category: "skill",
+      categoryId: "round-ratings",
+      subcategory: "roundRatings",
+      resetPolicy: "never",
+      isCompleted: false,
+      kind: "boolean",
+      points: 100,
+    },
+    {
+      id: "rating-800",
+      title: "800 Rated",
+      description: "Reach a PDGA rating of 800+",
+      category: "skill",
+      categoryId: "round-ratings",
+      subcategory: "roundRatings",
+      resetPolicy: "never",
+      isCompleted: false,
+      kind: "boolean",
+      points: 250,
+    },
+    {
+      id: "rating-900",
+      title: "900 Rated",
+      description: "Reach a PDGA rating of 900+",
+      category: "skill",
+      categoryId: "round-ratings",
+      subcategory: "roundRatings",
+      resetPolicy: "never",
+      isCompleted: false,
+      kind: "boolean",
+      points: 500,
+    },
+    {
+      id: "rating-1000",
+      title: "1000 Rated",
+      description: "Reach a PDGA rating of 1000+",
+      category: "skill",
+      categoryId: "round-ratings",
+      subcategory: "roundRatings",
+      resetPolicy: "never",
+      isCompleted: false,
+      kind: "boolean",
+      points: 1000,
+    },
   ],
   social: [
     // COMMUNITY ENGAGEMENT
@@ -2841,10 +2890,10 @@ const SCORING_ACHIEVEMENTS_TIER_IDS: Record<number, string[]> = {
 };
 
 const ROUND_RATINGS_TIER_IDS: Record<number, string[]> = {
-  0: ["skill_rating_100", "skill_rating_125", "skill_rating_150"],
-  1: ["skill_rating_175", "skill_rating_200"],
-  2: ["skill_rating_225", "skill_rating_250"],
-  3: ["skill_rating_275", "skill_rating_300"],
+  0: ["skill_rating_100", "skill_rating_125", "skill_rating_150", "rating-700"],
+  1: ["skill_rating_175", "skill_rating_200", "rating-800"],
+  2: ["skill_rating_225", "skill_rating_250", "rating-900"],
+  3: ["skill_rating_275", "skill_rating_300", "rating-1000"],
 };
 
 const CARDMATES_TIER_IDS: Record<number, string[]> = {

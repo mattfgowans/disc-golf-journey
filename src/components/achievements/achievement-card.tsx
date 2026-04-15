@@ -21,7 +21,7 @@ interface AchievementCardProps {
   completedDate?: Timestamp;
   points?: number;
   rarity?: "common" | "rare" | "epic" | "legendary";
-  kind?: "toggle" | "counter";
+  kind?: "toggle" | "boolean" | "counter";
   progress?: number;
   target?: number;
   locked?: boolean;

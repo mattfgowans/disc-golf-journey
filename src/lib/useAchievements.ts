@@ -52,7 +52,8 @@ export type AchievementBase = {
 };
 
 export type ToggleAchievement = AchievementBase & {
-  kind?: "toggle"; // optional for backward compatibility
+  /** Self-declared milestone; same completion UI as toggle. */
+  kind?: "toggle" | "boolean";
 };
 
 export type CounterAchievement = AchievementBase & {
