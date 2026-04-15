@@ -811,7 +811,7 @@ function DashboardInner() {
                       : activeTierIndex;
 
                   const selectedTierIndex = viewedTierIndex;
-                  const isTierViewOnly = selectedTierIndex !== activeTierIndex;
+                  const isTierViewOnly = selectedTierIndex > activeTierIndex;
 
                   const canViewPreviousTier = selectedTierIndex > 0;
                   const canViewNextTier = selectedTierIndex < activeTierIndex;
@@ -893,7 +893,7 @@ function DashboardInner() {
                       : activeTierIndex;
 
                   const selectedTierIndex = viewedTierIndex;
-                  const isTierViewOnly = selectedTierIndex !== activeTierIndex;
+                  const isTierViewOnly = selectedTierIndex > activeTierIndex;
 
                   const canViewPreviousTier = selectedTierIndex > 0;
                   const canViewNextTier = selectedTierIndex < activeTierIndex;
@@ -987,7 +987,7 @@ function DashboardInner() {
                       : activeTierIndex;
 
                   const selectedTierIndex = viewedTierIndex;
-                  const isTierViewOnly = selectedTierIndex !== activeTierIndex;
+                  const isTierViewOnly = selectedTierIndex > activeTierIndex;
 
                   const canViewPreviousTier = selectedTierIndex > 0;
                   const canViewNextTier = selectedTierIndex < activeTierIndex;

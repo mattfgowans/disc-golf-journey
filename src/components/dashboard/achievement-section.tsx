@@ -213,17 +213,17 @@ export function AchievementSection({
                   {TIER_LABELS.map((label, idx) => {
                     const isCurrent = idx === activeTierIndex;
                     const isSelected = idx === viewedTierIndex;
-                    const isFuture = idx > activeTierIndex;
+                    const isLocked = idx > activeTierIndex;
                     const isPast = idx < activeTierIndex;
 
                     return (
                       <button
                         key={label}
                         type="button"
-                        disabled={isFuture}
+                        disabled={isLocked}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (!isFuture) onSelectTier(idx);
+                          if (!isLocked) onSelectTier(idx);
                         }}
                         className={cn(
                           "relative min-w-0 overflow-hidden rounded-full px-1.5 py-1 text-[9px] font-semibold transition-all duration-100 active:scale-95",
@@ -231,17 +231,17 @@ export function AchievementSection({
                           isSelected && isCurrent && "bg-white text-slate-900 ring-white shadow-[0_2px_10px_rgba(255,255,255,0.18)]",
                           isSelected && !isCurrent && "bg-white/20 text-white ring-white/30 shadow-[0_2px_10px_rgba(0,0,0,0.16)]",
                           !isSelected && isPast && "bg-black/15 text-white/85 ring-white/20 hover:bg-black/20",
-                          isFuture && "bg-black/10 text-white/35 ring-white/10 cursor-not-allowed"
+                          isLocked && "bg-black/10 text-white/35 ring-white/10 cursor-not-allowed"
                         )}
                         aria-pressed={isSelected}
-                        aria-label={isFuture ? `${label} locked` : label}
+                        aria-label={isLocked ? `${label} locked` : label}
                       >
                         <span className="relative z-10 inline-flex w-full items-center justify-center gap-1 truncate">
-                          {isFuture && <Lock className="h-3 w-3 shrink-0" />}
+                          {isLocked && <Lock className="h-3 w-3 shrink-0" />}
                           <span className="truncate leading-none">{label}</span>
                         </span>
 
-                        {isFuture && (
+                        {isLocked && (
                           <>
                             <span
                               aria-hidden="true"
