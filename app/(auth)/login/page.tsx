@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/lib/firebase-auth";
-import { openExternalLoginUrl } from "@/lib/openExternalLogin";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -74,21 +73,17 @@ export default function LoginPage() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <div className="text-3xl mb-2 text-center">⚠️</div>
-            <CardTitle>Facebook blocks sign-in — open in Safari/Chrome</CardTitle>
-            <CardDescription>
-              If you opened this from Facebook or Instagram, tap below to continue in Safari or Chrome.
+            <CardTitle>Open this in Safari to continue</CardTitle>
+            <CardDescription className="space-y-2">
+              <span className="block">
+                This link opened inside Facebook, which blocks Google sign-in.
+              </span>
+              <span className="block">
+                Tap the ••• in the top right corner, then select “Open in Safari” to continue.
+              </span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-2">
-            <Button
-              onClick={() => {
-                openExternalLoginUrl();
-              }}
-              className="w-full"
-              size="lg"
-            >
-              Open in Browser (Safari/Chrome)
-            </Button>
             <Button
               variant="outline"
               onClick={() =>
@@ -97,10 +92,10 @@ export default function LoginPage() {
               className="w-full"
               size="lg"
             >
-              Copy link
+              Copy link and open in Safari
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              If this doesn’t work, tap the ••• in the top corner and choose “Open in Safari”
+              Then paste it into Safari or Chrome
             </p>
           </CardContent>
         </Card>
