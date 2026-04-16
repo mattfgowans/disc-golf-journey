@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { Suspense } from "react";
 import "./globals.css";
 import type { Metadata } from "next";
 import { HeaderProvider } from "@/components/layout/header-context";
@@ -28,7 +29,9 @@ export default function RootLayout({
             <div className="px-4 pb-24 max-w-screen-md mx-auto w-full">
               {children}
             </div>
-            <BottomNav />
+            <Suspense fallback={null}>
+              <BottomNav />
+            </Suspense>
           </HeaderProvider>
         </AuthProvider>
       </body>

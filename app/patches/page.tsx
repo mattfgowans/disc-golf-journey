@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { PATCHES } from "@/lib/patches/patchCatalog";
 import { usePatchEligibility } from "@/lib/patches/usePatchEligibility";
 import { PatchCard } from "@/components/patches/PatchCard";
@@ -51,7 +52,9 @@ export default function PatchesPage() {
     <RequireAuth>
       <PageWrapper>
         <Suspense fallback={<div className="p-6 text-muted-foreground text-sm">Loading…</div>}>
-          <PatchesPageInner />
+          <PreviewFeatureBlock>
+            <PatchesPageInner />
+          </PreviewFeatureBlock>
         </Suspense>
       </PageWrapper>
     </RequireAuth>

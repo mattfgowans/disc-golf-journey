@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { useAuth } from "@/lib/firebase-auth";
 import { useUserDoc } from "@/lib/useUserDoc";
 import { ClubLeaderboardContent } from "@/components/leaderboard/club-leaderboard-content";
@@ -70,7 +71,9 @@ function ClubLeaderboardInner() {
 export default function ClubLeaderboardPage() {
   return (
     <RequireAuth>
-      <ClubLeaderboardInner />
+      <PreviewFeatureBlock>
+        <ClubLeaderboardInner />
+      </PreviewFeatureBlock>
     </RequireAuth>
   );
 }

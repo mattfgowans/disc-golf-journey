@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, notFound } from "next/navigation";
+import { useParams, notFound, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import {
 import { PATCHES } from "@/lib/patches/patchCatalog";
 import { usePatchEligibility } from "@/lib/patches/usePatchEligibility";
 import { cn } from "@/lib/utils";
+import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
+import { hrefWithPreview } from "@/lib/previewRoutes";
 
 const TAB_LABELS: Record<"skill" | "social" | "collection", string> = {
   skill: "Skill",
@@ -30,6 +32,8 @@ const TAB_ROUTE: Record<"skill" | "social" | "collection", string> = {
 };
 
 export function PatchDetailClient() {
+  const searchParams = useSearchParams();
+  const previewActive = searchParams.get("preview") === "true";
   const params = useParams();
   const slug = params?.slug as string | undefined;
   const patch = PATCHES.find((p) => p.slug === slug);
@@ -46,10 +50,11 @@ export function PatchDetailClient() {
   const tabLabel = TAB_LABELS[patch.tabKey];
 
   return (
+    <PreviewFeatureBlock>
     <div className="w-full max-w-2xl mx-auto px-4 pb-[calc(96px+env(safe-area-inset-bottom))] md:pb-8">
       <div className="flex justify-start mb-4">
         <Button asChild variant="outline" size="sm">
-          <Link href="/patches">← Back to Patches</Link>
+          <Link href={hrefWithPreview("/patches", previewActive)}>← Back to Patches</Link>
         </Button>
       </div>
 
@@ -90,7 +95,7 @@ export function PatchDetailClient() {
                   Eligible
                 </span>
                 <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-muted-foreground">
-                  <Link href={TAB_ROUTE[patch.tabKey]}>Go to {tabLabel}</Link>
+                  <Link href={hrefWithPreview(TAB_ROUTE[patch.tabKey], previewActive)}>Go to {tabLabel}</Link>
                 </Button>
               </div>
               <div className="space-y-1">
@@ -108,7 +113,7 @@ export function PatchDetailClient() {
                   <span className="text-muted-foreground">{pctToUnlock}% to unlock</span>
                 </div>
                 <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-muted-foreground">
-                  <Link href={TAB_ROUTE[patch.tabKey]}>Go to {tabLabel}</Link>
+                  <Link href={hrefWithPreview(TAB_ROUTE[patch.tabKey], previewActive)}>Go to {tabLabel}</Link>
                 </Button>
               </div>
               <Progress value={completionPct} className="h-2" />
@@ -143,15 +148,16 @@ export function PatchDetailClient() {
             </DialogHeader>
             <div className="flex gap-2">
               <Button asChild variant="secondary" className="w-full">
-                <Link href="/patches">Back to Patches</Link>
+                <Link href={hrefWithPreview("/patches", previewActive)}>Back to Patches</Link>
               </Button>
               <Button asChild className="w-full">
-                <Link href={TAB_ROUTE[patch.tabKey]}>Go to {tabLabel}</Link>
+                <Link href={hrefWithPreview(TAB_ROUTE[patch.tabKey], previewActive)}>Go to {tabLabel}</Link>
               </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
     </div>
+    </PreviewFeatureBlock>
   );
 }

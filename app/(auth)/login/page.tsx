@@ -129,6 +129,13 @@ export default function LoginPage() {
           >
             Sign in with Google
           </Button>
+          <Button
+            variant="outline"
+            className="mt-2 w-full"
+            onClick={() => router.push("/dashboard?preview=true")}
+          >
+            Continue as Guest
+          </Button>
           {isIOS && (
             <button
               type="button"

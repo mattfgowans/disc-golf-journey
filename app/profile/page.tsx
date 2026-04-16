@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { usePageHeader } from "@/components/layout/header-context";
 import { useUserDoc } from "@/lib/useUserDoc";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import PageWrapper from "@/components/layout/page-wrapper";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -125,6 +126,7 @@ export default function Page() {
   return (
     <RequireAuth>
       <PageWrapper>
+      <PreviewFeatureBlock>
       {/* Handle profile loading and error states inside RequireAuth */}
       {profileLoading ? (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -147,6 +149,7 @@ export default function Page() {
           prestigeStep={PRESTIGE_STEP_POINTS}
         />
       )}
+      </PreviewFeatureBlock>
       </PageWrapper>
     </RequireAuth>
   );

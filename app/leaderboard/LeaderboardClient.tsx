@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { LeaderboardTab } from "@/components/leaderboard/leaderboard-tab";
@@ -9,7 +10,9 @@ import { ClubBadge } from "@/components/club/club-badge";
 import { ClubLeaderboardContent } from "@/components/leaderboard/club-leaderboard-content";
 import { ClubEmptyState } from "@/components/leaderboard/club-empty-state";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { useAuth } from "@/lib/firebase-auth";
+import { hrefWithPreview } from "@/lib/previewRoutes";
 import { useUserDoc } from "@/lib/useUserDoc";
 import { createClub, joinClubByCode, getUserClub } from "@/lib/clubs";
 import type { LeaderboardPeriod } from "@/lib/leaderboard";
@@ -20,6 +23,8 @@ const PERIOD_STORAGE_KEY = "leaderboardPeriod";
 type LeaderboardScope = "global" | "friends" | "club";
 
 export function LeaderboardClient() {
+  const searchParams = useSearchParams();
+  const previewActive = searchParams.get("preview") === "true";
   const { user } = useAuth();
   const { userData, loading: userLoading } = useUserDoc();
   const clubId = (userData as { clubId?: string } | null)?.clubId as string | undefined;
@@ -104,6 +109,7 @@ export function LeaderboardClient() {
 
   return (
     <RequireAuth>
+      <PreviewFeatureBlock>
       <div className="w-full">
         <div className="mb-4 text-center mt-2">
           <h1 className="text-3xl font-bold tracking-tight">
@@ -120,7 +126,7 @@ export function LeaderboardClient() {
             {isClubScope && clubId && (
               <div className="flex justify-end">
                 <Button variant="outline" size="sm" asChild className="mt-0.5 shrink-0">
-                  <Link href="/club">View club</Link>
+                  <Link href={hrefWithPreview("/club", previewActive)}>View club</Link>
                 </Button>
               </div>
             )}
@@ -244,7 +250,7 @@ export function LeaderboardClient() {
 
                   <div className="border-t pt-2.5 text-center">
                     <Link
-                      href="/leaderboard/all"
+                      href={hrefWithPreview("/leaderboard/all", previewActive)}
                       className="text-sm font-medium text-primary hover:underline"
                     >
                       View full leaderboard →
@@ -257,7 +263,7 @@ export function LeaderboardClient() {
 
           <div className="border-t pt-2.5 text-center">
             <Link
-              href="/friends"
+              href={hrefWithPreview("/friends", previewActive)}
               className="text-sm text-muted-foreground/90 transition-colors hover:text-primary"
             >
               Connect with friends →
@@ -265,6 +271,7 @@ export function LeaderboardClient() {
           </div>
         </div>
       </div>
+      </PreviewFeatureBlock>
     </RequireAuth>
   );
 }

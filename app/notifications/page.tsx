@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { useAuth } from "@/lib/firebase-auth";
 import {
   getIncomingFriendRequests,
@@ -80,6 +81,7 @@ export default function NotificationsPage() {
 
   return (
     <RequireAuth>
+      <PreviewFeatureBlock>
       <div className="container mx-auto py-6 sm:py-8 max-w-2xl px-4">
         <h1 className="text-2xl sm:text-3xl font-bold mb-6">Notifications</h1>
 
@@ -188,6 +190,7 @@ export default function NotificationsPage() {
           </CardContent>
         </Card>
       </div>
+      </PreviewFeatureBlock>
     </RequireAuth>
   );
 }

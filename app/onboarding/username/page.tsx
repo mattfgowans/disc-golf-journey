@@ -17,6 +17,7 @@ import { doc, runTransaction, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { useUserProfile } from "@/lib/useUserProfile";
 
 function UsernameOnboardingInner() {
@@ -201,7 +202,9 @@ function UsernameOnboardingInner() {
 export default function UsernameOnboardingPage() {
   return (
     <RequireAuth>
-      <UsernameOnboardingInner />
+      <PreviewFeatureBlock>
+        <UsernameOnboardingInner />
+      </PreviewFeatureBlock>
     </RequireAuth>
   );
 }

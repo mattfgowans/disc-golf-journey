@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { PATCHES } from "@/lib/patches/patchCatalog";
 import { PatchDetailClient } from "./PatchDetailClient";
@@ -9,7 +10,9 @@ export function generateStaticParams() {
 export default function PatchDetailPage() {
   return (
     <RequireAuth>
-      <PatchDetailClient />
+      <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
+        <PatchDetailClient />
+      </Suspense>
     </RequireAuth>
   );
 }

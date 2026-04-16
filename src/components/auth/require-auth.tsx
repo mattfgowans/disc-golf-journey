@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/firebase-auth";
 import { useUserProfile } from "@/lib/useUserProfile";
 import { openExternalLoginUrl } from "@/lib/openExternalLogin";
@@ -62,10 +62,12 @@ type UsernameStatus = "loading" | "missing" | "present" | "error";
  * - Logged-in + username -> cannot access onboarding (even direct URL)
  * - Avoid rendering protected content until decision is settled (prevents flashes)
  */
-export function RequireAuth({ children }: { children: React.ReactNode }) {
+function RequireAuthInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const path = normalizePath(pathname);
+  const isGuestPreview = searchParams.get("preview") === "true";
 
   let missingAuthContext = false;
   let authState: ReturnType<typeof useAuth>;
@@ -86,6 +88,14 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     };
   }
   const { user, loading: authLoading, authInitialized, redirectSettling, signOut, userDocReady } = authState;
+
+  /** Logged-out app preview (?preview=true): ready once auth resolved (bypass stale redirect-in-progress). */
+  const guestPreviewReady =
+    isGuestPreview &&
+    !user &&
+    authInitialized &&
+    !authLoading;
+
   const [stuck, setStuck] = useState(false);
   const inApp = isInAppBrowser();
   const userRef = useRef(user);
@@ -147,6 +157,11 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
       return null;
     }
 
+    // Guest app preview: logged-out only (signed-in users follow normal redirect rules)
+    if (searchParams.get("preview") === "true" && !user) {
+      return null;
+    }
+
     // 0b) Do NOT redirect while initiating sign-in redirect or redirect-in-progress.
     if (redirectSettling) return null;
 
@@ -190,7 +205,17 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     }
 
     return null;
-  }, [authInitialized, authLoading, redirectProcessing, redirectSettling, user, userDocReady, usernameStatus, path]);
+  }, [
+    authInitialized,
+    authLoading,
+    redirectProcessing,
+    redirectSettling,
+    user,
+    userDocReady,
+    usernameStatus,
+    path,
+    searchParams,
+  ]);
 
   if (process.env.NODE_ENV === "development") {
     console.debug({ pathname, authLoading, uid: user?.uid, usernameStatus, desiredPath });
@@ -314,7 +339,14 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     </div>
   );
 
-  if (missingAuthContext || authLoading || !authInitialized || redirectSettling || redirectProcessing || (user && !userDocReady)) {
+  if (
+    missingAuthContext ||
+    authLoading ||
+    !authInitialized ||
+    redirectSettling ||
+    (!guestPreviewReady && redirectProcessing) ||
+    (user && !userDocReady)
+  ) {
     return stuck ? LoadingRecoveryPanel : LoadingSplash;
   }
 
@@ -324,8 +356,17 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  const previewGuestAllowed =
+    guestPreviewReady && !redirectSettling;
+
   const shouldBlockRender =
-    !!desiredPath || authLoading || !authInitialized || !user || !userDocReady || usernameStatus === "loading" || redirectProcessing;
+    !!desiredPath ||
+    authLoading ||
+    !authInitialized ||
+    (!user && !previewGuestAllowed) ||
+    (user && !userDocReady) ||
+    usernameStatus === "loading" ||
+    (!previewGuestAllowed && redirectProcessing);
 
   if (DEBUG_AUTH && authLoading && !desiredPath) {
     console.log("GUARD: waiting (auth loading)", { authLoading });
@@ -375,4 +416,18 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   }
 
   return <>{children}</>;
+}
+
+const requireAuthSuspenseFallback = (
+  <div className="flex min-h-[200px] items-center justify-center">
+    <p className="text-muted-foreground text-sm">Loading…</p>
+  </div>
+);
+
+export function RequireAuth({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={requireAuthSuspenseFallback}>
+      <RequireAuthInner>{children}</RequireAuthInner>
+    </Suspense>
+  );
 }

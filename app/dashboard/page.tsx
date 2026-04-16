@@ -10,6 +10,7 @@ import { getCurrentYear, isAchievementCompleted, isGatedVisible } from "@/lib/ac
 import { StatsHeader } from "@/components/dashboard/stats-header";
 import { AchievementSection } from "@/components/dashboard/achievement-section";
 import { auth } from "@/lib/firebase";
+import { useAuth } from "@/lib/firebase-auth";
 import { subscribeToUserStats } from "@/lib/leaderboard";
 import { getRankAndPrestige } from "@/lib/ranks";
 import { computeTabPointTotals } from "@/lib/points";
@@ -175,6 +176,18 @@ function DashboardInner() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isPreview = searchParams.get("preview") === "true";
+
+  const { user, loading, redirectSettling } = useAuth();
+  const displayUser = user || (isPreview ? { displayName: "Guest User" } : null);
+
+  /** Blocks achievement mutations in guest preview; returns true when the caller should no-op. */
+  const blockPreviewMutation = () => {
+    if (!isPreview) return false;
+    alert("Sign in to track your progress");
+    return true;
+  };
+
   const [openSections, setOpenSections] = useState(getInitialOpenSections);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
 
@@ -335,6 +348,8 @@ function DashboardInner() {
   }, [allAchievements]);
 
   const toggleAchievementWithCelebration = (category: keyof Achievements, id: string) => {
+    if (blockPreviewMutation()) return;
+
     const ach = currentAchievements[category].find((a) => a.id === id);
     if (!ach) return;
 
@@ -368,6 +383,15 @@ function DashboardInner() {
     }
 
     toggleAchievement(category, id);
+  };
+
+  const incrementAchievementUnlessPreview = (
+    category: keyof Achievements,
+    id: string,
+    delta: number
+  ) => {
+    if (blockPreviewMutation()) return;
+    incrementAchievement(category, id, delta);
   };
 
   // Helper functions (defined early so they can be used by AchievementSection)
@@ -489,7 +513,10 @@ function DashboardInner() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <p>Loading...</p>
-        <p className="text-xs text-muted-foreground mt-2">uid: {uid}</p>
+        <p className="text-xs text-muted-foreground mt-2">
+          {displayUser?.displayName ? `${displayUser.displayName} • ` : null}
+          uid: {uid}
+        </p>
       </div>
     );
   }
@@ -591,6 +618,20 @@ function DashboardInner() {
   return (
     <PageWrapper>
     <div className="w-full" data-gramm="false">
+      {isPreview && (
+        <div className="bg-yellow-100 text-yellow-800 text-sm px-3 py-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-center">
+          <span className="min-w-0 shrink">
+            You&apos;re in preview mode — try exploring the app.
+          </span>
+          <button
+            type="button"
+            onClick={() => router.push("/login")}
+            className="shrink-0 rounded-full bg-yellow-800 text-white px-3 py-1 text-xs font-medium transition-all duration-100 active:scale-95"
+          >
+            Sign in
+          </button>
+        </div>
+      )}
       <Dialog
         open={secretModalOpen}
         onOpenChange={(open) => {
@@ -764,6 +805,7 @@ function DashboardInner() {
                       size="sm"
                       variant="outline"
                       onClick={() => {
+                        if (blockPreviewMutation()) return;
                         console.log("[DEV] clicked reset putting mastery", {
                           uid,
                           devUid,
@@ -778,6 +820,7 @@ function DashboardInner() {
                       size="sm"
                       variant="outline"
                       onClick={() => {
+                        if (blockPreviewMutation()) return;
                         console.log("[DEV] clicked reset all", {
                           uid,
                           devUid,
@@ -853,6 +896,7 @@ function DashboardInner() {
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
                       onToggleAchievement={(id) => {
+                        if (blockPreviewMutation()) return;
                         // FIRST ACHIEVEMENT BONUS
                         if (!hasCompletedFirstAchievement) {
                           setHasCompletedFirstAchievement(true);
@@ -866,7 +910,9 @@ function DashboardInner() {
 
                         toggleAchievementWithCelebration("skill", id);
                       }}
-                      onIncrementAchievement={(id, delta) => incrementAchievement("skill", id, delta)}
+                      onIncrementAchievement={(id, delta) =>
+                        incrementAchievementUnlessPreview("skill", id, delta)
+                      }
                       getCompletionColor={getCompletionColor}
                       tierUnlockPulse={tierUnlockPulse}
                     />
@@ -935,6 +981,7 @@ function DashboardInner() {
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
                       onToggleAchievement={(id) => {
+                        if (blockPreviewMutation()) return;
                         // FIRST ACHIEVEMENT BONUS
                         if (!hasCompletedFirstAchievement) {
                           setHasCompletedFirstAchievement(true);
@@ -961,7 +1008,9 @@ function DashboardInner() {
                           }, 800);
                         }
                       }}
-                      onIncrementAchievement={(id, delta) => incrementAchievement("social", id, delta)}
+                      onIncrementAchievement={(id, delta) =>
+                        incrementAchievementUnlessPreview("social", id, delta)
+                      }
                       getCompletionColor={getCompletionColor}
                       tierUnlockPulse={tierUnlockPulse}
                     />
@@ -1028,6 +1077,7 @@ function DashboardInner() {
                       isOpen={openSections[sectionKey]}
                       onToggle={() => toggleSection(sectionKey)}
                       onToggleAchievement={(id) => {
+                        if (blockPreviewMutation()) return;
                         // FIRST ACHIEVEMENT BONUS
                         if (!hasCompletedFirstAchievement) {
                           setHasCompletedFirstAchievement(true);
@@ -1041,7 +1091,9 @@ function DashboardInner() {
 
                         toggleAchievementWithCelebration("collection", id);
                       }}
-                      onIncrementAchievement={(id, delta) => incrementAchievement("collection", id, delta)}
+                      onIncrementAchievement={(id, delta) =>
+                        incrementAchievementUnlessPreview("collection", id, delta)
+                      }
                       getCompletionColor={getCompletionColor}
                       tierUnlockPulse={tierUnlockPulse}
                     />

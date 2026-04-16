@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/firebase-auth";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export default function FullLeaderboardPage() {
 
   return (
     <RequireAuth>
+      <PreviewFeatureBlock>
       <div className="w-full">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold mb-2">🏆 Full Leaderboard</h1>
@@ -117,6 +119,7 @@ export default function FullLeaderboardPage() {
           </CardContent>
         </Card>
       </div>
+      </PreviewFeatureBlock>
     </RequireAuth>
   );
 }

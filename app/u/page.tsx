@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RequireAuth } from "@/components/auth/require-auth";
+import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { useAuth } from "@/lib/firebase-auth";
 import { getPublicProfileByUsername } from "@/lib/publicProfile";
 import type { PublicProfile } from "@/lib/publicProfile";
@@ -257,7 +258,9 @@ export default function PublicProfilePage() {
         </div>
       }
     >
-      <PublicProfileContent />
+      <PreviewFeatureBlock>
+        <PublicProfileContent />
+      </PreviewFeatureBlock>
     </Suspense>
   );
 }
