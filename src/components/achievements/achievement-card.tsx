@@ -170,7 +170,9 @@ export function AchievementCard({
                 </span>
               )}
             </div>
-            <CardDescription className="text-[11px] leading-snug line-clamp-1 opacity-90">{description}</CardDescription>
+            <CardDescription className="mt-0.5 text-sm text-muted-foreground leading-snug line-clamp-3">
+              {description}
+            </CardDescription>
             {/* Rarity badges temporarily disabled - uncomment to re-enable */}
             {/* {rarity && rarity !== "common" && (
               <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${

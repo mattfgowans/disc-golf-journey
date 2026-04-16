@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import confetti from "canvas-confetti";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { ChevronDown, Lock } from "lucide-react";
 import { AchievementCard } from "@/components/achievements/achievement-card";
@@ -94,6 +95,8 @@ interface AchievementSectionProps {
   onToggleAchievement: (id: string) => void;
   onIncrementAchievement?: (id: string, delta: number) => void;
   getCompletionColor: (value: number) => string;
+  /** Set when this tiered category levels up; section matches on categoryId. */
+  tierUnlockPulse?: { categoryId: string; tierKey: string } | null;
 }
 
 export function AchievementSection({
@@ -117,7 +120,23 @@ export function AchievementSection({
   onToggleAchievement,
   onIncrementAchievement,
   getCompletionColor,
+  tierUnlockPulse,
 }: AchievementSectionProps) {
+  const [justUnlockedTier, setJustUnlockedTier] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!tierUnlockPulse || !tierInfo?.categoryId) return;
+    if (tierUnlockPulse.categoryId !== tierInfo.categoryId) return;
+    setJustUnlockedTier(tierUnlockPulse.tierKey);
+    confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+  }, [tierUnlockPulse, tierInfo?.categoryId]);
+
+  useEffect(() => {
+    if (!justUnlockedTier) return;
+    const t = setTimeout(() => setJustUnlockedTier(null), 800);
+    return () => clearTimeout(t);
+  }, [justUnlockedTier]);
+
   const localById = useMemo(() => {
     const map: Record<string, Achievement> = {};
     for (const a of achievements) map[a.id] = a;
@@ -145,7 +164,11 @@ export function AchievementSection({
     <Collapsible open={isOpen}>
       <div
         id={sectionKey}
-        className={cn("w-full rounded-2xl", headerClassName)}
+        className={cn(
+          "w-full rounded-2xl transition-all duration-300",
+          justUnlockedTier && "scale-[1.02] shadow-lg ring-2 ring-emerald-400/50",
+          headerClassName
+        )}
       >
         {/* Sticky offset is controlled by dashboard/page.tsx via the stickyTop prop. */}
         <div

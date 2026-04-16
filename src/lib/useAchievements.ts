@@ -191,6 +191,10 @@ export function useAchievements(initialAchievements?: Achievements) {
   const [error, setError] = useState<string | null>(null);
   const [newUnlocks, setNewUnlocks] = useState<Achievement[]>([]);
   const [tierUpMessage, setTierUpMessage] = useState<string | null>(null);
+  const [tierUnlockPulse, setTierUnlockPulse] = useState<{
+    categoryId: string;
+    tierKey: string;
+  } | null>(null);
   const [aceCelebratingId, setAceCelebratingId] = useState<string | null>(null);
   const [aceCelebrationPhase, setAceCelebrationPhase] = useState<
     "idle" | "shake" | "pop"
@@ -796,7 +800,10 @@ export function useAchievements(initialAchievements?: Achievements) {
   }, [achievements, loading]);
 
   const clearNewUnlocks = () => setNewUnlocks([]);
-  const clearTierUpMessage = () => setTierUpMessage(null);
+  const clearTierUpMessage = () => {
+    setTierUpMessage(null);
+    setTierUnlockPulse(null);
+  };
 
   const devToolsEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS === "true";
   const devUid = process.env.NEXT_PUBLIC_DEV_UID;
@@ -1014,6 +1021,7 @@ export function useAchievements(initialAchievements?: Achievements) {
           const nextLabel = tierLabels[nextTier.tierKey] ?? `Tier ${currentTierIndex + 1}`;
           const title = cardDef?.title ?? "Category";
           setTierUpMessage(`${title} leveled up to ${nextLabel}`);
+          setTierUnlockPulse({ categoryId, tierKey: nextTier.tierKey });
         }
       }
     }
@@ -1162,6 +1170,7 @@ export function useAchievements(initialAchievements?: Achievements) {
           const nextLabel = tierLabels[nextTier.tierKey] ?? `Tier ${currentTierIndex + 1}`;
           const title = cardDef?.title ?? "Category";
           setTierUpMessage(`${title} leveled up to ${nextLabel}`);
+          setTierUnlockPulse({ categoryId, tierKey: nextTier.tierKey });
           if (process.env.NODE_ENV !== "production") {
             console.log("[TIER][DBG] tierUp", {
               categoryId,
@@ -1186,6 +1195,7 @@ export function useAchievements(initialAchievements?: Achievements) {
     clearNewUnlocks,
     getUserCategoryTierIndex,
     tierUpMessage,
+    tierUnlockPulse,
     clearTierUpMessage,
     devResetPuttingMasteryTier,
     devResetAllTieredCategoryTiers,

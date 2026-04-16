@@ -162,6 +162,7 @@ function DashboardInner() {
     newUnlocks,
     clearNewUnlocks,
     tierUpMessage,
+    tierUnlockPulse,
     clearTierUpMessage,
     devResetPuttingMasteryTier,
     devResetAllTieredCategoryTiers,
@@ -867,6 +868,7 @@ function DashboardInner() {
                       }}
                       onIncrementAchievement={(id, delta) => incrementAchievement("skill", id, delta)}
                       getCompletionColor={getCompletionColor}
+                      tierUnlockPulse={tierUnlockPulse}
                     />
                   );
                 });
@@ -961,6 +963,7 @@ function DashboardInner() {
                       }}
                       onIncrementAchievement={(id, delta) => incrementAchievement("social", id, delta)}
                       getCompletionColor={getCompletionColor}
+                      tierUnlockPulse={tierUnlockPulse}
                     />
                   );
                 });
@@ -1040,6 +1043,7 @@ function DashboardInner() {
                       }}
                       onIncrementAchievement={(id, delta) => incrementAchievement("collection", id, delta)}
                       getCompletionColor={getCompletionColor}
+                      tierUnlockPulse={tierUnlockPulse}
                     />
                   );
                 });
