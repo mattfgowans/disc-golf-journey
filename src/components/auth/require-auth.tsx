@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/firebase-auth";
 import { useUserProfile } from "@/lib/useUserProfile";
+import { openExternalLoginUrl } from "@/lib/openExternalLogin";
 
 const DEBUG_AUTH = true;
 
@@ -293,8 +294,9 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
             <>
               <button
                 className="w-full rounded-md border px-4 py-2 transition-all duration-100 active:scale-95"
+                type="button"
                 onClick={() => {
-                  window.location.href = window.location.href;
+                  openExternalLoginUrl();
                 }}
               >
                 Open in Browser (Safari/Chrome)
@@ -341,7 +343,10 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
             <div className="mt-4 flex flex-col gap-2">
               <button
                 className="w-full rounded-md bg-black px-4 py-2 text-white transition-all duration-100 active:scale-95"
-                onClick={() => { window.location.href = window.location.href; }}
+                type="button"
+                onClick={() => {
+                  openExternalLoginUrl();
+                }}
               >
                 Open in Browser (Safari/Chrome)
               </button>

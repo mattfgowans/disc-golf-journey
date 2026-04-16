@@ -9,6 +9,7 @@ import {
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { openUrlInNewTabWithFallback } from "@/lib/openExternalLogin";
 
 const DEFAULT_RETURN = "/dashboard";
 
@@ -93,7 +94,7 @@ function AuthCallbackContent() {
           <div className="flex w-full max-w-xs flex-col gap-2">
             <Button
               onClick={() => {
-                window.location.href = loginUrl;
+                openUrlInNewTabWithFallback(loginUrl);
               }}
               className="w-full"
             >

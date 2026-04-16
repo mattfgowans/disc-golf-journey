@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/lib/firebase-auth";
+import { openExternalLoginUrl } from "@/lib/openExternalLogin";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -72,16 +73,17 @@ export default function LoginPage() {
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Open in a browser to sign in</CardTitle>
+            <div className="text-3xl mb-2 text-center">⚠️</div>
+            <CardTitle>Facebook blocks sign-in — open in Safari/Chrome</CardTitle>
             <CardDescription>
-              In-app browsers can block Google sign-in. Tap below to open Disc Golf Journey in your browser, then sign in.
+              If you opened this from Facebook or Instagram, tap below to continue in Safari or Chrome.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4 pt-2">
             <Button
               onClick={() => {
-              window.location.href = "https://disc-golf-journey.web.app/login";
-            }}
+                openExternalLoginUrl();
+              }}
               className="w-full"
               size="lg"
             >
@@ -89,12 +91,17 @@ export default function LoginPage() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigator.clipboard.writeText(window.location.href)}
+              onClick={() =>
+                navigator.clipboard.writeText("https://disc-golf-journey.web.app/login")
+              }
               className="w-full"
               size="lg"
             >
               Copy link
             </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              If this doesn’t work, tap the ••• in the top corner and choose “Open in Safari”
+            </p>
           </CardContent>
         </Card>
       </div>
