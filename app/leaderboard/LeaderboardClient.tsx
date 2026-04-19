@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { LeaderboardTab } from "@/components/leaderboard/leaderboard-tab";
@@ -10,7 +10,6 @@ import { ClubBadge } from "@/components/club/club-badge";
 import { ClubLeaderboardContent } from "@/components/leaderboard/club-leaderboard-content";
 import { ClubEmptyState } from "@/components/leaderboard/club-empty-state";
 import { RequireAuth } from "@/components/auth/require-auth";
-import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { useAuth } from "@/lib/firebase-auth";
 import { hrefWithPreview } from "@/lib/previewRoutes";
 import { useUserDoc } from "@/lib/useUserDoc";
@@ -23,8 +22,9 @@ const PERIOD_STORAGE_KEY = "leaderboardPeriod";
 type LeaderboardScope = "global" | "friends" | "club";
 
 export function LeaderboardClient() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const previewActive = searchParams.get("preview") === "true";
+  const isPreview = searchParams.get("preview") === "true";
   const { user } = useAuth();
   const { userData, loading: userLoading } = useUserDoc();
   const clubId = (userData as { clubId?: string } | null)?.clubId as string | undefined;
@@ -44,6 +44,11 @@ export function LeaderboardClient() {
     const stored = localStorage.getItem(PERIOD_STORAGE_KEY) as LeaderboardPeriod | null;
     return stored && ["weekly", "monthly", "yearly", "allTime"].includes(stored) ? stored : "weekly";
   });
+  useEffect(() => {
+    if (!isPreview) return;
+    setScope("global");
+  }, [isPreview]);
+
   useEffect(() => {
     if (!clubId) {
       setClubName(null);
@@ -77,7 +82,12 @@ export function LeaderboardClient() {
 
   useEffect(() => {
     const handler = () => {
-      const tabParam = new URLSearchParams(window.location.search).get("tab");
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab");
+      if (params.get("preview") === "true" && tabParam && tabParam !== "global") {
+        setScope("global");
+        return;
+      }
       if (tabParam && ["global", "friends", "club"].includes(tabParam)) {
         setScope(tabParam as LeaderboardScope);
       }
@@ -102,6 +112,7 @@ export function LeaderboardClient() {
   };
 
   const handleScopeChange = (newScope: LeaderboardScope) => {
+    if (isPreview && newScope !== "global") return;
     setScope(newScope);
   };
 
@@ -109,8 +120,21 @@ export function LeaderboardClient() {
 
   return (
     <RequireAuth>
-      <PreviewFeatureBlock>
       <div className="w-full">
+        {isPreview && (
+          <div className="mb-4 bg-yellow-100 text-yellow-800 text-sm px-3 py-2 flex flex-wrap items-center justify-center gap-2 text-center">
+            <span>
+              Explore the leaderboard — sign in to claim your spot.
+            </span>
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="rounded-full bg-yellow-800 text-white px-3 py-1 text-xs font-medium transition-all duration-100 active:scale-95"
+            >
+              Sign in
+            </button>
+          </div>
+        )}
         <div className="mb-4 text-center mt-2">
           <h1 className="text-3xl font-bold tracking-tight">
             🏆 Leaderboard
@@ -126,7 +150,7 @@ export function LeaderboardClient() {
             {isClubScope && clubId && (
               <div className="flex justify-end">
                 <Button variant="outline" size="sm" asChild className="mt-0.5 shrink-0">
-                  <Link href={hrefWithPreview("/club", previewActive)}>View club</Link>
+                  <Link href={hrefWithPreview("/club", isPreview)}>View club</Link>
                 </Button>
               </div>
             )}
@@ -146,6 +170,7 @@ export function LeaderboardClient() {
                     variant={scope === "friends" ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleScopeChange("friends")}
+                    disabled={isPreview}
                     className="h-9 rounded-full"
                   >
                     Friends (Top)
@@ -154,6 +179,7 @@ export function LeaderboardClient() {
                     variant={scope === "club" ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleScopeChange("club")}
+                    disabled={isPreview}
                     className="h-9 justify-center gap-2 rounded-full"
                   >
                     {clubId ? (
@@ -209,6 +235,7 @@ export function LeaderboardClient() {
                       showViewAllLink={false}
                       maxHeightClass="max-h-none"
                       friendsOnly={scope === "friends"}
+                      previewGuest={isPreview}
                     />
                   </TabsContent>
 
@@ -221,6 +248,7 @@ export function LeaderboardClient() {
                       showViewAllLink={false}
                       maxHeightClass="max-h-none"
                       friendsOnly={scope === "friends"}
+                      previewGuest={isPreview}
                     />
                   </TabsContent>
 
@@ -233,6 +261,7 @@ export function LeaderboardClient() {
                       showViewAllLink={false}
                       maxHeightClass="max-h-none"
                       friendsOnly={scope === "friends"}
+                      previewGuest={isPreview}
                     />
                   </TabsContent>
 
@@ -245,12 +274,13 @@ export function LeaderboardClient() {
                       showViewAllLink={false}
                       maxHeightClass="max-h-none"
                       friendsOnly={scope === "friends"}
+                      previewGuest={isPreview}
                     />
                   </TabsContent>
 
                   <div className="border-t pt-2.5 text-center">
                     <Link
-                      href={hrefWithPreview("/leaderboard/all", previewActive)}
+                      href={hrefWithPreview("/leaderboard/all", isPreview)}
                       className="text-sm font-medium text-primary hover:underline"
                     >
                       View full leaderboard →
@@ -263,7 +293,7 @@ export function LeaderboardClient() {
 
           <div className="border-t pt-2.5 text-center">
             <Link
-              href={hrefWithPreview("/friends", previewActive)}
+              href={hrefWithPreview("/friends", isPreview)}
               className="text-sm text-muted-foreground/90 transition-colors hover:text-primary"
             >
               Connect with friends →
@@ -271,7 +301,6 @@ export function LeaderboardClient() {
           </div>
         </div>
       </div>
-      </PreviewFeatureBlock>
     </RequireAuth>
   );
 }

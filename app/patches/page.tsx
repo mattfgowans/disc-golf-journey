@@ -1,14 +1,16 @@
 "use client";
 
 import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { RequireAuth } from "@/components/auth/require-auth";
-import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { PATCHES } from "@/lib/patches/patchCatalog";
 import { usePatchEligibility } from "@/lib/patches/usePatchEligibility";
 import { PatchCard } from "@/components/patches/PatchCard";
 import PageWrapper from "@/components/layout/page-wrapper";
 
 function PatchesPageInner() {
+  const searchParams = useSearchParams();
+  const isPreview = searchParams.get("preview") === "true";
   const { completion, eligibleBySlug } = usePatchEligibility();
   const total = PATCHES.length;
   const readyCount = PATCHES.filter((p) => eligibleBySlug[p.tabKey]).length;
@@ -16,6 +18,11 @@ function PatchesPageInner() {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-6">
+      {isPreview && (
+        <div className="text-center text-sm text-muted-foreground py-2">
+          Sign in to unlock and earn patches
+        </div>
+      )}
       <div className="text-center mt-2 mb-4">
         <h1 className="text-3xl font-bold tracking-tight">
           🏅 Patches
@@ -40,6 +47,7 @@ function PatchesPageInner() {
             completionPct={completion[patch.tabKey]}
             eligible={eligibleBySlug[patch.tabKey]}
             href={`/patches/${patch.slug}`}
+            isPreview={isPreview}
           />
         ))}
       </div>
@@ -52,9 +60,7 @@ export default function PatchesPage() {
     <RequireAuth>
       <PageWrapper>
         <Suspense fallback={<div className="p-6 text-muted-foreground text-sm">Loading…</div>}>
-          <PreviewFeatureBlock>
-            <PatchesPageInner />
-          </PreviewFeatureBlock>
+          <PatchesPageInner />
         </Suspense>
       </PageWrapper>
     </RequireAuth>

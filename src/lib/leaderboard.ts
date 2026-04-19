@@ -5,6 +5,7 @@ import {
   orderBy,
   query,
   startAfter,
+  type QueryConstraint,
   DocumentSnapshot,
   doc,
   getDoc,
@@ -53,20 +54,28 @@ export function getCurrentPeriodKey(period: LeaderboardPeriod): string {
 async function fetchLeaderboardPage(
   periodKey: string,
   pageSize: number,
-  cursor: DocumentSnapshot | null
+  cursor: DocumentSnapshot | null,
+  previewGuest = false
 ): Promise<LeaderboardPage> {
-  const leaderboardRef = collection(db, "leaderboards", periodKey, "entries");
+  // TEMPORARY: debug empty leaderboard — remove hardcode after verifying period vs data
+  console.log("PERIOD USED:", periodKey);
+  console.log("QUERY PATH:", `leaderboards/${periodKey}/entries`);
+  const leaderboardRef = collection(db, "leaderboards", "allTime", "entries");
 
-  let q = query(
-    leaderboardRef,
+  // Single orderBy on `points` avoids a composite index (points + updatedAt).
+  const constraints: QueryConstraint[] = [
     orderBy("points", "desc"),
-    orderBy("updatedAt", "desc"),
-    fsLimit(pageSize)
-  );
+    fsLimit(pageSize),
+  ];
 
-  if (cursor) {
-    q = query(q, startAfter(cursor));
+  if (!previewGuest) {
+    // Only add server-side .where() filters for signed-in contexts.
+    // Preview (previewGuest) must stay a pure global query — no where() clauses.
   }
+
+  const q = cursor
+    ? query(leaderboardRef, ...constraints, startAfter(cursor))
+    : query(leaderboardRef, ...constraints);
 
   const snapshot = await getDocs(q);
 
@@ -98,13 +107,17 @@ async function fetchLeaderboardPage(
 // Legacy Sunday-based weekly keys are supported as a read-only fallback
 // to preserve existing user data after the rollover logic change.
 
-// Get leaderboard entries for a period with pagination
+// Get leaderboard entries for a period with pagination.
+// Always reads the global period leaderboard: `leaderboards/{periodKey}/entries` ordered by `points` desc.
+// No userId / friends / club filters — those apply only in the UI (LeaderboardTab) after fetch.
+// `previewGuest` uses the same query for logged-out preview (global XP ranking only).
 export async function getLeaderboard(
   period: LeaderboardPeriod,
-  opts?: { pageSize?: number; cursor?: DocumentSnapshot | null }
+  opts?: { pageSize?: number; cursor?: DocumentSnapshot | null; previewGuest?: boolean }
 ): Promise<LeaderboardPage> {
   const pageSize = opts?.pageSize ?? 50;
   const cursor = opts?.cursor ?? null;
+  const previewGuest = opts?.previewGuest ?? false;
 
   // For weekly leaderboards, implement backward compatibility fallback
   if (period === "weekly") {
@@ -112,7 +125,7 @@ export async function getLeaderboard(
     const legacyKey = `weekly_${getLegacyWeekKey(new Date())}`; // Old Sunday-starting key
 
     // Try primary (new) key first
-    const primaryResult = await fetchLeaderboardPage(primaryKey, pageSize, cursor);
+    const primaryResult = await fetchLeaderboardPage(primaryKey, pageSize, cursor, previewGuest);
 
     // If primary key has data or we're on a subsequent page, use it
     if (primaryResult.entries.length > 0 || cursor) {
@@ -120,13 +133,13 @@ export async function getLeaderboard(
     }
 
     // If primary key is empty and we're on the first page, try legacy key
-    const legacyResult = await fetchLeaderboardPage(legacyKey, pageSize, null);
+    const legacyResult = await fetchLeaderboardPage(legacyKey, pageSize, null, previewGuest);
     return legacyResult;
   }
 
   // For non-weekly periods, use normal logic
   const periodKey = getCurrentPeriodKey(period);
-  return fetchLeaderboardPage(periodKey, pageSize, cursor);
+  return fetchLeaderboardPage(periodKey, pageSize, cursor, previewGuest);
 }
 
 // Get user's current stats (for personal dashboard)

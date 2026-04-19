@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/firebase-auth";
 import { RequireAuth } from "@/components/auth/require-auth";
-import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,9 @@ import type { LeaderboardPeriod } from "@/lib/leaderboard";
 const SCOPE_STORAGE_KEY = "leaderboardScope";
 
 export default function FullLeaderboardPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPreview = searchParams.get("preview") === "true";
   const { user } = useAuth();
   const [scope, setScope] = useState<"global" | "friends">(() => {
     if (typeof window === "undefined") return "global";
@@ -26,10 +29,28 @@ export default function FullLeaderboardPage() {
     localStorage.setItem(SCOPE_STORAGE_KEY, scope);
   }, [scope]);
 
+  useEffect(() => {
+    if (!isPreview) return;
+    setScope("global");
+  }, [isPreview]);
+
   return (
     <RequireAuth>
-      <PreviewFeatureBlock>
       <div className="w-full">
+        {isPreview && (
+          <div className="mb-4 bg-yellow-100 text-yellow-800 text-sm px-3 py-2 flex flex-wrap items-center justify-center gap-2 text-center">
+            <span>
+              See how you stack up — sign in to join the leaderboard.
+            </span>
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="rounded-full bg-yellow-800 text-white px-3 py-1 text-xs font-medium transition-all duration-100 active:scale-95"
+            >
+              Sign in
+            </button>
+          </div>
+        )}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold mb-2">🏆 Full Leaderboard</h1>
           <p className="text-muted-foreground">
@@ -56,7 +77,11 @@ export default function FullLeaderboardPage() {
                 <Button
                   variant={scope === "friends" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setScope("friends")}
+                  onClick={() => {
+                    if (isPreview) return;
+                    setScope("friends");
+                  }}
+                  disabled={isPreview}
                   className="flex-1"
                 >
                   Friends
@@ -80,6 +105,7 @@ export default function FullLeaderboardPage() {
                   pageSize={25}
                   showViewAllLink={false}
                   maxHeightClass="max-h-[70vh]"
+                  previewGuest={isPreview}
                 />
               </TabsContent>
 
@@ -91,6 +117,7 @@ export default function FullLeaderboardPage() {
                   pageSize={25}
                   showViewAllLink={false}
                   maxHeightClass="max-h-[70vh]"
+                  previewGuest={isPreview}
                 />
               </TabsContent>
 
@@ -102,6 +129,7 @@ export default function FullLeaderboardPage() {
                   pageSize={25}
                   showViewAllLink={false}
                   maxHeightClass="max-h-[70vh]"
+                  previewGuest={isPreview}
                 />
               </TabsContent>
 
@@ -113,13 +141,13 @@ export default function FullLeaderboardPage() {
                   pageSize={25}
                   showViewAllLink={false}
                   maxHeightClass="max-h-[70vh]"
+                  previewGuest={isPreview}
                 />
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
       </div>
-      </PreviewFeatureBlock>
     </RequireAuth>
   );
 }

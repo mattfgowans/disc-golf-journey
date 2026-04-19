@@ -14,18 +14,27 @@ export interface PatchCardProps {
   completionPct: number;
   eligible: boolean;
   href: string;
+  /** Guest preview: block navigation and prompt sign-in */
+  isPreview?: boolean;
 }
 
-export function PatchCard({ patch, completionPct, eligible, href }: PatchCardProps) {
+export function PatchCard({ patch, completionPct, eligible, href, isPreview = false }: PatchCardProps) {
   const remaining = Math.round(Math.max(0, 80 - completionPct));
   const roundedPct = Math.round(completionPct);
 
   return (
     <Link
       href={href}
+      onClick={(e) => {
+        if (isPreview) {
+          e.preventDefault();
+          alert("Sign in to track your progress");
+        }
+      }}
       className={cn(
         "block rounded-xl outline-none transition-all duration-200 active:scale-[0.99]",
-        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        isPreview && "cursor-default"
       )}
     >
       <Card

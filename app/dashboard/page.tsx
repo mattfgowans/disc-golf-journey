@@ -619,14 +619,14 @@ function DashboardInner() {
     <PageWrapper>
     <div className="w-full" data-gramm="false">
       {isPreview && (
-        <div className="bg-yellow-100 text-yellow-800 text-sm px-3 py-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-center">
-          <span className="min-w-0 shrink">
+        <div className="bg-yellow-100 text-yellow-800 text-sm px-3 py-2 flex flex-wrap items-center justify-center gap-2 text-center">
+          <span>
             You&apos;re in preview mode — try exploring the app.
           </span>
           <button
             type="button"
             onClick={() => router.push("/login")}
-            className="shrink-0 rounded-full bg-yellow-800 text-white px-3 py-1 text-xs font-medium transition-all duration-100 active:scale-95"
+            className="rounded-full bg-yellow-800 text-white px-3 py-1 text-xs font-medium transition-all duration-100 active:scale-95"
           >
             Sign in
           </button>

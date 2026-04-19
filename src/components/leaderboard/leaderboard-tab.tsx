@@ -33,6 +33,7 @@ export function LeaderboardTab({
   maxHeightClass = "max-h-[420px]",
   maxRows,
   friendsOnly = false,
+  previewGuest = false,
 }: {
   period: LeaderboardPeriod;
   currentUserId: string;
@@ -41,6 +42,8 @@ export function LeaderboardTab({
   maxHeightClass?: string;
   maxRows?: number;
   friendsOnly?: boolean;
+  /** Logged-out preview: show global list but hide personalized rank */
+  previewGuest?: boolean;
 }) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,10 +55,24 @@ export function LeaderboardTab({
 
   useEffect(() => {
     const loadLeaderboard = async () => {
+      // Friends scope requires a signed-in user (unless preview forces global-only elsewhere).
+      if (!currentUserId && friendsOnly && !previewGuest) {
+        setLoading(false);
+        setEntries([]);
+        setCursor(null);
+        setHasMore(false);
+        setError(null);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {
-        const page = await getLeaderboard(period, { pageSize, cursor: null });
+        const page = await getLeaderboard(period, {
+          pageSize,
+          cursor: null,
+          previewGuest,
+        });
         let filteredEntries = page.entries;
 
         if (friendsOnly && currentUserId) {
@@ -88,14 +105,15 @@ export function LeaderboardTab({
     };
 
     loadLeaderboard();
-  }, [period, pageSize, friendsOnly, currentUserId]);
+  }, [period, pageSize, friendsOnly, currentUserId, previewGuest]);
 
   const loadMore = async () => {
     if (!hasMore || loadingMore) return;
+    if (!currentUserId && friendsOnly && !previewGuest) return;
 
     setLoadingMore(true);
     try {
-      const page = await getLeaderboard(period, { pageSize, cursor });
+      const page = await getLeaderboard(period, { pageSize, cursor, previewGuest });
       let filteredEntries = page.entries;
 
       if (friendsOnly) {
@@ -191,22 +209,26 @@ export function LeaderboardTab({
           <p className="mt-1 text-xs text-muted-foreground">{error}</p>
         </div>
       )}
-      {currentUserId && userRank !== null && (
+      {!previewGuest && (
         <>
-          <p className="text-sm text-muted-foreground mb-3">
-            {`You're #${userRank} ${getRankTimeframeSuffix(period)}`}
-          </p>
-          {percentile !== null && (
-            <p className="text-xs text-muted-foreground mt-1">
-              You're ahead of {percentile}% of players
+          {currentUserId && userRank !== null && (
+            <>
+              <p className="text-sm text-muted-foreground mb-3">
+                {`You're #${userRank} ${getRankTimeframeSuffix(period)}`}
+              </p>
+              {percentile !== null && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  You're ahead of {percentile}% of players
+                </p>
+              )}
+            </>
+          )}
+          {userRank === null && currentUserId && (
+            <p className="text-sm text-muted-foreground mb-3">
+              You're outside the top 10 — you're closer than you think 👀
             </p>
           )}
         </>
-      )}
-      {userRank === null && (
-        <p className="text-sm text-muted-foreground mb-3">
-          You're outside the top 10 — you're closer than you think 👀
-        </p>
       )}
       <div className={`${maxHeightClass} space-y-2 overflow-y-auto pr-2`}>
         {(maxRows ? renderedEntries.slice(0, maxRows) : renderedEntries).map((entry, index) => (
@@ -218,7 +240,7 @@ export function LeaderboardTab({
           />
         ))}
       </div>
-      {showYourRank && (
+      {showYourRank && !previewGuest && (
         <div className="border-t pt-4">
           <div className="mb-2 px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground/90">Your rank</div>
           <div className="rounded-xl bg-muted/30 p-2">
