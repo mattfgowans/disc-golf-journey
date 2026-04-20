@@ -1290,6 +1290,16 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       isCompleted: false,
     } as Achievement,
     {
+      id: "first_friend",
+      title: "First Connection",
+      description: "Add your first friend.",
+      category: "social",
+      subcategory: "communityEngagement",
+      isCompleted: false,
+      points: 100,
+      kind: "toggle",
+    },
+    {
       id: "social-1",
       title: "Club Member",
       description: "Join your local disc golf club",
