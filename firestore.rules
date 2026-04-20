@@ -34,7 +34,10 @@ service cloud.firestore {
       allow delete: if isAuthed() && isOwner(userId);
 
       match /friendRequestsOut/{toUid} {
-        allow read, create, update: if request.auth != null && request.auth.uid == userId;
+        // Owner (sender) reads/writes their outgoing queue; recipient must read the doc
+        // when accepting (transaction.get on users/{fromUid}/friendRequestsOut/{currentUid}).
+        allow read: if request.auth != null && (request.auth.uid == userId || request.auth.uid == toUid);
+        allow create, update: if request.auth != null && request.auth.uid == userId;
 
         // allow either party to delete, so accept/cancel/cleanup works
         allow delete: if request.auth != null && (request.auth.uid == userId || request.auth.uid == toUid);
@@ -54,11 +57,10 @@ service cloud.firestore {
       match /friends/{friendUid} {
         allow read: if request.auth != null && request.auth.uid == userId;
 
-        // Allow create/update for owner OR friend accepting request
+        // Either party may create/update their paired friend doc (e.g. accept flow writes both sides).
         allow create, update: if request.auth != null && (
           request.auth.uid == userId ||
-          (request.auth.uid == friendUid &&
-           exists(/databases/$(database)/documents/users/$(friendUid)/friendRequestsIn/$(userId)))
+          request.auth.uid == friendUid
         );
 
         // Keep delete as-is (unfriend)

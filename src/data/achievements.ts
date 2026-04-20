@@ -856,6 +856,17 @@ export const ACHIEVEMENTS_CATALOG: Achievements = {
       kind: "toggle",
     },
     {
+      id: "score_par_round",
+      title: "Even Par",
+      description: "Finish a full round at even par or better.",
+      category: "skill",
+      categoryId: "scoring-achievements",
+      subcategory: "scoringAchievements",
+      isCompleted: false,
+      points: 150,
+      kind: "toggle",
+    },
+    {
       id: "skill-34",
       title: "Eagle Eye",
       description: "Score your first eagle",
@@ -2884,7 +2895,7 @@ const SPECIALTY_SHOTS_TIER_IDS: Record<number, string[]> = {
 
 const SCORING_ACHIEVEMENTS_TIER_IDS: Record<number, string[]> = {
   0: ["skill-32", "skill-33", "skill-32a", "skill-32b", "skill-32c"],
-  1: ["skill-33a", "skill-33b", "skill-41", "birdies_10", "skill-37"],
+  1: ["skill-33a", "skill-33b", "score_par_round", "skill-41", "birdies_10", "skill-37"],
   2: ["skill_bogey_free_round", "skill-38", "skill-34", "skill-39"],
   3: ["skill-36", "skill-40"],
 };
