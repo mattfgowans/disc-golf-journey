@@ -1,5 +1,5 @@
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs, writeBatch, runTransaction, serverTimestamp } from "firebase/firestore";
-import { db } from "./firebase";
+import { auth, db } from "./firebase";
 
 // Helper to remove undefined and null values from objects before writing to Firestore
 function cleanFirestoreData<T extends Record<string, any>>(obj: T): Partial<T> {
@@ -76,7 +76,13 @@ export async function sendFriendRequest(currentUid: string, targetUid: string, t
       : fromUsername
         ? `@${fromUsername}`
         : "Friend";
-  const fromPhotoURL = currentUserData?.photoURL ?? currentUserData?.profile?.photoURL ?? null;
+  // Prefer Firestore profile; fall back to Auth (often set for OAuth) when doc is stale or empty
+  const docPhoto = currentUserData?.photoURL ?? currentUserData?.profile?.photoURL;
+  const authPhoto =
+    auth.currentUser?.uid === currentUid ? auth.currentUser.photoURL : undefined;
+  const rawPhoto = docPhoto ?? authPhoto ?? null;
+  const fromPhotoURL =
+    rawPhoto != null && String(rawPhoto).trim() !== "" ? String(rawPhoto).trim() : null;
 
   // Build payload once
   const payload = cleanFirestoreData({

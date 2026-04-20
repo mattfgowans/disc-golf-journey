@@ -5,8 +5,6 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { PreviewFeatureBlock } from "@/components/auth/preview-feature-block";
 import { useAuth } from "@/lib/firebase-auth";
@@ -118,59 +116,63 @@ export default function NotificationsPage() {
             ) : (
               <ul className="space-y-2">
                 {requests.map((request) => {
-                  const primaryLabel = request.fromUsername
-                    ? `@${request.fromUsername}`
-                    : "Player";
+                  const username = request.fromUsername ?? "player";
+                  const photoURL = request.fromPhotoURL;
+                  const displayName = request.fromDisplayName;
                   const isAnyBusy = busyFromUid !== null;
 
                   return (
                     <li
                       key={request.fromUid}
-                      className="flex items-center justify-between gap-3 p-3 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
+                      className="rounded-lg border bg-card hover:bg-muted/30 transition-colors"
                     >
-                      <div className="flex min-w-0 flex-1 items-center gap-3">
-                        <Avatar className="h-10 w-10 shrink-0">
-                          <AvatarImage src={request.fromPhotoURL} />
-                          <AvatarFallback className="text-sm">
-                            {primaryLabel.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          {request.fromUsername ? (
-                            <Link
-                              href={`/u?username=${encodeURIComponent(request.fromUsername)}`}
-                              className="text-sm font-medium truncate text-primary hover:underline"
-                            >
-                              {primaryLabel}
-                            </Link>
-                          ) : (
-                            <p className="text-sm font-medium truncate">
-                              {primaryLabel}
-                            </p>
-                          )}
-                          {request.fromDisplayName && (
-                            <p className="text-xs text-muted-foreground truncate">
-                              {request.fromDisplayName}
-                            </p>
-                          )}
+                      <div className="flex flex-col gap-3 p-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={photoURL || "/default-avatar.png"}
+                            alt={username}
+                            className="h-10 w-10 rounded-full object-cover bg-muted ring-1 ring-border"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = "/default-avatar.png";
+                            }}
+                          />
+
+                          <div className="min-w-0">
+                            {request.fromUsername ? (
+                              <Link
+                                href={`/u?username=${encodeURIComponent(request.fromUsername)}`}
+                                className="block truncate font-semibold text-primary hover:underline"
+                              >
+                                @{username}
+                              </Link>
+                            ) : (
+                              <p className="truncate font-semibold">Player</p>
+                            )}
+                            {displayName && (
+                              <p className="truncate text-sm text-muted-foreground">{displayName}</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex shrink-0 gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleAccept(request.fromUid)}
-                          disabled={isAnyBusy}
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDecline(request.fromUid)}
-                          disabled={isAnyBusy}
-                        >
-                          Decline
-                        </Button>
+
+                        <div className="flex gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => handleAccept(request.fromUid)}
+                            disabled={isAnyBusy}
+                            className="flex-1 rounded-md bg-black py-2 text-sm font-medium text-white active:scale-95 active:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+                          >
+                            Accept
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDecline(request.fromUid)}
+                            disabled={isAnyBusy}
+                            className="flex-1 rounded-md border py-2 text-sm font-medium active:scale-95 disabled:pointer-events-none disabled:opacity-50"
+                          >
+                            Decline
+                          </button>
+                        </div>
                       </div>
                     </li>
                   );
