@@ -124,7 +124,7 @@ export function LeaderboardClient() {
         {isPreview && (
           <div className="mb-4 bg-yellow-100 text-yellow-800 text-sm px-3 py-2 flex flex-wrap items-center justify-center gap-2 text-center">
             <span>
-              Explore the leaderboard — sign in to claim your spot.
+              See how you stack up — sign in to join the leaderboard.
             </span>
             <button
               type="button"
@@ -147,13 +147,25 @@ export function LeaderboardClient() {
 
         <div className="space-y-5">
           <div className="space-y-3">
-            {isClubScope && clubId && (
-              <div className="flex justify-end">
-                <Button variant="outline" size="sm" asChild className="mt-0.5 shrink-0">
-                  <Link href={hrefWithPreview("/club", isPreview)}>View club</Link>
+            {clubId ? (
+              <div className="flex h-8 items-center justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className={`shrink-0 transition-opacity duration-150 ${
+                    isClubScope ? "opacity-100" : "opacity-0 pointer-events-none"
+                  }`}
+                >
+                  <Link
+                    href={hrefWithPreview("/club", isPreview)}
+                    tabIndex={isClubScope ? undefined : -1}
+                  >
+                    View club
+                  </Link>
                 </Button>
               </div>
-            )}
+            ) : null}
             <div className="overflow-visible space-y-2.5">
               {/* Scope Toggle */}
               <div className="sticky top-0 z-10 -mx-4 border-y bg-background/95 px-4 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:-mx-6 md:px-6">
