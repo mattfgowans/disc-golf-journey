@@ -2,25 +2,29 @@
 
 import { useEffect, useState } from "react";
 
+const MOBILE_MAX_INNER_WIDTH = 768;
+
 export function OrientationGuard() {
-  const [isLandscape, setIsLandscape] = useState(false);
+  const [showRotateScreen, setShowRotateScreen] = useState(false);
 
   useEffect(() => {
-    const checkOrientation = () => {
-      setIsLandscape(window.innerWidth > window.innerHeight);
+    const check = () => {
+      const isMobile = window.innerWidth < MOBILE_MAX_INNER_WIDTH;
+      const isLandscape = window.innerWidth > window.innerHeight;
+      setShowRotateScreen(isMobile && isLandscape);
     };
 
-    checkOrientation();
-    window.addEventListener("resize", checkOrientation);
-    window.addEventListener("orientationchange", checkOrientation);
+    check();
+    window.addEventListener("resize", check);
+    window.addEventListener("orientationchange", check);
 
     return () => {
-      window.removeEventListener("resize", checkOrientation);
-      window.removeEventListener("orientationchange", checkOrientation);
+      window.removeEventListener("resize", check);
+      window.removeEventListener("orientationchange", check);
     };
   }, []);
 
-  if (!isLandscape) return null;
+  if (!showRotateScreen) return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background px-6 text-center">

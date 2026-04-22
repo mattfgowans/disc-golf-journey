@@ -65,7 +65,7 @@ export function BottomNav() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-50 border-t bg-background md:hidden touch-pan-y select-none"
+      className="fixed inset-x-0 bottom-0 z-50 border-t bg-background touch-pan-y select-none"
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
