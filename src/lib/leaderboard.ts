@@ -60,7 +60,7 @@ async function fetchLeaderboardPage(
   // TEMPORARY: debug empty leaderboard — remove hardcode after verifying period vs data
   console.log("PERIOD USED:", periodKey);
   console.log("QUERY PATH:", `leaderboards/${periodKey}/entries`);
-  const leaderboardRef = collection(db, "leaderboards", "allTime", "entries");
+  const leaderboardRef = collection(db, "leaderboards", periodKey, "entries");
 
   // Single orderBy on `points` avoids a composite index (points + updatedAt).
   const constraints: QueryConstraint[] = [
