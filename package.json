@@ -2,15 +2,15 @@
   "name": "disc-golf-journey",
   "version": "0.1.0",
   "private": true,
- "scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
-  "lint": "next lint",
-  "backfill:leaderboardIdentity": "ts-node scripts/backfill-leaderboard-identity.ts",
-  "build:prod": "rm -rf .next && next build",
-  "deploy": "npm run build:prod && firebase deploy --only hosting"
-},
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "backfill:leaderboardIdentity": "ts-node scripts/backfill-leaderboard-identity.ts",
+    "build:prod": "rm -rf .next && next build",
+    "deploy": "npm run build:prod && firebase deploy --only hosting"
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@opentelemetry/api": "^1.9.0",
@@ -28,8 +28,10 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "firebase": "^12.7.0",
+    "framer-motion": "^12.38.0",
     "lucide-react": "^0.287.0",
     "next": "^14.2.35",
+    "next-themes": "^0.4.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.49.2",

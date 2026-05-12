@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { XpTokenPortal } from "@/components/ui/xp-token-portal";
+import { playCompletionSound, triggerHaptic } from "@/lib/haptics";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -74,6 +77,9 @@ export function AchievementCard({
   const Icon = categoryIcons[category];
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [justCompleted, setJustCompleted] = useState(false);
+  const [tokenOrigin, setTokenOrigin] = useState<DOMRect | null>(null);
+  // Increment on each completion — used as `key` on the portal to force a fresh mount/burst
+  const [tokenFire, setTokenFire] = useState(0);
   const animClass =
     celebratePhase === "shake"
       ? "animate-ace-shake"
@@ -90,21 +96,24 @@ export function AchievementCard({
   const isRoundCounter = id === "round_counter_lifetime";
   const counterCompleted = isCounter && progress >= target;
 
-  const handleToggle = () => {
+  const handleToggle = (e?: React.MouseEvent) => {
     if (locked) return;
     if (isCompleted) {
-      // Show confirmation dialog when marking as incomplete
       setShowConfirmDialog(true);
     } else {
-      // Direct toggle when marking as complete (secret parents: confetti is fired by dashboard after bobble)
-      // skill-35 and social-0: confetti fires on ace-pop event at pop moment
       if (!hasSecrets && id !== "skill-35" && id !== "social-0") {
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       }
+      playCompletionSound();
+      triggerHaptic();
+      // Capture origin rect and increment fire counter to trigger a fresh portal burst
+      if (e?.currentTarget instanceof HTMLElement) {
+        setTokenOrigin(e.currentTarget.getBoundingClientRect());
+      }
+      setTokenFire((n) => n + 1);
+
       setJustCompleted(true);
-      setTimeout(() => {
-        setJustCompleted(false);
-      }, 300);
+      setTimeout(() => setJustCompleted(false), 400);
       onToggle();
     }
   };
@@ -117,6 +126,16 @@ export function AchievementCard({
 
   return (
     <>
+      <motion.div
+        whileTap={{ scale: 0.97 }}
+        animate={justCompleted ? { scale: [1, 1.06, 0.97, 1] } : {}}
+        transition={
+          justCompleted
+            ? { duration: 0.38, times: [0, 0.3, 0.65, 1] }
+            : { type: "spring", stiffness: 400, damping: 25 }
+        }
+        className="transform-gpu"
+      >
       <Card
         id={id === "onboarding_start" ? "onboarding-start-card" : undefined}
         className={cn(
@@ -138,9 +157,7 @@ export function AchievementCard({
           id === "invite_friend" && !isCompleted
             ? "border border-border/60 bg-muted/30"
             : "",
-          justCompleted ? "scale-[1.03] transition-transform duration-200" : "",
           "transition-all duration-200 hover:scale-[1.01] hover:shadow-md",
-          "active:scale-[0.99]",
           "transform-gpu will-change-transform transition-colors rounded-xl overflow-hidden leading-tight py-1"
         )}
       >
@@ -240,7 +257,7 @@ export function AchievementCard({
                 <Button
                   variant={isCompleted ? "outline" : "default"}
                   size="sm"
-                  onClick={handleToggle}
+                  onClick={(e) => handleToggle(e)}
                   className={isCompleted ? "text-green-600 border-green-600 hover:bg-green-50 flex-1 text-xs h-7 py-0" : "flex-1 text-xs h-7 py-0"}
                 >
                   {isCompleted ? "Mark as Incomplete" : "Mark as Complete"}
@@ -266,6 +283,7 @@ export function AchievementCard({
           </div>
         </CardContent>
       </Card>
+      </motion.div>
 
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
@@ -293,6 +311,10 @@ export function AchievementCard({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {tokenFire > 0 && (
+        <XpTokenPortal key={tokenFire} origin={tokenOrigin} />
+      )}
     </>
   );
 }

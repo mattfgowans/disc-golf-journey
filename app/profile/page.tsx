@@ -126,30 +126,30 @@ export default function Page() {
   return (
     <RequireAuth>
       <PageWrapper>
-      <PreviewFeatureBlock>
-      {/* Handle profile loading and error states inside RequireAuth */}
-      {profileLoading ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-            <p>Loading...</p>
-          </div>
-        </div>
-      ) : !profile ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <p className="text-sm text-gray-600">Couldn&apos;t load your profile. Try refreshing.</p>
-        </div>
-      ) : (
-        <ProfileContent
-          profile={profile}
-          user={user}
-          signOut={signOut}
-          updateProfile={updateProfile}
-          rankPrestige={rp}
-          prestigeStep={PRESTIGE_STEP_POINTS}
-        />
-      )}
-      </PreviewFeatureBlock>
+        <PreviewFeatureBlock>
+          {/* Handle profile loading and error states inside RequireAuth */}
+          {profileLoading ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                <p>Loading...</p>
+              </div>
+            </div>
+          ) : !profile ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <p className="text-sm text-gray-600">Couldn&apos;t load your profile. Try refreshing.</p>
+            </div>
+          ) : (
+            <ProfileContent
+              profile={profile}
+              user={user}
+              signOut={signOut}
+              updateProfile={updateProfile}
+              rankPrestige={rp}
+              prestigeStep={PRESTIGE_STEP_POINTS}
+            />
+          )}
+        </PreviewFeatureBlock>
       </PageWrapper>
     </RequireAuth>
   );
@@ -292,9 +292,8 @@ function ProfileContent({
                     ref={imgRef}
                     src={profileImage}
                     alt=""
-                    className={`w-full h-full object-cover rounded-full transition-opacity duration-300 ${
-                      imageLoaded ? "opacity-100" : "opacity-0"
-                    }`}
+                    className={`w-full h-full object-cover rounded-full transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"
+                      }`}
                     onLoad={() => setImageLoaded(true)}
                   />
                 ) : user?.photoURL ? (
@@ -302,9 +301,8 @@ function ProfileContent({
                     ref={imgRef}
                     src={user.photoURL}
                     alt=""
-                    className={`w-full h-full object-cover rounded-full transition-opacity duration-300 ${
-                      imageLoaded ? "opacity-100" : "opacity-0"
-                    }`}
+                    className={`w-full h-full object-cover rounded-full transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"
+                      }`}
                     onLoad={() => setImageLoaded(true)}
                   />
                 ) : (

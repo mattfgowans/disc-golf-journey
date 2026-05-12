@@ -50,7 +50,7 @@ export function Navbar() {
     return (
       <nav
         id="dg-navbar"
-        className="sticky top-0 z-50 border-b bg-background shadow-sm"
+        className="sticky top-0 z-50 border-b border-border/50 bg-background shadow-sm"
       >
         <div className="relative mx-auto flex h-[60px] w-full max-w-4xl items-center justify-center px-4 sm:px-6">
           <div className="min-w-0 max-w-[min(100%,20rem)] px-8 text-center">
@@ -110,7 +110,7 @@ export function Navbar() {
             label="Back"
             className="-ml-1 h-8 px-2"
           />
-          )
+        )
         : null);
 
   const leftOffsetForInvite = Boolean(
@@ -120,7 +120,7 @@ export function Navbar() {
   return (
     <nav
       id="dg-navbar"
-      className="sticky top-0 z-50 border-b bg-background shadow-sm"
+      className="sticky top-0 z-50 border-b border-border/50 bg-background shadow-sm"
     >
       <HeaderBar
         center={center}

@@ -2,7 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import confetti from "canvas-confetti";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
+
+const listVariants: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.045, delayChildren: 0.05 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.18, ease: "easeOut" } },
+};
 import { ChevronDown, Lock } from "lucide-react";
 import { AchievementCard } from "@/components/achievements/achievement-card";
 import { cn } from "@/lib/utils";
@@ -161,165 +174,205 @@ export function AchievementSection({
   const TIER_LABELS = ["Beginner", "Intermed.", "Advanced", "Expert"];
 
   return (
-    <Collapsible open={isOpen}>
+    <div
+      id={sectionKey}
+      className={cn(
+        "w-full rounded-2xl transition-all duration-300",
+        justUnlockedTier && "scale-[1.02] shadow-lg ring-2 ring-emerald-400/50",
+        headerClassName
+      )}
+    >
+      {/* Sticky offset is controlled by dashboard/page.tsx via the stickyTop prop. */}
       <div
-        id={sectionKey}
-        className={cn(
-          "w-full rounded-2xl transition-all duration-300",
-          justUnlockedTier && "scale-[1.02] shadow-lg ring-2 ring-emerald-400/50",
-          headerClassName
-        )}
+        className={cn("sticky z-40 rounded-2xl")}
+        style={{ top: `${stickyTop}px` }}
       >
-        {/* Sticky offset is controlled by dashboard/page.tsx via the stickyTop prop. */}
         <div
-          className={cn("sticky z-40 rounded-2xl")}
-          style={{ top: `${stickyTop}px` }}
+          className={cn(
+            "relative overflow-hidden rounded-2xl border-b shadow-[0_6px_16px_rgba(0,0,0,0.10)] ring-1 ring-black/5",
+            theme
+              ? cn(TIERED_NEUTRAL_BG, theme.accentBorder, `ring-1 ${theme.ring}`)
+              : headerVariant === "aces"
+                ? "bg-gradient-to-r from-fuchsia-600 to-indigo-600 border-b ring-1 ring-fuchsia-500/20"
+                : "bg-gradient-to-r from-emerald-400 to-teal-500 border-b ring-1 ring-emerald-500/20"
+          )}
         >
-          <div
-            className={cn(
-              "relative overflow-hidden rounded-2xl border-b shadow-[0_6px_16px_rgba(0,0,0,0.10)] ring-1 ring-black/5",
-              theme
-                ? cn(TIERED_NEUTRAL_BG, theme.accentBorder, `ring-1 ${theme.ring}`)
-                : headerVariant === "aces"
-                  ? "bg-gradient-to-r from-fuchsia-600 to-indigo-600 border-b ring-1 ring-fuchsia-500/20"
-                  : "bg-gradient-to-r from-emerald-400 to-teal-500 border-b ring-1 ring-emerald-500/20"
-            )}
-          >
-            {theme && <div className="pointer-events-none absolute inset-0 z-0 bg-slate-950/35" />}
-            {theme && (
-              <div
-                className={cn(
-                  "pointer-events-none absolute left-0 top-0 z-[1] h-full w-[5px] rounded-l-2xl",
-                  theme.accentBg
-                )}
-              />
-            )}
-
-            <button
-              type="button"
-              onClick={onToggle}
-              className="relative z-10 flex w-full flex-col rounded-2xl px-3 py-1.5 transition-transform duration-100 active:scale-95 active:opacity-95"
-              style={{ outline: "none", border: "none", background: "none" }}
-              aria-expanded={isOpen}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="min-w-0 flex-1 text-left text-base font-semibold leading-tight text-white">
-                  {title}
-                </h3>
-
-                <div className="flex shrink-0 items-center gap-2">
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/80">
-                    {Math.round(completion)}%
-                  </span>
-
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 shrink-0 text-white opacity-70 transition-transform",
-                      isOpen ? "rotate-180" : "rotate-0"
-                    )}
-                  />
-                </div>
-              </div>
-
-              {tierInfo && (
-                <div className="mt-0.5">
-                  <span className="rounded-full bg-white/15 px-2 py-0.5 text-xs text-white/90">
-                    • {tierInfo.label} {tierInfo.progressText}
-                  </span>
-                </div>
+          {theme && <div className="pointer-events-none absolute inset-0 z-0 bg-slate-950/35" />}
+          {theme && (
+            <div
+              className={cn(
+                "pointer-events-none absolute left-0 top-0 z-[1] h-full w-[5px] rounded-l-2xl",
+                theme.accentBg
               )}
-            </button>
+            />
+          )}
 
-            {tierInfo && typeof activeTierIndex === "number" && typeof viewedTierIndex === "number" && onSelectTier && (
-              <div className="px-3 pb-1.5">
-                <div className="grid grid-cols-4 gap-1">
-                  {TIER_LABELS.map((label, idx) => {
-                    const isCurrent = idx === activeTierIndex;
-                    const isSelected = idx === viewedTierIndex;
-                    const isLocked = idx > activeTierIndex;
-                    const isPast = idx < activeTierIndex;
+          <button
+            type="button"
+            onClick={onToggle}
+            className="relative z-10 flex w-full flex-col rounded-2xl px-3 py-1.5 transition-transform duration-100 active:scale-95 active:opacity-95"
+            style={{ outline: "none", border: "none", background: "none" }}
+            aria-expanded={isOpen}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="min-w-0 flex-1 text-left text-base font-semibold leading-tight text-white">
+                {title}
+              </h3>
 
-                    return (
-                      <button
-                        key={label}
-                        type="button"
-                        disabled={isLocked}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (!isLocked) onSelectTier(idx);
-                        }}
-                        className={cn(
-                          "relative min-w-0 overflow-hidden rounded-full px-1.5 py-1 text-[9px] font-semibold transition-all duration-100 active:scale-95",
-                          "ring-1",
-                          isSelected && isCurrent && "bg-white text-slate-900 ring-white shadow-[0_2px_10px_rgba(255,255,255,0.18)]",
-                          isSelected && !isCurrent && "bg-white/20 text-white ring-white/30 shadow-[0_2px_10px_rgba(0,0,0,0.16)]",
-                          !isSelected && isPast && "bg-black/15 text-white/85 ring-white/20 hover:bg-black/20",
-                          isLocked && "bg-black/10 text-white/35 ring-white/10 cursor-not-allowed"
-                        )}
-                        aria-pressed={isSelected}
-                        aria-label={isLocked ? `${label} locked` : label}
-                      >
-                        <span className="relative z-10 inline-flex w-full items-center justify-center gap-1 truncate">
-                          {isLocked && <Lock className="h-3 w-3 shrink-0" />}
-                          <span className="truncate leading-none">{label}</span>
-                        </span>
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/80">
+                  {Math.round(completion)}%
+                </span>
 
-                        {isLocked && (
-                          <>
-                            <span
-                              aria-hidden="true"
-                              className="pointer-events-none absolute inset-y-[-6px] left-1/2 w-[1px] -translate-x-1/2 rotate-[28deg] bg-white/25"
-                            />
-                            <span
-                              aria-hidden="true"
-                              className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"
-                            />
-                          </>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+                <motion.div
+                  animate={{ rotate: isOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex shrink-0"
+                >
+                  <ChevronDown className="h-4 w-4 shrink-0 text-white opacity-70" />
+                </motion.div>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Content (now inside the same card) */}
-        <CollapsibleContent className="overflow-hidden transition-all duration-300 ease-in-out data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
-          <div className={cn("overflow-hidden p-2 pt-1.5", isTierViewOnly && "opacity-95")}>
-            <div className="grid gap-1.5 md:grid-cols-2 lg:grid-cols-3">
-              {achievements.map((achievement) => {
-                if (!isGatedVisible(achievement as any, effectiveById as any)) return null;
-
-                const unlocked = isUnlocked(achievement, effectiveById);
-                if (achievement.requiresId && !unlocked) return null;
-
-                return (
-                  <AchievementCard
-                    key={achievement.id}
-                    {...achievement}
-                    category={category}
-                    locked={!unlocked}
-                    onToggle={isTierViewOnly ? () => {} : () => onToggleAchievement(achievement.id)}
-                    onIncrement={
-                      !isTierViewOnly && achievement.kind === "counter" && onIncrementAchievement
-                        ? () => onIncrementAchievement(achievement.id, 1)
-                        : undefined
-                    }
-                    onDecrement={
-                      !isTierViewOnly && achievement.kind === "counter" && onIncrementAchievement
-                        ? () => onIncrementAchievement(achievement.id, -1)
-                        : undefined
-                    }
-                  />
-                );
-              })}
             </div>
 
-          </div>
-        </CollapsibleContent>
+            {tierInfo && (
+              <div className="mt-0.5">
+                <span className="rounded-full bg-white/15 px-2 py-0.5 text-xs text-white/90">
+                  • {tierInfo.label} {tierInfo.progressText}
+                </span>
+              </div>
+            )}
+          </button>
+
+          {tierInfo && typeof activeTierIndex === "number" && typeof viewedTierIndex === "number" && onSelectTier && (
+            <div className="px-3 pb-1.5">
+              <div className="grid grid-cols-4 gap-1">
+                {TIER_LABELS.map((label, idx) => {
+                  const isCurrent = idx === activeTierIndex;
+                  const isSelected = idx === viewedTierIndex;
+                  const isLocked = idx > activeTierIndex;
+                  const isPast = idx < activeTierIndex;
+
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      disabled={isLocked}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!isLocked) onSelectTier(idx);
+                      }}
+                      className={cn(
+                        "relative min-w-0 overflow-hidden rounded-full px-1.5 py-1 text-[9px] font-semibold transition-all duration-100 active:scale-95",
+                        "ring-1",
+                        isSelected && isCurrent && "bg-white text-slate-900 ring-white shadow-[0_2px_10px_rgba(255,255,255,0.18)]",
+                        isSelected && !isCurrent && "bg-white/20 text-white ring-white/30 shadow-[0_2px_10px_rgba(0,0,0,0.16)]",
+                        !isSelected && isPast && "bg-black/15 text-white/85 ring-white/20 hover:bg-black/20",
+                        isLocked && "bg-black/10 text-white/35 ring-white/10 cursor-not-allowed"
+                      )}
+                      aria-pressed={isSelected}
+                      aria-label={isLocked ? `${label} locked` : label}
+                    >
+                      <span className="relative z-10 inline-flex w-full items-center justify-center gap-1 truncate">
+                        {isLocked && <Lock className="h-3 w-3 shrink-0" />}
+                        <span className="truncate leading-none">{label}</span>
+                      </span>
+
+                      {isLocked && (
+                        <>
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-y-[-6px] left-1/2 w-[1px] -translate-x-1/2 rotate-[28deg] bg-white/25"
+                          />
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"
+                          />
+                        </>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </Collapsible>
+
+      {/* Content (now inside the same card) */}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <motion.div
+              variants={listVariants}
+              initial="hidden"
+              animate="show"
+              className={cn(
+                "mt-2 rounded-xl bg-muted/40 p-3 shadow-sm border border-border/40",
+                isTierViewOnly && "opacity-95"
+              )}
+            >
+              {(() => {
+                const visible = achievements.filter((a) => {
+                  if (!isGatedVisible(a as any, effectiveById as any)) return false;
+                  if (a.requiresId && !isUnlocked(a, effectiveById)) return false;
+                  return true;
+                });
+
+                if (visible.length === 0) {
+                  return (
+                    <motion.div
+                      variants={itemVariants}
+                      className="flex flex-col items-center gap-1.5 py-6 text-center"
+                    >
+                      <span className="text-2xl">🔒</span>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Keep playing to reveal more goals!
+                      </p>
+                      <p className="text-xs text-muted-foreground/70">
+                        Complete earlier achievements to unlock this tier.
+                      </p>
+                    </motion.div>
+                  );
+                }
+
+                return (
+                  <div className="grid gap-1.5 md:grid-cols-2 lg:grid-cols-3">
+                    {visible.map((achievement) => {
+                      const unlocked = isUnlocked(achievement, effectiveById);
+                      return (
+                        <motion.div key={achievement.id} variants={itemVariants}>
+                          <AchievementCard
+                            {...achievement}
+                            category={category}
+                            locked={!unlocked}
+                            onToggle={isTierViewOnly ? () => {} : () => onToggleAchievement(achievement.id)}
+                            onIncrement={
+                              !isTierViewOnly && achievement.kind === "counter" && onIncrementAchievement
+                                ? () => onIncrementAchievement(achievement.id, 1)
+                                : undefined
+                            }
+                            onDecrement={
+                              !isTierViewOnly && achievement.kind === "counter" && onIncrementAchievement
+                                ? () => onIncrementAchievement(achievement.id, -1)
+                                : undefined
+                            }
+                          />
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

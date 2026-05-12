@@ -83,27 +83,27 @@ const DEFAULT_OPEN_SECTIONS: Partial<Record<SectionKey, boolean>> = {
 // Generate default openSections object from SECTIONS
 function getDefaultOpenSections(): Record<SectionKey, boolean> {
   const allKeys: SectionKey[] = [];
-  
+
   // Collect all keys from all categories
   for (const category of Object.values(SECTIONS)) {
     for (const section of category) {
       allKeys.push(section.key);
     }
   }
-  
+
   // Create object with all keys, using defaults where specified
   const defaults: Record<SectionKey, boolean> = {} as Record<SectionKey, boolean>;
   for (const key of allKeys) {
     defaults[key] = DEFAULT_OPEN_SECTIONS[key] ?? false;
   }
-  
+
   return defaults;
 }
 
 // Load saved state from localStorage on mount
 function getInitialOpenSections(): Record<SectionKey, boolean> {
   const defaults = getDefaultOpenSections();
-  
+
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem('achievementOpenSections');
     if (saved) {
@@ -135,8 +135,8 @@ function getActiveTabCompletion(
 ): { label: string; pct: number } {
   const pct = Math.round(Math.min(100, Math.max(0,
     activeTab === "skill" ? skillPct :
-    activeTab === "social" ? socialPct :
-    collectionPct
+      activeTab === "social" ? socialPct :
+        collectionPct
   )));
   const label = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
   return { label, pct };
@@ -449,20 +449,20 @@ function DashboardInner() {
 
     const label =
       tierIndex === 0 ? "Beginner" :
-      tierIndex === 1 ? "Intermediate" :
-      tierIndex === 2 ? "Advanced" :
-      tierIndex === 3 ? "Expert" :
-      `Tier ${tierIndex}`;
+        tierIndex === 1 ? "Intermediate" :
+          tierIndex === 2 ? "Advanced" :
+            tierIndex === 3 ? "Expert" :
+              `Tier ${tierIndex}`;
 
     return {
       categoryId,
       tierIndex,
       tierKey:
         tierIndex === 0 ? "beginner" :
-        tierIndex === 1 ? "intermediate" :
-        tierIndex === 2 ? "advanced" :
-        tierIndex === 3 ? "expert" :
-        `tier-${tierIndex}`,
+          tierIndex === 1 ? "intermediate" :
+            tierIndex === 2 ? "advanced" :
+              tierIndex === 3 ? "expert" :
+                `tier-${tierIndex}`,
       label,
       progressText: `${completedCount}/${visibleTierDefs.length || 0}`,
     };
@@ -601,8 +601,8 @@ function DashboardInner() {
 
   const activeCompletion =
     activeTab === "skill" ? skillCompletion :
-    activeTab === "social" ? socialCompletion :
-    collectionCompletion;
+      activeTab === "social" ? socialCompletion :
+        collectionCompletion;
   const eligibleNow = activeCompletion >= 80;
   const patchCtaDismissedForTab = patchCtaDismissed.has(activeTab);
   const showPatchPromo = eligibleNow && !patchCtaDismissedForTab;
@@ -617,532 +617,532 @@ function DashboardInner() {
 
   return (
     <PageWrapper>
-    <div className="w-full" data-gramm="false">
-      {isPreview && (
-        <div className="bg-yellow-100 text-yellow-800 text-sm px-3 py-2 flex flex-wrap items-center justify-center gap-2 text-center">
-          <span>
-            You&apos;re in preview mode — try exploring the app.
-          </span>
-          <button
-            type="button"
-            onClick={() => router.push("/login")}
-            className="rounded-full bg-yellow-800 text-white px-3 py-1 text-xs font-medium transition-all duration-100 active:scale-95"
-          >
-            Sign in
-          </button>
-        </div>
-      )}
-      <Dialog
-        open={secretModalOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSecretModalOpen(false);
-            handleCloseSecretModal();
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>New achievements unlocked!</DialogTitle>
-            <DialogDescription>
-              Completing an achievement revealed new goals you can now work toward.
-            </DialogDescription>
-          </DialogHeader>
-          <ul className="list-disc list-inside text-sm space-y-1 my-2">
-            {newUnlocks.map((a) => (
-              <li key={a.id}>{a.title}</li>
-            ))}
-          </ul>
-          <DialogFooter>
-            <Button onClick={() => { setSecretModalOpen(false); handleCloseSecretModal(); }} size="sm">Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <main className="min-h-svh pb-24">
-        <div className="mx-auto w-full max-w-4xl">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-0">
-            {/* Header: tabs + progress bar (does not scroll) */}
-            <div className="sticky top-[61px] z-50 isolate border-b border-border/60 bg-background shadow-[0_1px_0_rgba(0,0,0,0.06)]">
-              <div className="absolute inset-0 bg-background" aria-hidden="true" />
-              <div className="relative z-10">
-                <div id="dg-top-chrome" className="min-w-0 py-1.5">
-                <div className="relative w-full">
-            <TabsList className="relative grid h-11 w-full grid-cols-3 gap-1 rounded-full bg-muted/60 p-1 shadow-sm ring-1 ring-black/5">
-              <TabsTrigger
-              value="skill"
-              className="relative z-10 flex h-full items-center justify-center rounded-full border-0 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background focus-visible:outline-none focus-visible:ring-0"
-            >
-              Skill
-            </TabsTrigger>
-            <TabsTrigger
-              value="social"
-              className="relative z-10 flex h-full items-center justify-center rounded-full border-0 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background focus-visible:outline-none focus-visible:ring-0"
-            >
-              Social
-            </TabsTrigger>
-            <TabsTrigger
-              value="collection"
-              className="relative z-10 flex h-full items-center justify-center rounded-full border-0 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background focus-visible:outline-none focus-visible:ring-0"
-            >
-              Collection
-            </TabsTrigger>
-            </TabsList>
-          </div>
-          <div className="mt-1.5 w-full">
-            {(() => {
-              const { label, pct } = getActiveTabCompletion(activeTab, skillCompletion, socialCompletion, collectionCompletion);
-              return (
-                <div className="flex items-center gap-3 rounded-xl bg-muted/70 px-3 py-2 ring-1 ring-black/5">
-                  <span className="w-16 text-xs font-medium text-foreground/80">{label}</span>
-                  <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/10">
-                    <div
-                      className={cn(
-                        "absolute left-0 top-0 h-full rounded-full transition-[width,background-color] duration-300",
-                        getProgressFillClass(pct)
-                      )}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <span className="w-10 text-right text-xs font-semibold tabular-nums text-foreground/80">{pct}%</span>
-                </div>
-              );
-            })()}
-          </div>
-          {showPatchPromo && (
-            <div className="mt-1.5 flex items-center justify-between gap-2 rounded-xl bg-muted/60 px-3 py-2 ring-1 ring-black/5">
-              <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-medium text-foreground/80">
-                Patch unlocked
-              </span>
-              <span className="flex-1 min-w-0 truncate text-xs text-muted-foreground">
-                You&apos;re eligible to purchase the {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} patch.
-              </span>
-              <div className="flex items-center gap-1 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs"
-                  onClick={() => router.push("/patches?category=" + activeTab)}
-                >
-                  View
-                </Button>
-                <button
-                  type="button"
-                  onClick={handlePatchCtaDismiss}
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-all duration-100 hover:bg-muted hover:text-foreground active:scale-95"
-                  aria-label="Dismiss"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          )}
-                </div>
-                <div className="h-3 bg-background" aria-hidden="true" />
-              </div>
-            </div>
-
-            <div className="mt-1.5 pb-6">
-              <StatsHeader
-                completionPercentage={activeCompletion}
-                totalPoints={allTimePoints}
-                currentStreak={currentStreak}
-                currentRank={currentRankTier}
-                nextRank={nextRankTier}
-                rankProgress={rankProgressPct}
-                prestige={rp.prestige}
-                pointsToNextRank={rp.progress.pointsToNext}
-                nextRankName={rp.progress.nextRank?.name}
-                pointsInPrestige={rp.pointsInPrestige}
-              />
-
-              {isNewUser && (
-                <div className="mt-4 rounded-2xl border border-border/60 bg-muted/30 p-5 shadow-sm transition-all">
-                  <h2 className="text-lg font-semibold text-foreground mb-1">
-                    Welcome to Disc Golf Journey
-                  </h2>
-
-                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                    Start your progress by completing your first achievement.
-                  </p>
-
-                  <button
-                    onClick={() => {
-                      setActiveTab("social");
-                      if (typeof window !== "undefined") {
-                        localStorage.setItem("achievementActiveTab", "social");
-                      }
-
-                      setOpenSections((prev) => ({
-                        ...prev,
-                        communityEngagement: true,
-                      }));
-
-                      setTimeout(() => {
-                        const el = document.getElementById("onboarding-start-card");
-                        if (el) {
-                          const yOffset = -240;
-                          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
-                          window.scrollTo({
-                            top: y,
-                            behavior: "smooth",
-                          });
-                        }
-                      }, 500);
-                    }}
-                    className="w-full rounded-xl bg-foreground py-2.5 text-sm font-medium text-background transition-all duration-100 hover:opacity-90 active:scale-95"
-                  >
-                    Start Your Journey
-                  </button>
-                </div>
-              )}
-
-              {showDevTools && (
-                <div className="mt-4 border-t border-border/50 pt-3">
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (blockPreviewMutation()) return;
-                        console.log("[DEV] clicked reset putting mastery", {
-                          uid,
-                          devUid,
-                          enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
-                        });
-                        devResetPuttingMasteryTier();
-                      }}
-                    >
-                      DEV: Reset Putting Mastery Tier
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (blockPreviewMutation()) return;
-                        console.log("[DEV] clicked reset all", {
-                          uid,
-                          devUid,
-                          enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
-                        });
-                        devResetAllTieredCategoryTiers();
-                      }}
-                    >
-                      DEV: Reset ALL Tiered Categories
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              <TabsContent value="skill" className="mt-0">
-          <div className="mt-5 space-y-4">
-              {(() => {
-                const withTierInfo = SECTIONS.skill.map((s) => ({
-                  section: s,
-                  tierInfo: getTierInfoForSection("skill", s.key),
-                }));
-                const nonTiered = withTierInfo.filter((x) => !x.tierInfo);
-                const tiered = withTierInfo.filter((x) => !!x.tierInfo);
-                const ordered = [...nonTiered, ...tiered];
-                return ordered.map(({ section, tierInfo }) => {
-                  const sectionKey = section.key as SectionKey;
-                  const categoryId = tierInfo?.categoryId;
-                  const activeTierIndex = tierInfo?.tierIndex ?? 0;
-                  const viewedTierIndex =
-                    categoryId && typeof viewedTierByCategoryId[categoryId] === "number"
-                      ? viewedTierByCategoryId[categoryId]
-                      : activeTierIndex;
-
-                  const selectedTierIndex = viewedTierIndex;
-                  const isTierViewOnly = selectedTierIndex > activeTierIndex;
-
-                  const canViewPreviousTier = selectedTierIndex > 0;
-                  const canViewNextTier = selectedTierIndex < activeTierIndex;
-                  const canJumpToCurrentTier = selectedTierIndex !== activeTierIndex;
-                  const achievements = getCategoryAchievements("skill", section.key, selectedTierIndex);
-                  const completion = getCategoryCompletion(achievements);
-                  return (
-                    <AchievementSection
-                      key={section.key}
-                      category="skill"
-                      subcategory={section.key}
-                      title={section.title}
-                      sectionKey={sectionKey}
-                      achievements={achievements}
-                      stickyTop={sectionStickyTop}
-                      viewedTierIndex={selectedTierIndex}
-                      activeTierIndex={activeTierIndex}
-                      isTierViewOnly={!!isTierViewOnly}
-                      onSelectTier={
-                        categoryId
-                          ? (nextTier: number) =>
-                              setViewedTierByCategoryId((prev) => ({
-                                ...prev,
-                                [categoryId]: nextTier,
-                              }))
-                          : undefined
-                      }
-                      tierInfo={tierInfo}
-                      headerVariant={section.key === "aces" ? "aces" : undefined}
-                      aceCelebratingId={aceCelebratingId}
-                      aceCelebrationPhase={aceCelebrationPhase}
-                      effectiveById={effectiveById}
-                      allAchievements={allAchievements}
-                      newlyRevealedIds={newlyRevealedIds}
-                      revealPulseParentIds={revealPulseParentIds}
-                      celebratingParentId={celebratingParentId}
-                      completion={completion}
-                      isOpen={openSections[sectionKey]}
-                      onToggle={() => toggleSection(sectionKey)}
-                      onToggleAchievement={(id) => {
-                        if (blockPreviewMutation()) return;
-                        // FIRST ACHIEVEMENT BONUS
-                        if (!hasCompletedFirstAchievement) {
-                          setHasCompletedFirstAchievement(true);
-
-                          setShowFirstBonus(true);
-
-                          setTimeout(() => {
-                            setShowFirstBonus(false);
-                          }, 2000);
-                        }
-
-                        toggleAchievementWithCelebration("skill", id);
-                      }}
-                      onIncrementAchievement={(id, delta) =>
-                        incrementAchievementUnlessPreview("skill", id, delta)
-                      }
-                      getCompletionColor={getCompletionColor}
-                      tierUnlockPulse={tierUnlockPulse}
-                    />
-                  );
-                });
-              })()}
-          </div>
-        </TabsContent>
-        <TabsContent value="social" className="mt-0">
-          <div className="mt-5 space-y-4">
-              {(() => {
-                const withTierInfo = SECTIONS.social.map((s) => ({
-                  section: s,
-                  tierInfo: getTierInfoForSection("social", s.key),
-                }));
-                const nonTiered = withTierInfo.filter((x) => !x.tierInfo);
-                const tiered = withTierInfo.filter((x) => !!x.tierInfo);
-                const ordered = [...nonTiered, ...tiered];
-                return ordered.map(({ section, tierInfo }) => {
-                  const sectionKey = section.key as SectionKey;
-                  const categoryId = tierInfo?.categoryId;
-                  const activeTierIndex = tierInfo?.tierIndex ?? 0;
-                  const viewedTierIndex =
-                    categoryId && typeof viewedTierByCategoryId[categoryId] === "number"
-                      ? viewedTierByCategoryId[categoryId]
-                      : activeTierIndex;
-
-                  const selectedTierIndex = viewedTierIndex;
-                  const isTierViewOnly = selectedTierIndex > activeTierIndex;
-
-                  const canViewPreviousTier = selectedTierIndex > 0;
-                  const canViewNextTier = selectedTierIndex < activeTierIndex;
-                  const canJumpToCurrentTier = selectedTierIndex !== activeTierIndex;
-                  const achievements = getCategoryAchievements("social", section.key, selectedTierIndex);
-                  const completion = getCategoryCompletion(achievements);
-                  return (
-                    <AchievementSection
-                      key={section.key}
-                      category="social"
-                      subcategory={section.key}
-                      title={section.title}
-                      sectionKey={sectionKey}
-                      achievements={achievements}
-                      stickyTop={sectionStickyTop}
-                      viewedTierIndex={selectedTierIndex}
-                      activeTierIndex={activeTierIndex}
-                      isTierViewOnly={!!isTierViewOnly}
-                      onSelectTier={
-                        categoryId
-                          ? (nextTier: number) =>
-                              setViewedTierByCategoryId((prev) => ({
-                                ...prev,
-                                [categoryId]: nextTier,
-                              }))
-                          : undefined
-                      }
-                      tierInfo={tierInfo}
-                      aceCelebratingId={aceCelebratingId}
-                      aceCelebrationPhase={aceCelebrationPhase}
-                      effectiveById={effectiveById}
-                      allAchievements={allAchievements}
-                      newlyRevealedIds={newlyRevealedIds}
-                      revealPulseParentIds={revealPulseParentIds}
-                      celebratingParentId={celebratingParentId}
-                      completion={completion}
-                      isOpen={openSections[sectionKey]}
-                      onToggle={() => toggleSection(sectionKey)}
-                      onToggleAchievement={(id) => {
-                        if (blockPreviewMutation()) return;
-                        // FIRST ACHIEVEMENT BONUS
-                        if (!hasCompletedFirstAchievement) {
-                          setHasCompletedFirstAchievement(true);
-
-                          setShowFirstBonus(true);
-
-                          setTimeout(() => {
-                            setShowFirstBonus(false);
-                          }, 2000);
-                        }
-
-                        const completingOnboardingStart =
-                          id === "onboarding_start" &&
-                          (() => {
-                            const ach = currentAchievements.social.find((a) => a.id === id);
-                            return !!ach && ach.kind !== "counter" && !ach.isCompleted;
-                          })();
-
-                        toggleAchievementWithCelebration("social", id);
-
-                        if (completingOnboardingStart) {
-                          setTimeout(() => {
-                            setShowLeaderboardPrompt(true);
-                          }, 800);
-                        }
-                      }}
-                      onIncrementAchievement={(id, delta) =>
-                        incrementAchievementUnlessPreview("social", id, delta)
-                      }
-                      getCompletionColor={getCompletionColor}
-                      tierUnlockPulse={tierUnlockPulse}
-                    />
-                  );
-                });
-              })()}
-          </div>
-        </TabsContent>
-        <TabsContent value="collection" className="mt-0">
-          <div className="mt-5 space-y-4">
-              {(() => {
-                const withTierInfo = SECTIONS.collection.map((s) => ({
-                  section: s,
-                  tierInfo: getTierInfoForSection("collection", s.key),
-                }));
-                const nonTiered = withTierInfo.filter((x) => !x.tierInfo);
-                const tiered = withTierInfo.filter((x) => !!x.tierInfo);
-                const ordered = [...nonTiered, ...tiered];
-                return ordered.map(({ section, tierInfo }) => {
-                  const sectionKey = section.key as SectionKey;
-                  const categoryId = tierInfo?.categoryId;
-                  const activeTierIndex = tierInfo?.tierIndex ?? 0;
-                  const viewedTierIndex =
-                    categoryId && typeof viewedTierByCategoryId[categoryId] === "number"
-                      ? viewedTierByCategoryId[categoryId]
-                      : activeTierIndex;
-
-                  const selectedTierIndex = viewedTierIndex;
-                  const isTierViewOnly = selectedTierIndex > activeTierIndex;
-
-                  const canViewPreviousTier = selectedTierIndex > 0;
-                  const canViewNextTier = selectedTierIndex < activeTierIndex;
-                  const canJumpToCurrentTier = selectedTierIndex !== activeTierIndex;
-                  const achievements = getCategoryAchievements("collection", section.key, selectedTierIndex);
-                  const completion = getCategoryCompletion(achievements);
-                  return (
-                    <AchievementSection
-                      key={section.key}
-                      category="collection"
-                      subcategory={section.key}
-                      title={section.title}
-                      sectionKey={sectionKey}
-                      achievements={achievements}
-                      stickyTop={sectionStickyTop}
-                      viewedTierIndex={selectedTierIndex}
-                      activeTierIndex={activeTierIndex}
-                      isTierViewOnly={!!isTierViewOnly}
-                      onSelectTier={
-                        categoryId
-                          ? (nextTier: number) =>
-                              setViewedTierByCategoryId((prev) => ({
-                                ...prev,
-                                [categoryId]: nextTier,
-                              }))
-                          : undefined
-                      }
-                      tierInfo={tierInfo}
-                      effectiveById={effectiveById}
-                      allAchievements={allAchievements}
-                      newlyRevealedIds={newlyRevealedIds}
-                      revealPulseParentIds={revealPulseParentIds}
-                      celebratingParentId={celebratingParentId}
-                      completion={completion}
-                      isOpen={openSections[sectionKey]}
-                      onToggle={() => toggleSection(sectionKey)}
-                      onToggleAchievement={(id) => {
-                        if (blockPreviewMutation()) return;
-                        // FIRST ACHIEVEMENT BONUS
-                        if (!hasCompletedFirstAchievement) {
-                          setHasCompletedFirstAchievement(true);
-
-                          setShowFirstBonus(true);
-
-                          setTimeout(() => {
-                            setShowFirstBonus(false);
-                          }, 2000);
-                        }
-
-                        toggleAchievementWithCelebration("collection", id);
-                      }}
-                      onIncrementAchievement={(id, delta) =>
-                        incrementAchievementUnlessPreview("collection", id, delta)
-                      }
-                      getCompletionColor={getCompletionColor}
-                      tierUnlockPulse={tierUnlockPulse}
-                    />
-                  );
-                });
-              })()}
-          </div>
-        </TabsContent>
-            </div>
-          </Tabs>
-        </div>
-
-      </main>
-      {tierUpMessage && (
-        <div
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[120] px-4 py-2 rounded-lg bg-foreground text-background text-sm shadow-lg animate-in fade-in duration-200"
-          role="status"
-          aria-live="polite"
-        >
-          {tierUpMessage}
-        </div>
-      )}
-      {showFirstBonus && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center pointer-events-none">
-          <div className="bg-white text-black px-6 py-3 rounded-xl shadow-xl border border-black/10 text-base font-semibold animate-[bonusPop_0.5s_ease-out]">
-            +100 First Achievement Bonus
-          </div>
-        </div>
-      )}
-      {showLeaderboardPrompt && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center pointer-events-none">
-          <div className="pointer-events-auto bg-white text-black px-6 py-4 rounded-xl shadow-xl border border-black/10 text-center max-w-xs">
-            <p className="text-sm font-medium mb-3">
-              You&apos;re now on the leaderboard, take a look! 👀
-            </p>
+      <div className="w-full" data-gramm="false">
+        {isPreview && (
+          <div className="bg-yellow-100 text-yellow-800 text-sm px-3 py-2 flex flex-wrap items-center justify-center gap-2 text-center">
+            <span>
+              You&apos;re in preview mode — try exploring the app.
+            </span>
             <button
               type="button"
-              onClick={() => {
-                setShowLeaderboardPrompt(false);
-                router.push("/leaderboard");
-              }}
-              className="w-full rounded-lg bg-black py-2 text-sm font-medium text-white transition-all duration-100 active:scale-95"
+              onClick={() => router.push("/login")}
+              className="rounded-full bg-yellow-800 text-white px-3 py-1 text-xs font-medium transition-all duration-100 active:scale-95"
             >
-              View Leaderboard
+              Sign in
             </button>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+        <Dialog
+          open={secretModalOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSecretModalOpen(false);
+              handleCloseSecretModal();
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>New achievements unlocked!</DialogTitle>
+              <DialogDescription>
+                Completing an achievement revealed new goals you can now work toward.
+              </DialogDescription>
+            </DialogHeader>
+            <ul className="list-disc list-inside text-sm space-y-1 my-2">
+              {newUnlocks.map((a) => (
+                <li key={a.id}>{a.title}</li>
+              ))}
+            </ul>
+            <DialogFooter>
+              <Button onClick={() => { setSecretModalOpen(false); handleCloseSecretModal(); }} size="sm">Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <main className="min-h-svh pb-24">
+          <div className="mx-auto w-full max-w-4xl">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-0">
+              {/* Header: tabs + progress bar (does not scroll) */}
+              <div className="sticky top-[61px] z-50 isolate border-b border-border/60 bg-background shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+                <div className="absolute inset-0 bg-background" aria-hidden="true" />
+                <div className="relative z-10">
+                  <div id="dg-top-chrome" className="min-w-0 py-1.5">
+                    <div className="relative w-full">
+                      <TabsList className="relative grid h-11 w-full grid-cols-3 gap-1 rounded-full bg-muted/60 p-1 shadow-sm ring-1 ring-black/5">
+                        <TabsTrigger
+                          value="skill"
+                          className="relative z-10 flex h-full items-center justify-center rounded-full border-0 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background focus-visible:outline-none focus-visible:ring-0"
+                        >
+                          Skill
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="social"
+                          className="relative z-10 flex h-full items-center justify-center rounded-full border-0 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background focus-visible:outline-none focus-visible:ring-0"
+                        >
+                          Social
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="collection"
+                          className="relative z-10 flex h-full items-center justify-center rounded-full border-0 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background focus-visible:outline-none focus-visible:ring-0"
+                        >
+                          Collection
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
+                    <div className="mt-1.5 w-full">
+                      {(() => {
+                        const { label, pct } = getActiveTabCompletion(activeTab, skillCompletion, socialCompletion, collectionCompletion);
+                        return (
+                          <div className="flex items-center gap-3 rounded-xl bg-muted/70 px-3 py-2 ring-1 ring-black/5">
+                            <span className="w-16 text-xs font-medium text-foreground/80">{label}</span>
+                            <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/10">
+                              <div
+                                className={cn(
+                                  "absolute left-0 top-0 h-full rounded-full transition-[width,background-color] duration-300",
+                                  getProgressFillClass(pct)
+                                )}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <span className="w-10 text-right text-xs font-semibold tabular-nums text-foreground/80">{pct}%</span>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                    {showPatchPromo && (
+                      <div className="mt-1.5 flex items-center justify-between gap-2 rounded-xl bg-muted/60 px-3 py-2 ring-1 ring-black/5">
+                        <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-medium text-foreground/80">
+                          Patch unlocked
+                        </span>
+                        <span className="flex-1 min-w-0 truncate text-xs text-muted-foreground">
+                          You&apos;re eligible to purchase the {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} patch.
+                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => router.push("/patches?category=" + activeTab)}
+                          >
+                            View
+                          </Button>
+                          <button
+                            type="button"
+                            onClick={handlePatchCtaDismiss}
+                            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-all duration-100 hover:bg-muted hover:text-foreground active:scale-95"
+                            aria-label="Dismiss"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="h-3 bg-background" aria-hidden="true" />
+                </div>
+              </div>
+
+              <div className="mt-1.5 pb-6">
+                <StatsHeader
+                  completionPercentage={activeCompletion}
+                  totalPoints={allTimePoints}
+                  currentStreak={currentStreak}
+                  currentRank={currentRankTier}
+                  nextRank={nextRankTier}
+                  rankProgress={rankProgressPct}
+                  prestige={rp.prestige}
+                  pointsToNextRank={rp.progress.pointsToNext}
+                  nextRankName={rp.progress.nextRank?.name}
+                  pointsInPrestige={rp.pointsInPrestige}
+                />
+
+                {isNewUser && (
+                  <div className="mt-4 rounded-2xl border border-border/60 bg-muted/30 p-5 shadow-sm transition-all">
+                    <h2 className="text-lg font-semibold text-foreground mb-1">
+                      Welcome to Disc Golf Journey
+                    </h2>
+
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                      Start your progress by completing your first achievement.
+                    </p>
+
+                    <button
+                      onClick={() => {
+                        setActiveTab("social");
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem("achievementActiveTab", "social");
+                        }
+
+                        setOpenSections((prev) => ({
+                          ...prev,
+                          communityEngagement: true,
+                        }));
+
+                        setTimeout(() => {
+                          const el = document.getElementById("onboarding-start-card");
+                          if (el) {
+                            const yOffset = -240;
+                            const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+                            window.scrollTo({
+                              top: y,
+                              behavior: "smooth",
+                            });
+                          }
+                        }, 500);
+                      }}
+                      className="w-full rounded-xl bg-foreground py-2.5 text-sm font-medium text-background transition-all duration-100 hover:opacity-90 active:scale-95"
+                    >
+                      Start Your Journey
+                    </button>
+                  </div>
+                )}
+
+                {showDevTools && (
+                  <div className="mt-4 border-t border-border/50 pt-3">
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          if (blockPreviewMutation()) return;
+                          console.log("[DEV] clicked reset putting mastery", {
+                            uid,
+                            devUid,
+                            enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
+                          });
+                          devResetPuttingMasteryTier();
+                        }}
+                      >
+                        DEV: Reset Putting Mastery Tier
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          if (blockPreviewMutation()) return;
+                          console.log("[DEV] clicked reset all", {
+                            uid,
+                            devUid,
+                            enabled: process.env.NEXT_PUBLIC_SHOW_DEV_TOOLS,
+                          });
+                          devResetAllTieredCategoryTiers();
+                        }}
+                      >
+                        DEV: Reset ALL Tiered Categories
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <TabsContent value="skill" className="mt-0">
+                  <div className="mt-5 space-y-4">
+                    {(() => {
+                      const withTierInfo = SECTIONS.skill.map((s) => ({
+                        section: s,
+                        tierInfo: getTierInfoForSection("skill", s.key),
+                      }));
+                      const nonTiered = withTierInfo.filter((x) => !x.tierInfo);
+                      const tiered = withTierInfo.filter((x) => !!x.tierInfo);
+                      const ordered = [...nonTiered, ...tiered];
+                      return ordered.map(({ section, tierInfo }) => {
+                        const sectionKey = section.key as SectionKey;
+                        const categoryId = tierInfo?.categoryId;
+                        const activeTierIndex = tierInfo?.tierIndex ?? 0;
+                        const viewedTierIndex =
+                          categoryId && typeof viewedTierByCategoryId[categoryId] === "number"
+                            ? viewedTierByCategoryId[categoryId]
+                            : activeTierIndex;
+
+                        const selectedTierIndex = viewedTierIndex;
+                        const isTierViewOnly = selectedTierIndex > activeTierIndex;
+
+                        const canViewPreviousTier = selectedTierIndex > 0;
+                        const canViewNextTier = selectedTierIndex < activeTierIndex;
+                        const canJumpToCurrentTier = selectedTierIndex !== activeTierIndex;
+                        const achievements = getCategoryAchievements("skill", section.key, selectedTierIndex);
+                        const completion = getCategoryCompletion(achievements);
+                        return (
+                          <AchievementSection
+                            key={section.key}
+                            category="skill"
+                            subcategory={section.key}
+                            title={section.title}
+                            sectionKey={sectionKey}
+                            achievements={achievements}
+                            stickyTop={sectionStickyTop}
+                            viewedTierIndex={selectedTierIndex}
+                            activeTierIndex={activeTierIndex}
+                            isTierViewOnly={!!isTierViewOnly}
+                            onSelectTier={
+                              categoryId
+                                ? (nextTier: number) =>
+                                  setViewedTierByCategoryId((prev) => ({
+                                    ...prev,
+                                    [categoryId]: nextTier,
+                                  }))
+                                : undefined
+                            }
+                            tierInfo={tierInfo}
+                            headerVariant={section.key === "aces" ? "aces" : undefined}
+                            aceCelebratingId={aceCelebratingId}
+                            aceCelebrationPhase={aceCelebrationPhase}
+                            effectiveById={effectiveById}
+                            allAchievements={allAchievements}
+                            newlyRevealedIds={newlyRevealedIds}
+                            revealPulseParentIds={revealPulseParentIds}
+                            celebratingParentId={celebratingParentId}
+                            completion={completion}
+                            isOpen={openSections[sectionKey]}
+                            onToggle={() => toggleSection(sectionKey)}
+                            onToggleAchievement={(id) => {
+                              if (blockPreviewMutation()) return;
+                              // FIRST ACHIEVEMENT BONUS
+                              if (!hasCompletedFirstAchievement) {
+                                setHasCompletedFirstAchievement(true);
+
+                                setShowFirstBonus(true);
+
+                                setTimeout(() => {
+                                  setShowFirstBonus(false);
+                                }, 2000);
+                              }
+
+                              toggleAchievementWithCelebration("skill", id);
+                            }}
+                            onIncrementAchievement={(id, delta) =>
+                              incrementAchievementUnlessPreview("skill", id, delta)
+                            }
+                            getCompletionColor={getCompletionColor}
+                            tierUnlockPulse={tierUnlockPulse}
+                          />
+                        );
+                      });
+                    })()}
+                  </div>
+                </TabsContent>
+                <TabsContent value="social" className="mt-0">
+                  <div className="mt-5 space-y-4">
+                    {(() => {
+                      const withTierInfo = SECTIONS.social.map((s) => ({
+                        section: s,
+                        tierInfo: getTierInfoForSection("social", s.key),
+                      }));
+                      const nonTiered = withTierInfo.filter((x) => !x.tierInfo);
+                      const tiered = withTierInfo.filter((x) => !!x.tierInfo);
+                      const ordered = [...nonTiered, ...tiered];
+                      return ordered.map(({ section, tierInfo }) => {
+                        const sectionKey = section.key as SectionKey;
+                        const categoryId = tierInfo?.categoryId;
+                        const activeTierIndex = tierInfo?.tierIndex ?? 0;
+                        const viewedTierIndex =
+                          categoryId && typeof viewedTierByCategoryId[categoryId] === "number"
+                            ? viewedTierByCategoryId[categoryId]
+                            : activeTierIndex;
+
+                        const selectedTierIndex = viewedTierIndex;
+                        const isTierViewOnly = selectedTierIndex > activeTierIndex;
+
+                        const canViewPreviousTier = selectedTierIndex > 0;
+                        const canViewNextTier = selectedTierIndex < activeTierIndex;
+                        const canJumpToCurrentTier = selectedTierIndex !== activeTierIndex;
+                        const achievements = getCategoryAchievements("social", section.key, selectedTierIndex);
+                        const completion = getCategoryCompletion(achievements);
+                        return (
+                          <AchievementSection
+                            key={section.key}
+                            category="social"
+                            subcategory={section.key}
+                            title={section.title}
+                            sectionKey={sectionKey}
+                            achievements={achievements}
+                            stickyTop={sectionStickyTop}
+                            viewedTierIndex={selectedTierIndex}
+                            activeTierIndex={activeTierIndex}
+                            isTierViewOnly={!!isTierViewOnly}
+                            onSelectTier={
+                              categoryId
+                                ? (nextTier: number) =>
+                                  setViewedTierByCategoryId((prev) => ({
+                                    ...prev,
+                                    [categoryId]: nextTier,
+                                  }))
+                                : undefined
+                            }
+                            tierInfo={tierInfo}
+                            aceCelebratingId={aceCelebratingId}
+                            aceCelebrationPhase={aceCelebrationPhase}
+                            effectiveById={effectiveById}
+                            allAchievements={allAchievements}
+                            newlyRevealedIds={newlyRevealedIds}
+                            revealPulseParentIds={revealPulseParentIds}
+                            celebratingParentId={celebratingParentId}
+                            completion={completion}
+                            isOpen={openSections[sectionKey]}
+                            onToggle={() => toggleSection(sectionKey)}
+                            onToggleAchievement={(id) => {
+                              if (blockPreviewMutation()) return;
+                              // FIRST ACHIEVEMENT BONUS
+                              if (!hasCompletedFirstAchievement) {
+                                setHasCompletedFirstAchievement(true);
+
+                                setShowFirstBonus(true);
+
+                                setTimeout(() => {
+                                  setShowFirstBonus(false);
+                                }, 2000);
+                              }
+
+                              const completingOnboardingStart =
+                                id === "onboarding_start" &&
+                                (() => {
+                                  const ach = currentAchievements.social.find((a) => a.id === id);
+                                  return !!ach && ach.kind !== "counter" && !ach.isCompleted;
+                                })();
+
+                              toggleAchievementWithCelebration("social", id);
+
+                              if (completingOnboardingStart) {
+                                setTimeout(() => {
+                                  setShowLeaderboardPrompt(true);
+                                }, 800);
+                              }
+                            }}
+                            onIncrementAchievement={(id, delta) =>
+                              incrementAchievementUnlessPreview("social", id, delta)
+                            }
+                            getCompletionColor={getCompletionColor}
+                            tierUnlockPulse={tierUnlockPulse}
+                          />
+                        );
+                      });
+                    })()}
+                  </div>
+                </TabsContent>
+                <TabsContent value="collection" className="mt-0">
+                  <div className="mt-5 space-y-4">
+                    {(() => {
+                      const withTierInfo = SECTIONS.collection.map((s) => ({
+                        section: s,
+                        tierInfo: getTierInfoForSection("collection", s.key),
+                      }));
+                      const nonTiered = withTierInfo.filter((x) => !x.tierInfo);
+                      const tiered = withTierInfo.filter((x) => !!x.tierInfo);
+                      const ordered = [...nonTiered, ...tiered];
+                      return ordered.map(({ section, tierInfo }) => {
+                        const sectionKey = section.key as SectionKey;
+                        const categoryId = tierInfo?.categoryId;
+                        const activeTierIndex = tierInfo?.tierIndex ?? 0;
+                        const viewedTierIndex =
+                          categoryId && typeof viewedTierByCategoryId[categoryId] === "number"
+                            ? viewedTierByCategoryId[categoryId]
+                            : activeTierIndex;
+
+                        const selectedTierIndex = viewedTierIndex;
+                        const isTierViewOnly = selectedTierIndex > activeTierIndex;
+
+                        const canViewPreviousTier = selectedTierIndex > 0;
+                        const canViewNextTier = selectedTierIndex < activeTierIndex;
+                        const canJumpToCurrentTier = selectedTierIndex !== activeTierIndex;
+                        const achievements = getCategoryAchievements("collection", section.key, selectedTierIndex);
+                        const completion = getCategoryCompletion(achievements);
+                        return (
+                          <AchievementSection
+                            key={section.key}
+                            category="collection"
+                            subcategory={section.key}
+                            title={section.title}
+                            sectionKey={sectionKey}
+                            achievements={achievements}
+                            stickyTop={sectionStickyTop}
+                            viewedTierIndex={selectedTierIndex}
+                            activeTierIndex={activeTierIndex}
+                            isTierViewOnly={!!isTierViewOnly}
+                            onSelectTier={
+                              categoryId
+                                ? (nextTier: number) =>
+                                  setViewedTierByCategoryId((prev) => ({
+                                    ...prev,
+                                    [categoryId]: nextTier,
+                                  }))
+                                : undefined
+                            }
+                            tierInfo={tierInfo}
+                            effectiveById={effectiveById}
+                            allAchievements={allAchievements}
+                            newlyRevealedIds={newlyRevealedIds}
+                            revealPulseParentIds={revealPulseParentIds}
+                            celebratingParentId={celebratingParentId}
+                            completion={completion}
+                            isOpen={openSections[sectionKey]}
+                            onToggle={() => toggleSection(sectionKey)}
+                            onToggleAchievement={(id) => {
+                              if (blockPreviewMutation()) return;
+                              // FIRST ACHIEVEMENT BONUS
+                              if (!hasCompletedFirstAchievement) {
+                                setHasCompletedFirstAchievement(true);
+
+                                setShowFirstBonus(true);
+
+                                setTimeout(() => {
+                                  setShowFirstBonus(false);
+                                }, 2000);
+                              }
+
+                              toggleAchievementWithCelebration("collection", id);
+                            }}
+                            onIncrementAchievement={(id, delta) =>
+                              incrementAchievementUnlessPreview("collection", id, delta)
+                            }
+                            getCompletionColor={getCompletionColor}
+                            tierUnlockPulse={tierUnlockPulse}
+                          />
+                        );
+                      });
+                    })()}
+                  </div>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
+
+        </main>
+        {tierUpMessage && (
+          <div
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[120] px-4 py-2 rounded-lg bg-foreground text-background text-sm shadow-lg animate-in fade-in duration-200"
+            role="status"
+            aria-live="polite"
+          >
+            {tierUpMessage}
+          </div>
+        )}
+        {showFirstBonus && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center pointer-events-none">
+            <div className="bg-white text-black px-6 py-3 rounded-xl shadow-xl border border-black/10 text-base font-semibold animate-[bonusPop_0.5s_ease-out]">
+              +100 First Achievement Bonus
+            </div>
+          </div>
+        )}
+        {showLeaderboardPrompt && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center pointer-events-none">
+            <div className="pointer-events-auto bg-white text-black px-6 py-4 rounded-xl shadow-xl border border-black/10 text-center max-w-xs">
+              <p className="text-sm font-medium mb-3">
+                You&apos;re now on the leaderboard, take a look! 👀
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLeaderboardPrompt(false);
+                  router.push("/leaderboard");
+                }}
+                className="w-full rounded-lg bg-black py-2 text-sm font-medium text-white transition-all duration-100 active:scale-95"
+              >
+                View Leaderboard
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </PageWrapper>
   );
 }

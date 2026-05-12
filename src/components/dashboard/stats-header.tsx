@@ -65,7 +65,7 @@ export function StatsHeader({
                   <span>Progress</span>
                   <span>{Math.round(rankProgress)}%</span>
                 </div>
-                <div className="h-1 w-full rounded-full bg-white/20">
+                <div id="xp-rank-target" className="h-1 w-full rounded-full bg-white/20">
                   <div
                     className="h-1 rounded-full bg-white transition-all duration-300"
                     style={{ width: `${rankProgress}%` }}
@@ -89,7 +89,7 @@ export function StatsHeader({
             )}
           </div>
           {/* Points Display */}
-          <div className="flex flex-1 flex-col justify-between rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 px-3 py-2.5 text-white shadow-sm">
+          <div id="xp-total-target" className="flex flex-1 flex-col justify-between rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 px-3 py-2.5 text-white shadow-sm">
             <div className="text-[11px] font-semibold uppercase tracking-wide/relaxed opacity-90">Total Points</div>
             <div className="text-lg font-semibold leading-none tracking-tight">{totalPoints.toLocaleString()}</div>
           </div>
