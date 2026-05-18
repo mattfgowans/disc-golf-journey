@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/navigation/BackButton";
 import { useHeader } from "@/components/layout/header-context";
@@ -13,7 +14,7 @@ function normalizePath(pathname: string) {
   return pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 }
 
-const ROOT_TAB_PATHS = new Set(["/dashboard", "/leaderboard", "/friends", "/patches", "/profile"]);
+const ROOT_TAB_PATHS = new Set(["/dashboard", "/leaderboard", "/friends", "/patches", "/profile", "/challenges"]);
 
 function isRootTabPath(normalizedPath: string): boolean {
   return ROOT_TAB_PATHS.has(normalizedPath);
@@ -90,13 +91,24 @@ export function Navbar() {
       </span>
     </Button>
   ) : (
-    <Link
-      href="/notifications"
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-all duration-100 hover:bg-transparent active:scale-95"
-      aria-label="Notifications"
-    >
-      <PendingRequestsBell />
-    </Link>
+    <div className="flex items-center gap-0.5">
+      <Link
+        href="/challenges"
+        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-all duration-100 hover:bg-muted active:scale-95"
+        aria-label="Weekly Challenges"
+      >
+        <Target className="h-5 w-5 text-muted-foreground" />
+        {/* Notification dot — visible when there are incomplete challenges */}
+        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-background" />
+      </Link>
+      <Link
+        href="/notifications"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-all duration-100 hover:bg-transparent active:scale-95"
+        aria-label="Notifications"
+      >
+        <PendingRequestsBell />
+      </Link>
+    </div>
   );
 
   const leftSlot =
